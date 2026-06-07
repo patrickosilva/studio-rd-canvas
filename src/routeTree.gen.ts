@@ -9,38 +9,246 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ClienteRouteImport } from './routes/cliente'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
+import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
+import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelidade'
+import { Route as ClienteBeneficiosRouteImport } from './routes/cliente.beneficios'
+import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
+import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
+import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
+import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
+import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
+import { Route as AdminAssinaturasRouteImport } from './routes/admin.assinaturas'
+import { Route as AdminAgendaRouteImport } from './routes/admin.agenda'
 
+const ClienteRoute = ClienteRouteImport.update({
+  id: '/cliente',
+  path: '/cliente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClienteIndexRoute = ClienteIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ClientePerfilRoute = ClientePerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteHistoricoRoute = ClienteHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteFidelidadeRoute = ClienteFidelidadeRouteImport.update({
+  id: '/fidelidade',
+  path: '/fidelidade',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteBeneficiosRoute = ClienteBeneficiosRouteImport.update({
+  id: '/beneficios',
+  path: '/beneficios',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
+  id: '/agendamentos',
+  path: '/agendamentos',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminClientesRoute = AdminClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAssinaturasRoute = AdminAssinaturasRouteImport.update({
+  id: '/assinaturas',
+  path: '/assinaturas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAgendaRoute = AdminAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/cliente': typeof ClienteRouteWithChildren
+  '/admin/agenda': typeof AdminAgendaRoute
+  '/admin/assinaturas': typeof AdminAssinaturasRoute
+  '/admin/clientes': typeof AdminClientesRoute
+  '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/financeiro': typeof AdminFinanceiroRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/beneficios': typeof ClienteBeneficiosRoute
+  '/cliente/fidelidade': typeof ClienteFidelidadeRoute
+  '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
+  '/admin/': typeof AdminIndexRoute
+  '/cliente/': typeof ClienteIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/agenda': typeof AdminAgendaRoute
+  '/admin/assinaturas': typeof AdminAssinaturasRoute
+  '/admin/clientes': typeof AdminClientesRoute
+  '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/financeiro': typeof AdminFinanceiroRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/beneficios': typeof ClienteBeneficiosRoute
+  '/cliente/fidelidade': typeof ClienteFidelidadeRoute
+  '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
+  '/admin': typeof AdminIndexRoute
+  '/cliente': typeof ClienteIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/cliente': typeof ClienteRouteWithChildren
+  '/admin/agenda': typeof AdminAgendaRoute
+  '/admin/assinaturas': typeof AdminAssinaturasRoute
+  '/admin/clientes': typeof AdminClientesRoute
+  '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/financeiro': typeof AdminFinanceiroRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/beneficios': typeof ClienteBeneficiosRoute
+  '/cliente/fidelidade': typeof ClienteFidelidadeRoute
+  '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
+  '/admin/': typeof AdminIndexRoute
+  '/cliente/': typeof ClienteIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/cliente'
+    | '/admin/agenda'
+    | '/admin/assinaturas'
+    | '/admin/clientes'
+    | '/admin/configuracoes'
+    | '/admin/financeiro'
+    | '/admin/marketing'
+    | '/admin/relatorios'
+    | '/cliente/agendamentos'
+    | '/cliente/beneficios'
+    | '/cliente/fidelidade'
+    | '/cliente/historico'
+    | '/cliente/perfil'
+    | '/admin/'
+    | '/cliente/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin/agenda'
+    | '/admin/assinaturas'
+    | '/admin/clientes'
+    | '/admin/configuracoes'
+    | '/admin/financeiro'
+    | '/admin/marketing'
+    | '/admin/relatorios'
+    | '/cliente/agendamentos'
+    | '/cliente/beneficios'
+    | '/cliente/fidelidade'
+    | '/cliente/historico'
+    | '/cliente/perfil'
+    | '/admin'
+    | '/cliente'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/cliente'
+    | '/admin/agenda'
+    | '/admin/assinaturas'
+    | '/admin/clientes'
+    | '/admin/configuracoes'
+    | '/admin/financeiro'
+    | '/admin/marketing'
+    | '/admin/relatorios'
+    | '/cliente/agendamentos'
+    | '/cliente/beneficios'
+    | '/cliente/fidelidade'
+    | '/cliente/historico'
+    | '/cliente/perfil'
+    | '/admin/'
+    | '/cliente/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  ClienteRoute: typeof ClienteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/cliente': {
+      id: '/cliente'
+      path: '/cliente'
+      fullPath: '/cliente'
+      preLoaderRoute: typeof ClienteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +256,157 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cliente/': {
+      id: '/cliente/'
+      path: '/'
+      fullPath: '/cliente/'
+      preLoaderRoute: typeof ClienteIndexRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/cliente/perfil': {
+      id: '/cliente/perfil'
+      path: '/perfil'
+      fullPath: '/cliente/perfil'
+      preLoaderRoute: typeof ClientePerfilRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/historico': {
+      id: '/cliente/historico'
+      path: '/historico'
+      fullPath: '/cliente/historico'
+      preLoaderRoute: typeof ClienteHistoricoRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/fidelidade': {
+      id: '/cliente/fidelidade'
+      path: '/fidelidade'
+      fullPath: '/cliente/fidelidade'
+      preLoaderRoute: typeof ClienteFidelidadeRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/beneficios': {
+      id: '/cliente/beneficios'
+      path: '/beneficios'
+      fullPath: '/cliente/beneficios'
+      preLoaderRoute: typeof ClienteBeneficiosRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/agendamentos': {
+      id: '/cliente/agendamentos'
+      path: '/agendamentos'
+      fullPath: '/cliente/agendamentos'
+      preLoaderRoute: typeof ClienteAgendamentosRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/admin/relatorios': {
+      id: '/admin/relatorios'
+      path: '/relatorios'
+      fullPath: '/admin/relatorios'
+      preLoaderRoute: typeof AdminRelatoriosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/financeiro': {
+      id: '/admin/financeiro'
+      path: '/financeiro'
+      fullPath: '/admin/financeiro'
+      preLoaderRoute: typeof AdminFinanceiroRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/configuracoes': {
+      id: '/admin/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AdminConfiguracoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/clientes': {
+      id: '/admin/clientes'
+      path: '/clientes'
+      fullPath: '/admin/clientes'
+      preLoaderRoute: typeof AdminClientesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/assinaturas': {
+      id: '/admin/assinaturas'
+      path: '/assinaturas'
+      fullPath: '/admin/assinaturas'
+      preLoaderRoute: typeof AdminAssinaturasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/agenda': {
+      id: '/admin/agenda'
+      path: '/agenda'
+      fullPath: '/admin/agenda'
+      preLoaderRoute: typeof AdminAgendaRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminAgendaRoute: typeof AdminAgendaRoute
+  AdminAssinaturasRoute: typeof AdminAssinaturasRoute
+  AdminClientesRoute: typeof AdminClientesRoute
+  AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
+  AdminFinanceiroRoute: typeof AdminFinanceiroRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
+  AdminRelatoriosRoute: typeof AdminRelatoriosRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAgendaRoute: AdminAgendaRoute,
+  AdminAssinaturasRoute: AdminAssinaturasRoute,
+  AdminClientesRoute: AdminClientesRoute,
+  AdminConfiguracoesRoute: AdminConfiguracoesRoute,
+  AdminFinanceiroRoute: AdminFinanceiroRoute,
+  AdminMarketingRoute: AdminMarketingRoute,
+  AdminRelatoriosRoute: AdminRelatoriosRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface ClienteRouteChildren {
+  ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
+  ClienteBeneficiosRoute: typeof ClienteBeneficiosRoute
+  ClienteFidelidadeRoute: typeof ClienteFidelidadeRoute
+  ClienteHistoricoRoute: typeof ClienteHistoricoRoute
+  ClientePerfilRoute: typeof ClientePerfilRoute
+  ClienteIndexRoute: typeof ClienteIndexRoute
+}
+
+const ClienteRouteChildren: ClienteRouteChildren = {
+  ClienteAgendamentosRoute: ClienteAgendamentosRoute,
+  ClienteBeneficiosRoute: ClienteBeneficiosRoute,
+  ClienteFidelidadeRoute: ClienteFidelidadeRoute,
+  ClienteHistoricoRoute: ClienteHistoricoRoute,
+  ClientePerfilRoute: ClientePerfilRoute,
+  ClienteIndexRoute: ClienteIndexRoute,
+}
+
+const ClienteRouteWithChildren =
+  ClienteRoute._addFileChildren(ClienteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  ClienteRoute: ClienteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
