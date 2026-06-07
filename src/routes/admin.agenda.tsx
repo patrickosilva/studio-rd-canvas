@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/dashboard/Sidebar";
 
@@ -29,8 +30,8 @@ function Page() {
           <div className="bg-surface-elevated p-3" />
           {days.map((d,i)=>(<div key={i} className="bg-surface-elevated p-3 text-center font-medium border-l border-border">{d}<div className="text-muted-foreground font-normal">{9+i}</div></div>))}
           {hours.map((h)=>(
-            <>
-              <div key={h} className="p-3 text-muted-foreground border-t border-border">{h}</div>
+            <Fragment key={h}>
+              <div className="p-3 text-muted-foreground border-t border-border">{h}</div>
               {days.map((_,d)=>{
                 const key = `${d}-${h}`; const ev = booked[key];
                 return (
@@ -39,7 +40,7 @@ function Page() {
                   </div>
                 );
               })}
-            </>
+            </Fragment>
           ))}
         </div>
       </div>
