@@ -30,3 +30,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#arquivos sensíveis
+node_modules/
+.env
+dist/
+build/
