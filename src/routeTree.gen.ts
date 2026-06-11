@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ClienteRouteImport } from './routes/cliente'
+import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
@@ -30,6 +31,11 @@ import { Route as AdminAgendaRouteImport } from './routes/admin.agenda'
 const ClienteRoute = ClienteRouteImport.update({
   id: '/cliente',
   path: '/cliente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -116,6 +122,7 @@ const AdminAgendaRoute = AdminAgendaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/cadastro': typeof CadastroRoute
   '/cliente': typeof ClienteRouteWithChildren
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cadastro': typeof CadastroRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/cadastro': typeof CadastroRoute
   '/cliente': typeof ClienteRouteWithChildren
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/cadastro'
     | '/cliente'
     | '/admin/agenda'
     | '/admin/assinaturas'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cadastro'
     | '/admin/agenda'
     | '/admin/assinaturas'
     | '/admin/clientes'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/cadastro'
     | '/cliente'
     | '/admin/agenda'
     | '/admin/assinaturas'
@@ -230,6 +242,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  CadastroRoute: typeof CadastroRoute
   ClienteRoute: typeof ClienteRouteWithChildren
 }
 
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/cliente'
       fullPath: '/cliente'
       preLoaderRoute: typeof ClienteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -405,8 +425,19 @@ const ClienteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  CadastroRoute: CadastroRoute,
   ClienteRoute: ClienteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

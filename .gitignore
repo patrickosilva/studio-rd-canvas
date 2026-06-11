@@ -34,5 +34,8 @@ dist-ssr
 #arquivos sensíveis
 node_modules/
 .env
+.env.*
 dist/
 build/
+
+/src/generated/prisma
