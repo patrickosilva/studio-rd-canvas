@@ -1,26 +1,105 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { LayoutDashboard, Calendar, Users, DollarSign, Crown, Megaphone, BarChart3, Settings } from "lucide-react";
+import {
+  createFileRoute,
+  getRouteApi,
+  Outlet,
+  redirect,
+} from "@tanstack/react-router";
+import {
+  BarChart3,
+  Calendar,
+  DollarSign,
+  LayoutDashboard,
+} from "lucide-react";
+
 import { DashboardShell } from "@/components/dashboard/Sidebar";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin · Studio RD" }] }),
+  beforeLoad: ({ context, location }) => {
+    const { usuario } = context;
+
+    // Visitante tentando acessar a área administrativa.
+    if (!usuario) {
+      throw redirect({
+        to: "/login",
+        search: {
+          redirect: location.href,
+        },
+      });
+    }
+
+    // Cliente possui sua própria área.
+    if (usuario.papel === "CLIENTE") {
+      throw redirect({
+        to: "/cliente",
+      });
+    }
+
+    /*
+     * A área operacional do funcionário ainda será criada.
+     * Ele não pode acessar faturamento e relatórios administrativos.
+     */
+    if (usuario.papel === "FUNCIONARIO") {
+      throw redirect({
+        to: "/",
+      });
+    }
+
+    // Somente DONO chega até aqui.
+    if (usuario.papel !== "DONO") {
+      throw redirect({
+        to: "/",
+      });
+    }
+  },
+
+  head: () => ({
+    meta: [
+      {
+        title: "Administração · Studio RD",
+      },
+    ],
+  }),
+
   component: AdminLayout,
 });
 
+const rootRoute = getRouteApi("__root__");
+
 const items = [
-  { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
-  { label: "Agenda", to: "/admin/agenda", icon: Calendar },
-  { label: "Clientes", to: "/admin/clientes", icon: Users },
-  { label: "Financeiro", to: "/admin/financeiro", icon: DollarSign },
-  { label: "Assinaturas", to: "/admin/assinaturas", icon: Crown },
-  { label: "Marketing", to: "/admin/marketing", icon: Megaphone },
-  { label: "Relatórios", to: "/admin/relatorios", icon: BarChart3 },
-  { label: "Configurações", to: "/admin/configuracoes", icon: Settings },
+  {
+    label: "Visão geral",
+    to: "/admin",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "Monitorar agenda",
+    to: "/admin/agenda",
+    icon: Calendar,
+  },
+  {
+    label: "Financeiro",
+    to: "/admin/financeiro",
+    icon: DollarSign,
+  },
+  {
+    label: "Relatórios",
+    to: "/admin/relatorios",
+    icon: BarChart3,
+  },
 ];
 
 function AdminLayout() {
+  const { usuario } = rootRoute.useRouteContext();
+
   return (
-    <DashboardShell items={items} title="Admin" user={{ name: "Studio RD", role: "Administrador" }}>
+    <DashboardShell
+      items={items}
+      title="Administração"
+      user={{
+        name: usuario?.nome ?? "Administrador",
+        role: "Administrador",
+      }}
+    >
       <Outlet />
     </DashboardShell>
   );

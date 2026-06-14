@@ -1,47 +1,236 @@
-import { Link } from "@tanstack/react-router";
-import { Scissors, Menu } from "lucide-react";
 import { useState } from "react";
+import {
+  getRouteApi,
+  Link,
+} from "@tanstack/react-router";
+import {
+  LogIn,
+  Menu,
+  Scissors,
+  UserRound,
+  X,
+} from "lucide-react";
+
+const rootRoute = getRouteApi("__root__");
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+
+  const { usuario } = rootRoute.useRouteContext();
+
+  const primeiroNome =
+    usuario?.nome.trim().split(/\s+/)[0] ?? "";
+
+  function fecharMenu() {
+    setOpen(false);
+  }
+
   return (
-    <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="w-8 h-8 rounded-md bg-gradient-gold grid place-items-center">
-            <Scissors className="w-4 h-4 text-primary-foreground" />
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+        <Link
+          to="/"
+          className="flex items-center gap-2"
+          onClick={fecharMenu}
+        >
+          <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-gold">
+            <Scissors className="h-4 w-4 text-primary-foreground" />
           </span>
+
           <span className="font-display text-base tracking-tight">
             Studio <span className="text-gold">RD</span>
           </span>
         </Link>
-        <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#servicos" className="hover:text-foreground transition">Serviços</a>
-          <a href="#black" className="hover:text-foreground transition">RD Black</a>
-          <a href="#depoimentos" className="hover:text-foreground transition">Depoimentos</a>
-          <Link to="/cliente" className="hover:text-foreground transition">Área do Cliente</Link>
-          <Link to="/admin" className="hover:text-foreground transition">Admin</Link>
-        </nav>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/cliente"
-            className="hidden md:inline-flex items-center h-9 px-4 rounded-full bg-gold text-gold-foreground text-sm font-medium hover:opacity-90 transition"
+
+        <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
+          <a
+            href="/#servicos"
+            className="transition hover:text-foreground"
           >
-            Agendar
-          </Link>
-          <button onClick={() => setOpen(!open)} className="md:hidden p-2 -mr-2">
-            <Menu className="w-5 h-5" />
+            Serviços
+          </a>
+
+          <a
+            href="/#black"
+            className="transition hover:text-foreground"
+          >
+            RD Black
+          </a>
+
+          <a
+            href="/#depoimentos"
+            className="transition hover:text-foreground"
+          >
+            Depoimentos
+          </a>
+        </nav>
+
+        <div className="flex items-center gap-3">
+          {!usuario ? (
+            <>
+              <Link
+                to="/login"
+                search={{
+                  redirect: undefined,
+                }}
+                className="hidden items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground md:inline-flex"
+              >
+                <LogIn className="h-4 w-4" />
+                Conecte-se agora
+              </Link>
+
+              <Link
+                to="/login"
+                search={{
+                  redirect: "/cliente/agendamentos",
+                }}
+                className="hidden h-9 items-center rounded-full bg-gold px-4 text-sm font-medium text-gold-foreground transition hover:opacity-90 md:inline-flex"
+              >
+                Agendar
+              </Link>
+            </>
+          ) : usuario.papel === "DONO" ? (
+            <Link
+              to="/admin"
+              className="hidden h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium transition hover:bg-surface md:inline-flex"
+            >
+              <UserRound className="h-4 w-4 text-gold" />
+              {primeiroNome}
+            </Link>
+          ) : usuario.papel === "CLIENTE" ? (
+            <>
+              <Link
+                to="/cliente"
+                className="hidden items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground md:inline-flex"
+              >
+                <UserRound className="h-4 w-4 text-gold" />
+                {primeiroNome}
+              </Link>
+
+              <Link
+                to="/cliente/agendamentos"
+                className="hidden h-9 items-center rounded-full bg-gold px-4 text-sm font-medium text-gold-foreground transition hover:opacity-90 md:inline-flex"
+              >
+                Agendar
+              </Link>
+            </>
+          ) : (
+            /*
+             * A área /funcionario ainda será criada.
+             * Por enquanto, mostramos apenas o usuário conectado,
+             * sem apontar para uma rota inexistente.
+             */
+            <span className="hidden items-center gap-2 text-sm md:inline-flex">
+              <UserRound className="h-4 w-4 text-gold" />
+              {primeiroNome}
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setOpen((estadoAtual) => !estadoAtual)}
+            className="p-2 md:hidden"
+            aria-label={
+              open
+                ? "Fechar menu"
+                : "Abrir menu"
+            }
+            aria-expanded={open}
+          >
+            {open ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>
+
       {open && (
-        <div className="md:hidden border-t border-border bg-background/95">
-          <div className="px-6 py-4 flex flex-col gap-3 text-sm">
-            <a href="#servicos">Serviços</a>
-            <a href="#black">RD Black</a>
-            <a href="#depoimentos">Depoimentos</a>
-            <Link to="/cliente">Área do Cliente</Link>
-            <Link to="/admin">Admin</Link>
+        <div className="border-t border-border bg-background/95 md:hidden">
+          <div className="flex flex-col gap-4 px-6 py-5 text-sm">
+            <a
+              href="/#servicos"
+              onClick={fecharMenu}
+            >
+              Serviços
+            </a>
+
+            <a
+              href="/#black"
+              onClick={fecharMenu}
+            >
+              RD Black
+            </a>
+
+            <a
+              href="/#depoimentos"
+              onClick={fecharMenu}
+            >
+              Depoimentos
+            </a>
+
+            <div className="h-px bg-border" />
+
+            {!usuario ? (
+              <>
+                <Link
+                  to="/login"
+                  search={{
+                    redirect: undefined,
+                  }}
+                  onClick={fecharMenu}
+                  className="flex items-center gap-2"
+                >
+                  <LogIn className="h-4 w-4 text-gold" />
+                  Conecte-se agora
+                </Link>
+
+                <Link
+                  to="/login"
+                  search={{
+                    redirect: "/cliente/agendamentos",
+                  }}
+                  onClick={fecharMenu}
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-gold px-4 font-medium text-gold-foreground"
+                >
+                  Agendar
+                </Link>
+              </>
+            ) : usuario.papel === "DONO" ? (
+              <Link
+                to="/admin"
+                onClick={fecharMenu}
+                className="flex items-center gap-2"
+              >
+                <UserRound className="h-4 w-4 text-gold" />
+                Minha área — {primeiroNome}
+              </Link>
+            ) : usuario.papel === "CLIENTE" ? (
+              <>
+                <Link
+                  to="/cliente"
+                  onClick={fecharMenu}
+                  className="flex items-center gap-2"
+                >
+                  <UserRound className="h-4 w-4 text-gold" />
+                  Minha área — {primeiroNome}
+                </Link>
+
+                <Link
+                  to="/cliente/agendamentos"
+                  onClick={fecharMenu}
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-gold px-4 font-medium text-gold-foreground"
+                >
+                  Agendar
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <UserRound className="h-4 w-4 text-gold" />
+                {primeiroNome}
+              </div>
+            )}
           </div>
         </div>
       )}

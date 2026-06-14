@@ -140,8 +140,11 @@ function CadastroPage() {
 
         <p className="mt-4 text-center text-sm">
           Já possui uma conta?{" "}
-          <Link to="/" className="font-medium underline">
-            Voltar ao início
+          <Link
+          to ="/login"
+          search = {{ redirect: undefined}}
+          className="font-medium underline">
+            Entrar na minha conta
           </Link>
         </p>
       </section>

@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LogoutRouteImport } from './routes/logout'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ClienteRouteImport } from './routes/cliente'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -28,6 +30,16 @@ import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminAssinaturasRouteImport } from './routes/admin.assinaturas'
 import { Route as AdminAgendaRouteImport } from './routes/admin.agenda'
 
+const LogoutRoute = LogoutRouteImport.update({
+  id: '/logout',
+  path: '/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClienteRoute = ClienteRouteImport.update({
   id: '/cliente',
   path: '/cliente',
@@ -124,6 +136,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/cliente': typeof ClienteRouteWithChildren
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -142,6 +156,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -163,6 +179,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/cliente': typeof ClienteRouteWithChildren
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -185,6 +203,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cadastro'
     | '/cliente'
+    | '/login'
+    | '/logout'
     | '/admin/agenda'
     | '/admin/assinaturas'
     | '/admin/clientes'
@@ -203,6 +223,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/cadastro'
+    | '/login'
+    | '/logout'
     | '/admin/agenda'
     | '/admin/assinaturas'
     | '/admin/clientes'
@@ -223,6 +245,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cadastro'
     | '/cliente'
+    | '/login'
+    | '/logout'
     | '/admin/agenda'
     | '/admin/assinaturas'
     | '/admin/clientes'
@@ -244,10 +268,26 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   ClienteRoute: typeof ClienteRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  LogoutRoute: typeof LogoutRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/logout': {
+      id: '/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof LogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cliente': {
       id: '/cliente'
       path: '/cliente'
@@ -427,6 +467,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
   ClienteRoute: ClienteRouteWithChildren,
+  LoginRoute: LoginRoute,
+  LogoutRoute: LogoutRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { obterUsuarioAtualFn } from "../lib/api/auth.functions";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -72,7 +73,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{
+   queryClient: QueryClient }>()({
+      beforeLoad: async () => {
+    const usuario = await obterUsuarioAtualFn();
+
+    return {
+      usuario,
+    };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },

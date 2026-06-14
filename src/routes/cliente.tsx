@@ -1,24 +1,110 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { LayoutDashboard, Calendar, History, Gift, Crown, User } from "lucide-react";
+import {
+  createFileRoute,
+  getRouteApi,
+  Outlet,
+  redirect,
+} from "@tanstack/react-router";
+import {
+  Calendar,
+  Crown,
+  Gift,
+  History,
+  LayoutDashboard,
+  User,
+} from "lucide-react";
+
 import { DashboardShell } from "@/components/dashboard/Sidebar";
 
 export const Route = createFileRoute("/cliente")({
-  head: () => ({ meta: [{ title: "Área do Cliente · Studio RD" }] }),
+  beforeLoad: ({ context, location }) => {
+    const { usuario } = context;
+
+    // Visitante tentou acessar uma área privada.
+    if (!usuario) {
+      throw redirect({
+        to: "/login",
+        search: {
+          redirect: location.href,
+        },
+      });
+    }
+
+    // O administrador possui sua própria área.
+    if (usuario.papel === "DONO") {
+      throw redirect({
+        to: "/admin",
+      });
+    }
+
+    /*
+     * A área do funcionário ainda será criada.
+     * Enquanto isso, evitamos que ele entre na área de cliente.
+     */
+    if (usuario.papel === "FUNCIONARIO") {
+      throw redirect({
+        to: "/",
+      });
+    }
+  },
+
+  head: () => ({
+    meta: [
+      {
+        title: "Área do Cliente · Studio RD",
+      },
+    ],
+  }),
+
   component: ClientLayout,
 });
 
+const rootRoute = getRouteApi("__root__");
+
 const items = [
-  { label: "Dashboard", to: "/cliente", icon: LayoutDashboard },
-  { label: "Agendamentos", to: "/cliente/agendamentos", icon: Calendar },
-  { label: "Histórico", to: "/cliente/historico", icon: History },
-  { label: "Benefícios", to: "/cliente/beneficios", icon: Gift },
-  { label: "Fidelidade", to: "/cliente/fidelidade", icon: Crown },
-  { label: "Perfil", to: "/cliente/perfil", icon: User },
+  {
+    label: "Dashboard",
+    to: "/cliente",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "Agendamentos",
+    to: "/cliente/agendamentos",
+    icon: Calendar,
+  },
+  {
+    label: "Histórico",
+    to: "/cliente/historico",
+    icon: History,
+  },
+  {
+    label: "Benefícios",
+    to: "/cliente/beneficios",
+    icon: Gift,
+  },
+  {
+    label: "Fidelidade",
+    to: "/cliente/fidelidade",
+    icon: Crown,
+  },
+  {
+    label: "Perfil",
+    to: "/cliente/perfil",
+    icon: User,
+  },
 ];
 
 function ClientLayout() {
+  const { usuario } = rootRoute.useRouteContext();
+
   return (
-    <DashboardShell items={items} title="Cliente" user={{ name: "Rafael Dias", role: "Membro RD Black" }}>
+    <DashboardShell
+      items={items}
+      title="Cliente"
+      user={{
+        name: usuario?.nome ?? "Cliente",
+        role: "Cliente Studio RD",
+      }}
+    >
       <Outlet />
     </DashboardShell>
   );
