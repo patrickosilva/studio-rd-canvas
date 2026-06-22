@@ -9,6 +9,7 @@ import {
   Calendar,
   DollarSign,
   LayoutDashboard,
+  Settings,
 } from "lucide-react";
 
 import { DashboardShell } from "@/components/dashboard/Sidebar";
@@ -85,6 +86,11 @@ const items = [
     label: "Relatórios",
     to: "/admin/relatorios",
     icon: BarChart3,
+  },
+  {
+    label: "Configurações",
+    to: "/admin/configuracoes",
+    icon: Settings,
   },
 ];
 

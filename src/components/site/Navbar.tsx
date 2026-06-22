@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-router";
 import {
   LogIn,
+  LogOut,
   Menu,
   Scissors,
   UserRound,
@@ -115,15 +116,23 @@ export function Navbar() {
               </Link>
             </>
           ) : (
-            /*
-             * A área /funcionario ainda será criada.
-             * Por enquanto, mostramos apenas o usuário conectado,
-             * sem apontar para uma rota inexistente.
-             */
-            <span className="hidden items-center gap-2 text-sm md:inline-flex">
-              <UserRound className="h-4 w-4 text-gold" />
-              {primeiroNome}
-            </span>
+            <Link
+        to="/funcionario"
+        className="hidden h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium transition hover:bg-surface md:inline-flex"
+  >
+    <UserRound className="h-4 w-4 text-gold" />
+    {primeiroNome}
+  </Link>
+          )}
+
+          {usuario && (
+            <Link
+              to="/logout"
+              className="hidden h-9 items-center gap-2 rounded-full border border-border px-4 text-sm text-muted-foreground transition hover:bg-surface hover:text-foreground md:inline-flex"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Link>
           )}
 
           <button
@@ -226,10 +235,25 @@ export function Navbar() {
                 </Link>
               </>
             ) : (
-              <div className="flex items-center gap-2">
-                <UserRound className="h-4 w-4 text-gold" />
-                {primeiroNome}
-              </div>
+               <Link
+    to="/funcionario"
+    onClick={fecharMenu}
+    className="flex items-center gap-2"
+  >
+    <UserRound className="h-4 w-4 text-gold" />
+    Minha área — {primeiroNome}
+  </Link>
+            )}
+
+            {usuario && (
+              <Link
+                to="/logout"
+                onClick={fecharMenu}
+                className="flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+                Sair
+              </Link>
             )}
           </div>
         </div>

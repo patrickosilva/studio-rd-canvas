@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Scissors, type LucideIcon } from "lucide-react";
+import { LogOut, Scissors, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 export type SidebarItem = { label: string; to: string; icon: LucideIcon };
@@ -47,16 +47,25 @@ export function DashboardShell({
           })}
         </nav>
         <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-gold grid place-items-center text-sm font-medium text-primary-foreground">
-              {user.name[0]}
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm truncate">{user.name}</div>
-              <div className="text-xs text-muted-foreground">{user.role}</div>
-            </div>
-          </div>
-        </div>
+  <div className="flex items-center gap-3">
+    <div className="w-9 h-9 rounded-full bg-gradient-gold grid place-items-center text-sm font-medium text-primary-foreground">
+      {user.name[0]}
+    </div>
+
+    <div className="min-w-0 flex-1">
+      <div className="text-sm truncate">{user.name}</div>
+      <div className="text-xs text-muted-foreground">{user.role}</div>
+    </div>
+  </div>
+
+  <Link
+    to="/logout"
+    className="mt-4 flex h-10 items-center justify-center gap-2 rounded-lg border border-sidebar-border text-sm text-muted-foreground transition hover:bg-sidebar-accent hover:text-sidebar-foreground"
+  >
+    <LogOut className="w-4 h-4" />
+    Sair
+  </Link>
+</div>
       </aside>
       <main className="flex-1 min-w-0">{children}</main>
     </div>

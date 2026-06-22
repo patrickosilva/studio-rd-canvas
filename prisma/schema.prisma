@@ -38,7 +38,36 @@ model Usuario {
   criadoEm     DateTime     @default(now())
   atualizadoEm DateTime     @updatedAt
 
-  sessoes Sessao[]
+  sessoes      Sessao[]
+  profissional Profissional?
+}
+
+model Servico {
+  id             String   @id @default(cuid())
+  nome           String   @unique
+  descricao      String?
+  duracaoMinutos Int
+  precoCentavos  Int
+  ativo          Boolean  @default(true)
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  @@index([ativo])
+}
+
+model Profissional {
+  id           String   @id @default(cuid())
+  usuarioId    String?  @unique
+  nome         String
+  telefone     String?
+  descricao    String?
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  @@index([ativo])
 }
 
 model Sessao {

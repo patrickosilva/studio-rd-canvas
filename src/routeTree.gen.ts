@@ -11,12 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FuncionarioRouteImport } from './routes/funcionario'
 import { Route as ClienteRouteImport } from './routes/cliente'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
 import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as FuncionarioSolicitacoesRouteImport } from './routes/funcionario.solicitacoes'
 import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelidade'
@@ -40,6 +43,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FuncionarioRoute = FuncionarioRouteImport.update({
+  id: '/funcionario',
+  path: '/funcionario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClienteRoute = ClienteRouteImport.update({
   id: '/cliente',
   path: '/cliente',
@@ -60,6 +68,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FuncionarioIndexRoute = FuncionarioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
 const ClienteIndexRoute = ClienteIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -69,6 +82,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const FuncionarioSolicitacoesRoute = FuncionarioSolicitacoesRouteImport.update({
+  id: '/solicitacoes',
+  path: '/solicitacoes',
+  getParentRoute: () => FuncionarioRoute,
 } as any)
 const ClientePerfilRoute = ClientePerfilRouteImport.update({
   id: '/perfil',
@@ -136,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/cliente': typeof ClienteRouteWithChildren
+  '/funcionario': typeof FuncionarioRouteWithChildren
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/admin/agenda': typeof AdminAgendaRoute
@@ -150,8 +169,10 @@ export interface FileRoutesByFullPath {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
   '/cliente/': typeof ClienteIndexRoute
+  '/funcionario/': typeof FuncionarioIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -170,8 +191,10 @@ export interface FileRoutesByTo {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin': typeof AdminIndexRoute
   '/cliente': typeof ClienteIndexRoute
+  '/funcionario': typeof FuncionarioIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -179,6 +202,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/cliente': typeof ClienteRouteWithChildren
+  '/funcionario': typeof FuncionarioRouteWithChildren
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/admin/agenda': typeof AdminAgendaRoute
@@ -193,8 +217,10 @@ export interface FileRoutesById {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
   '/cliente/': typeof ClienteIndexRoute
+  '/funcionario/': typeof FuncionarioIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -203,6 +229,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cadastro'
     | '/cliente'
+    | '/funcionario'
     | '/login'
     | '/logout'
     | '/admin/agenda'
@@ -217,8 +244,10 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/solicitacoes'
     | '/admin/'
     | '/cliente/'
+    | '/funcionario/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -237,14 +266,17 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/solicitacoes'
     | '/admin'
     | '/cliente'
+    | '/funcionario'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/cadastro'
     | '/cliente'
+    | '/funcionario'
     | '/login'
     | '/logout'
     | '/admin/agenda'
@@ -259,8 +291,10 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/solicitacoes'
     | '/admin/'
     | '/cliente/'
+    | '/funcionario/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -268,6 +302,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   ClienteRoute: typeof ClienteRouteWithChildren
+  FuncionarioRoute: typeof FuncionarioRouteWithChildren
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
 }
@@ -286,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funcionario': {
+      id: '/funcionario'
+      path: '/funcionario'
+      fullPath: '/funcionario'
+      preLoaderRoute: typeof FuncionarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cliente': {
@@ -316,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/funcionario/': {
+      id: '/funcionario/'
+      path: '/'
+      fullPath: '/funcionario/'
+      preLoaderRoute: typeof FuncionarioIndexRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/cliente/': {
       id: '/cliente/'
       path: '/'
@@ -329,6 +378,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/funcionario/solicitacoes': {
+      id: '/funcionario/solicitacoes'
+      path: '/solicitacoes'
+      fullPath: '/funcionario/solicitacoes'
+      preLoaderRoute: typeof FuncionarioSolicitacoesRouteImport
+      parentRoute: typeof FuncionarioRoute
     }
     '/cliente/perfil': {
       id: '/cliente/perfil'
@@ -462,11 +518,26 @@ const ClienteRouteChildren: ClienteRouteChildren = {
 const ClienteRouteWithChildren =
   ClienteRoute._addFileChildren(ClienteRouteChildren)
 
+interface FuncionarioRouteChildren {
+  FuncionarioSolicitacoesRoute: typeof FuncionarioSolicitacoesRoute
+  FuncionarioIndexRoute: typeof FuncionarioIndexRoute
+}
+
+const FuncionarioRouteChildren: FuncionarioRouteChildren = {
+  FuncionarioSolicitacoesRoute: FuncionarioSolicitacoesRoute,
+  FuncionarioIndexRoute: FuncionarioIndexRoute,
+}
+
+const FuncionarioRouteWithChildren = FuncionarioRoute._addFileChildren(
+  FuncionarioRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
   ClienteRoute: ClienteRouteWithChildren,
+  FuncionarioRoute: FuncionarioRouteWithChildren,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
 }
