@@ -1,104 +1,414 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Calendar, Crown, Star, Scissors, ArrowRight } from "lucide-react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
+  createFileRoute,
+  getRouteApi,
+  Link,
+} from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  ArrowRight,
+  Calendar,
+  Crown,
+  Scissors,
+  Star,
+  UserRound,
+} from "lucide-react";
+
 import { PageHeader } from "@/components/dashboard/Sidebar";
+import { listarMeusAgendamentos } from "@/lib/api/agendamento.functions";
 
 export const Route = createFileRoute("/cliente/")({
   component: ClientDashboard,
 });
 
+const rootRoute = getRouteApi("__root__");
+
+type Agendamento = {
+  id: string;
+  inicio: string | Date;
+  fim: string | Date;
+  status: string;
+  observacaoCliente: string | null;
+  motivoRecusa: string | null;
+  servico: {
+    nome: string;
+    duracaoMinutos: number;
+    precoCentavos: number;
+  };
+  profissional: {
+    nome: string;
+  };
+};
+
+function formatarDataHora(valor: string | Date): string {
+  const data = new Date(valor);
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(data);
+}
+
+function traduzirStatus(status: string): string {
+  const mapa: Record<string, string> = {
+    SOLICITADO: "Solicitado",
+    CONFIRMADO: "Confirmado",
+    RECUSADO: "Recusado",
+    CANCELADO_CLIENTE: "Cancelado por você",
+    CANCELADO_FUNCIONARIO: "Cancelado pela equipe",
+    CONCLUIDO: "Concluído",
+    FALTOU: "Não compareceu",
+  };
+
+  return mapa[status] ?? status;
+}
+
+function obterClasseStatus(status: string): string {
+  if (status === "CONFIRMADO") {
+    return "bg-gold-soft text-gold";
+  }
+
+  if (status === "SOLICITADO") {
+    return "bg-background text-muted-foreground border border-border";
+  }
+
+  if (status === "RECUSADO" || status.includes("CANCELADO")) {
+    return "bg-destructive/10 text-destructive";
+  }
+
+  return "bg-surface-elevated text-muted-foreground";
+}
+
 function ClientDashboard() {
+  const { usuario } = rootRoute.useRouteContext();
+
+  const carregarMeusAgendamentos = useServerFn(
+    listarMeusAgendamentos,
+  );
+
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>(
+    [],
+  );
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+
+  const primeiroNome =
+    usuario?.nome.trim().split(/\s+/)[0] ?? "Cliente";
+
+  async function carregarDados() {
+    setCarregando(true);
+    setErro("");
+
+    try {
+      const resposta = await carregarMeusAgendamentos();
+
+      setAgendamentos(resposta);
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        "Não foi possível carregar seus agendamentos agora.",
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    void carregarDados();
+  }, []);
+
+  const proximoAgendamento = useMemo(() => {
+    const agora = Date.now();
+
+    return agendamentos
+      .filter((agendamento) =>
+        ["SOLICITADO", "CONFIRMADO"].includes(
+          agendamento.status,
+        ),
+      )
+      .filter(
+        (agendamento) =>
+          new Date(agendamento.inicio).getTime() >= agora,
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.inicio).getTime() -
+          new Date(b.inicio).getTime(),
+      )[0];
+  }, [agendamentos]);
+
+  const atendimentosConcluidos = useMemo(
+    () =>
+      agendamentos.filter(
+        (agendamento) => agendamento.status === "CONCLUIDO",
+      ).length,
+    [agendamentos],
+  );
+
+  const historicoRecente = useMemo(
+    () => agendamentos.slice(0, 4),
+    [agendamentos],
+  );
+
+  const indicadores = [
+    {
+      label: "Pontos de fidelidade",
+      value: "0",
+      icon: Star,
+      descricao: "Ainda não há pontuação registrada.",
+    },
+    {
+      label: "Atendimentos realizados",
+      value: String(atendimentosConcluidos),
+      icon: Scissors,
+      descricao:
+        atendimentosConcluidos === 1
+          ? "1 atendimento concluído."
+          : `${atendimentosConcluidos} atendimentos concluídos.`,
+    },
+    {
+      label: "Economia RD Black",
+      value: "R$ 0,00",
+      icon: Crown,
+      descricao: "Economia será calculada quando os planos forem ativados.",
+    },
+  ];
+
   return (
-    <div className="p-8 lg:p-12 max-w-7xl">
+    <div className="max-w-7xl p-8 lg:p-12">
       <PageHeader
-        title="Olá, Rafael."
-        subtitle="Aqui está o resumo da sua experiência Studio RD."
+        title={`Olá, ${primeiroNome}.`}
+        subtitle="Acompanhe seus agendamentos, benefícios e histórico no Studio RD."
         actions={
-          <button className="h-10 px-5 rounded-full bg-gold text-gold-foreground text-sm font-medium hover:opacity-90 transition">
-            Novo Agendamento
-          </button>
+          <Link
+            to="/cliente/agendamentos"
+            className="inline-flex h-10 items-center rounded-full bg-gold px-5 text-sm font-medium text-gold-foreground transition hover:opacity-90"
+          >
+            Novo agendamento
+          </Link>
         }
       />
 
-      <div className="grid lg:grid-cols-3 gap-5">
-        {/* Next appointment */}
-        <div className="lg:col-span-2 rounded-2xl border border-gold/20 bg-gradient-dark p-7 shadow-premium relative overflow-hidden">
+      {erro && (
+        <div
+          role="alert"
+          className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
+          {erro}
+        </div>
+      )}
+
+      <div className="grid gap-5 lg:grid-cols-3">
+        <section className="relative overflow-hidden rounded-2xl border border-gold/20 bg-gradient-dark p-7 shadow-premium lg:col-span-2">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,oklch(0.78_0.13_85/0.15),transparent_60%)]" />
+
           <div className="relative">
-            <div className="text-xs uppercase tracking-widest text-gold">Próximo Agendamento</div>
-            <div className="mt-4 flex items-end justify-between flex-wrap gap-4">
-              <div>
-                <div className="text-3xl font-display">Corte + Barba</div>
-                <div className="text-muted-foreground mt-1">Sexta, 14 de junho · 16h30</div>
-                <div className="text-sm mt-3">com <span className="text-gold">Bruno R.</span></div>
-              </div>
-              <div className="flex gap-2">
-                <button className="h-10 px-4 rounded-full border border-border text-sm hover:bg-surface-elevated">Reagendar</button>
-                <button className="h-10 px-4 rounded-full bg-gold text-gold-foreground text-sm font-medium">Detalhes</button>
-              </div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold">
+              <Calendar className="h-4 w-4" />
+              Próximo agendamento
             </div>
-          </div>
-        </div>
 
-        {/* Subscription */}
-        <div className="rounded-2xl border border-border bg-surface p-7">
+            {carregando ? (
+              <p className="mt-6 text-sm text-muted-foreground">
+                Carregando seu próximo horário...
+              </p>
+            ) : proximoAgendamento ? (
+              <div className="mt-6">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-2xl font-display">
+                    {proximoAgendamento.servico.nome}
+                  </h2>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs ${obterClasseStatus(
+                      proximoAgendamento.status,
+                    )}`}
+                  >
+                    {traduzirStatus(proximoAgendamento.status)}
+                  </span>
+                </div>
+
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {formatarDataHora(proximoAgendamento.inicio)}
+                </p>
+
+                <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                  <UserRound className="h-4 w-4" />
+                  {proximoAgendamento.profissional.nome}
+                </p>
+
+                {proximoAgendamento.status === "SOLICITADO" && (
+                  <p className="mt-4 max-w-xl text-sm text-muted-foreground">
+                    Sua solicitação foi enviada e está aguardando confirmação
+                    da equipe.
+                  </p>
+                )}
+
+                {proximoAgendamento.status === "CONFIRMADO" && (
+                  <p className="mt-4 max-w-xl text-sm text-muted-foreground">
+                    Seu horário já foi confirmado pela equipe do Studio RD.
+                  </p>
+                )}
+
+                <Link
+                  to="/cliente/agendamentos"
+                  className="mt-6 inline-flex h-10 items-center rounded-full border border-border px-4 text-sm transition hover:bg-surface-elevated"
+                >
+                  Ver meus pedidos
+                </Link>
+              </div>
+            ) : (
+              <div className="mt-6">
+                <h2 className="text-2xl font-display">
+                  Nenhum agendamento futuro
+                </h2>
+
+                <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+                  Quando uma solicitação for enviada ou confirmada, os dados
+                  do atendimento aparecerão aqui.
+                </p>
+
+                <Link
+                  to="/cliente/agendamentos"
+                  className="mt-6 inline-flex h-10 items-center rounded-full border border-border px-4 text-sm transition hover:bg-surface-elevated"
+                >
+                  Solicitar um horário
+                </Link>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-border bg-surface p-7">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">Assinatura</span>
-            <Crown className="w-4 h-4 text-gold" />
-          </div>
-          <div className="mt-4 text-2xl font-display">RD Black</div>
-          <div className="text-sm text-muted-foreground">Ativo · próxima cobrança 28/06</div>
-          <div className="mt-5 hairline" />
-          <div className="mt-5 text-sm flex justify-between">
-            <span className="text-muted-foreground">Cortes restantes</span>
-            <span className="text-gold font-medium">1 de 2</span>
-          </div>
-        </div>
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">
+              Assinatura
+            </span>
 
-        {/* KPI cards */}
-        {[
-          { label: "Pontos de Fidelidade", value: "1.240", icon: Star },
-          { label: "Cortes este ano", value: "18", icon: Scissors },
-          { label: "Economia RD Black", value: "R$ 420", icon: Crown },
-        ].map((k) => (
-          <div key={k.label} className="rounded-2xl border border-border bg-surface p-6">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground">{k.label}</span>
-              <k.icon className="w-4 h-4 text-gold" />
-            </div>
-            <div className="mt-3 text-3xl font-display">{k.value}</div>
+            <Crown className="h-4 w-4 text-gold" />
           </div>
+
+          <h2 className="mt-4 text-2xl font-display">
+            Nenhuma assinatura ativa
+          </h2>
+
+          <p className="mt-2 text-sm text-muted-foreground">
+            Seus dados do plano RD Black aparecerão aqui após a ativação.
+          </p>
+
+          <div className="mt-5 hairline" />
+
+          <Link
+            to="/cliente/beneficios"
+            className="mt-5 inline-flex items-center gap-1 text-sm text-gold hover:underline"
+          >
+            Conhecer benefícios
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </section>
+
+        {indicadores.map((indicador) => (
+          <section
+            key={indicador.label}
+            className="rounded-2xl border border-border bg-surface p-6"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                {indicador.label}
+              </span>
+
+              <indicador.icon className="h-4 w-4 text-gold" />
+            </div>
+
+            <div className="mt-3 text-3xl font-display">
+              {indicador.value}
+            </div>
+
+            <p className="mt-2 text-xs text-muted-foreground">
+              {indicador.descricao}
+            </p>
+          </section>
         ))}
       </div>
 
-      {/* History */}
-      <div className="mt-10 rounded-2xl border border-border bg-surface overflow-hidden">
-        <div className="px-6 py-4 flex items-center justify-between border-b border-border">
-          <h3 className="text-sm font-medium">Histórico recente</h3>
-          <a href="#" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-            Ver tudo <ArrowRight className="w-3 h-3" />
-          </a>
+      <section className="mt-10 overflow-hidden rounded-2xl border border-border bg-surface">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <h2 className="text-sm font-medium">
+            Histórico recente
+          </h2>
+
+          <Link
+            to="/cliente/historico"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Ver tudo
+            <ArrowRight className="h-3 w-3" />
+          </Link>
         </div>
-        <table className="w-full text-sm">
-          <thead className="text-xs uppercase tracking-widest text-muted-foreground">
-            <tr><th className="text-left px-6 py-3">Data</th><th className="text-left px-6 py-3">Serviço</th><th className="text-left px-6 py-3">Profissional</th><th className="text-right px-6 py-3">Valor</th></tr>
-          </thead>
-          <tbody>
-            {[
-              ["30 mai 2026", "Corte + Barba", "Bruno R.", "R$ 110"],
-              ["12 mai 2026", "Corte Masculino", "Diego S.", "R$ 70"],
-              ["28 abr 2026", "Limpeza de Pele", "Camila T.", "R$ 130"],
-              ["10 abr 2026", "Corte + Barba", "Bruno R.", "R$ 110"],
-            ].map((r) => (
-              <tr key={r[0]} className="border-t border-border">
-                <td className="px-6 py-4">{r[0]}</td>
-                <td className="px-6 py-4">{r[1]}</td>
-                <td className="px-6 py-4 text-muted-foreground">{r[2]}</td>
-                <td className="px-6 py-4 text-right text-gold">{r[3]}</td>
-              </tr>
+
+        {carregando ? (
+          <div className="px-6 py-10">
+            <p className="text-sm text-muted-foreground">
+              Carregando histórico...
+            </p>
+          </div>
+        ) : historicoRecente.length === 0 ? (
+          <div className="flex min-h-48 flex-col items-center justify-center px-6 py-10 text-center">
+            <Scissors className="h-8 w-8 text-muted-foreground" />
+
+            <h3 className="mt-4 text-base font-medium">
+              Nenhum atendimento registrado
+            </h3>
+
+            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+              Depois que você solicitar ou concluir um atendimento, ele
+              aparecerá aqui.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {historicoRecente.map((agendamento) => (
+              <article
+                key={agendamento.id}
+                className="flex flex-col gap-3 px-6 py-4 md:flex-row md:items-center md:justify-between"
+              >
+                <div>
+                  <h3 className="font-medium">
+                    {agendamento.servico.nome}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {formatarDataHora(agendamento.inicio)} ·{" "}
+                    {agendamento.profissional.nome}
+                  </p>
+
+                  {agendamento.motivoRecusa && (
+                    <p className="mt-1 text-sm text-destructive">
+                      Motivo da recusa: {agendamento.motivoRecusa}
+                    </p>
+                  )}
+                </div>
+
+                <span
+                  className={`w-fit rounded-full px-3 py-1 text-xs ${obterClasseStatus(
+                    agendamento.status,
+                  )}`}
+                >
+                  {traduzirStatus(agendamento.status)}
+                </span>
+              </article>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

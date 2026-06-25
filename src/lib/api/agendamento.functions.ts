@@ -1,0 +1,651 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import type { FormaPagamento } from "../../generated/prisma/client";
+import { prisma } from "../prisma.server";
+import { obterUsuarioAtual } from "../session.server";
+
+async function exigirUsuarioLogado() {
+  const usuario = await obterUsuarioAtual();
+
+  if (!usuario) {
+    throw new Error("Você precisa estar logado.");
+  }
+
+  return usuario;
+}
+
+async function exigirCliente() {
+  const usuario = await exigirUsuarioLogado();
+
+  if (usuario.papel !== "CLIENTE") {
+    throw new Error("Apenas clientes podem solicitar agendamentos.");
+  }
+
+  return usuario;
+}
+
+async function exigirOperacional() {
+  const usuario = await exigirUsuarioLogado();
+
+  if (
+    usuario.papel !== "FUNCIONARIO" &&
+    usuario.papel !== "DONO"
+  ) {
+    throw new Error("Acesso negado.");
+  }
+
+  return usuario;
+}
+async function exigirDono() {
+  const usuario = await exigirUsuarioLogado();
+
+  if (usuario.papel !== "DONO") {
+    throw new Error("Acesso negado.");
+  }
+
+  return usuario;
+}
+const solicitarAgendamentoSchema = z.object({
+  profissionalId: z
+    .string()
+    .trim()
+    .min(1, "Escolha um profissional."),
+
+  servicoId: z
+    .string()
+    .trim()
+    .min(1, "Escolha um serviço."),
+
+  inicio: z
+    .string()
+    .trim()
+    .min(1, "Escolha uma data e horário."),
+
+  observacaoCliente: z
+    .string()
+    .trim()
+    .max(500, "A observação é muito grande.")
+    .optional()
+    .or(z.literal("")),
+});
+
+const alterarStatusSchema = z.object({
+  agendamentoId: z
+    .string()
+    .trim()
+    .min(1, "Agendamento inválido."),
+});
+
+const recusarAgendamentoSchema = z.object({
+  agendamentoId: z
+    .string()
+    .trim()
+    .min(1, "Agendamento inválido."),
+
+  motivoRecusa: z
+    .string()
+    .trim()
+    .max(500, "O motivo é muito grande.")
+    .optional()
+    .or(z.literal("")),
+});
+const concluirAgendamentoSchema = z.object({
+  agendamentoId: z
+    .string()
+    .trim()
+    .min(1, "Agendamento inválido."),
+
+  formaPagamento: z.enum([
+    "PIX",
+    "DINHEIRO",
+    "CARTAO_DEBITO",
+    "CARTAO_CREDITO",
+    "ASSINATURA",
+    "CORTESIA",
+    "OUTRO",
+  ]),
+
+  valorPagoCentavos: z
+    .number()
+    .int("O valor precisa estar em centavos.")
+    .min(0, "O valor não pode ser negativo."),
+
+  observacaoPagamento: z
+    .string()
+    .trim()
+    .max(500, "A observação é muito grande.")
+    .optional()
+    .or(z.literal("")),
+});
+function converterData(valor: string): Date | null {
+  const data = new Date(valor);
+
+  if (Number.isNaN(data.getTime())) {
+    return null;
+  }
+
+  return data;
+}
+
+function calcularFim(inicio: Date, duracaoMinutos: number): Date {
+  return new Date(
+    inicio.getTime() + duracaoMinutos * 60 * 1000,
+  );
+}
+
+async function existeConflitoDeHorario({
+  profissionalId,
+  inicio,
+  fim,
+  ignorarAgendamentoId,
+}: {
+  profissionalId: string;
+  inicio: Date;
+  fim: Date;
+  ignorarAgendamentoId?: string;
+}) {
+  const conflito = await prisma.agendamento.findFirst({
+    where: {
+      profissionalId,
+      id: ignorarAgendamentoId
+        ? {
+          not: ignorarAgendamentoId,
+        }
+        : undefined,
+      status: {
+        in: ["SOLICITADO", "CONFIRMADO"],
+      },
+      inicio: {
+        lt: fim,
+      },
+      fim: {
+        gt: inicio,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return Boolean(conflito);
+}
+
+export const solicitarAgendamento = createServerFn({
+  method: "POST",
+})
+  .validator(solicitarAgendamentoSchema)
+  .handler(async ({ data }) => {
+    const usuario = await exigirCliente();
+
+    const inicio = converterData(data.inicio);
+
+    if (!inicio) {
+      return {
+        sucesso: false,
+        mensagem: "Data ou horário inválido.",
+      };
+    }
+
+    const agora = new Date();
+
+    if (inicio.getTime() <= agora.getTime()) {
+      return {
+        sucesso: false,
+        mensagem: "Escolha um horário futuro.",
+      };
+    }
+
+    const [servico, profissional] = await Promise.all([
+      prisma.servico.findFirst({
+        where: {
+          id: data.servicoId,
+          ativo: true,
+        },
+        select: {
+          id: true,
+          nome: true,
+          duracaoMinutos: true,
+          precoCentavos: true,
+        },
+      }),
+
+      prisma.profissional.findFirst({
+        where: {
+          id: data.profissionalId,
+          ativo: true,
+        },
+        select: {
+          id: true,
+          nome: true,
+        },
+      }),
+    ]);
+
+    if (!servico) {
+      return {
+        sucesso: false,
+        mensagem: "Serviço não encontrado ou inativo.",
+      };
+    }
+
+    if (!profissional) {
+      return {
+        sucesso: false,
+        mensagem: "Profissional não encontrado ou inativo.",
+      };
+    }
+
+    const fim = calcularFim(
+      inicio,
+      servico.duracaoMinutos,
+    );
+
+    const profissionalOcupado =
+      await existeConflitoDeHorario({
+        profissionalId: profissional.id,
+        inicio,
+        fim,
+      });
+
+    if (profissionalOcupado) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Esse profissional já possui uma solicitação ou agendamento nesse horário.",
+      };
+    }
+
+    const clienteOcupado = await prisma.agendamento.findFirst({
+      where: {
+        clienteId: usuario.id,
+        status: {
+          in: ["SOLICITADO", "CONFIRMADO"],
+        },
+        inicio: {
+          lt: fim,
+        },
+        fim: {
+          gt: inicio,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (clienteOcupado) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Você já possui uma solicitação ou agendamento nesse horário.",
+      };
+    }
+
+    const agendamento = await prisma.agendamento.create({
+      data: {
+        clienteId: usuario.id,
+        profissionalId: profissional.id,
+        servicoId: servico.id,
+        inicio,
+        fim,
+        status: "SOLICITADO",
+        observacaoCliente:
+          data.observacaoCliente?.trim() || null,
+      },
+      select: {
+        id: true,
+        inicio: true,
+        fim: true,
+        status: true,
+        servico: {
+          select: {
+            nome: true,
+            duracaoMinutos: true,
+            precoCentavos: true,
+          },
+        },
+        profissional: {
+          select: {
+            nome: true,
+          },
+        },
+      },
+    });
+
+    return {
+      sucesso: true,
+      mensagem:
+        "Solicitação enviada com sucesso. Aguarde a confirmação da equipe.",
+      agendamento,
+    };
+  });
+
+export const listarMeusAgendamentos = createServerFn({
+  method: "GET",
+}).handler(async () => {
+  const usuario = await exigirCliente();
+
+  return prisma.agendamento.findMany({
+    where: {
+      clienteId: usuario.id,
+    },
+    orderBy: {
+      inicio: "desc",
+    },
+    select: {
+      id: true,
+      inicio: true,
+      fim: true,
+      status: true,
+      observacaoCliente: true,
+      motivoRecusa: true,
+      servico: {
+        select: {
+          nome: true,
+          duracaoMinutos: true,
+          precoCentavos: true,
+        },
+      },
+      profissional: {
+        select: {
+          nome: true,
+        },
+      },
+    },
+  });
+});
+
+export const funcionarioListarSolicitacoes =
+  createServerFn({
+    method: "GET",
+  }).handler(async () => {
+    await exigirOperacional();
+
+    return prisma.agendamento.findMany({
+      where: {
+        status: {
+          in: ["SOLICITADO", "CONFIRMADO"],
+        },
+      },
+      orderBy: {
+        inicio: "asc",
+      },
+      select: {
+        id: true,
+        inicio: true,
+        fim: true,
+        status: true,
+        observacaoCliente: true,
+        cliente: {
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+            telefone: true,
+          },
+        },
+        servico: {
+          select: {
+            nome: true,
+            duracaoMinutos: true,
+            precoCentavos: true,
+          },
+        },
+        profissional: {
+          select: {
+            id: true,
+            nome: true,
+          },
+        },
+      },
+    });
+  });
+
+export const funcionarioConfirmarAgendamento =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(alterarStatusSchema)
+    .handler(async ({ data }) => {
+      await exigirOperacional();
+
+      const agendamento =
+        await prisma.agendamento.findUnique({
+          where: {
+            id: data.agendamentoId,
+          },
+          select: {
+            id: true,
+            profissionalId: true,
+            inicio: true,
+            fim: true,
+            status: true,
+          },
+        });
+
+      if (!agendamento) {
+        return {
+          sucesso: false,
+          mensagem: "Agendamento não encontrado.",
+        };
+      }
+
+      if (agendamento.status !== "SOLICITADO") {
+        return {
+          sucesso: false,
+          mensagem:
+            "Apenas solicitações pendentes podem ser confirmadas.",
+        };
+      }
+
+      const conflito = await existeConflitoDeHorario({
+        profissionalId: agendamento.profissionalId,
+        inicio: agendamento.inicio,
+        fim: agendamento.fim,
+        ignorarAgendamentoId: agendamento.id,
+      });
+
+      if (conflito) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Existe outro agendamento ou solicitação ocupando esse horário.",
+        };
+      }
+
+      const agendamentoAtualizado =
+        await prisma.agendamento.update({
+          where: {
+            id: agendamento.id,
+          },
+          data: {
+            status: "CONFIRMADO",
+            motivoRecusa: null,
+          },
+          select: {
+            id: true,
+            status: true,
+            inicio: true,
+            fim: true,
+          },
+        });
+
+      return {
+        sucesso: true,
+        mensagem: "Agendamento confirmado com sucesso.",
+        agendamento: agendamentoAtualizado,
+      };
+    });
+
+export const funcionarioRecusarAgendamento =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(recusarAgendamentoSchema)
+    .handler(async ({ data }) => {
+      await exigirOperacional();
+
+      const agendamento =
+        await prisma.agendamento.findUnique({
+          where: {
+            id: data.agendamentoId,
+          },
+          select: {
+            id: true,
+            status: true,
+          },
+        });
+
+      if (!agendamento) {
+        return {
+          sucesso: false,
+          mensagem: "Agendamento não encontrado.",
+        };
+      }
+
+      if (agendamento.status !== "SOLICITADO") {
+        return {
+          sucesso: false,
+          mensagem:
+            "Apenas solicitações pendentes podem ser recusadas.",
+        };
+      }
+
+      const agendamentoAtualizado =
+        await prisma.agendamento.update({
+          where: {
+            id: agendamento.id,
+          },
+          data: {
+            status: "RECUSADO",
+            motivoRecusa:
+              data.motivoRecusa?.trim() || null,
+          },
+          select: {
+            id: true,
+            status: true,
+            motivoRecusa: true,
+          },
+        });
+
+      return {
+        sucesso: true,
+        mensagem: "Solicitação recusada.",
+        agendamento: agendamentoAtualizado,
+      };
+    });
+export const funcionarioConcluirAgendamento =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(concluirAgendamentoSchema)
+    .handler(async ({ data }) => {
+      await exigirOperacional();
+
+      const agendamento =
+        await prisma.agendamento.findUnique({
+          where: {
+            id: data.agendamentoId,
+          },
+          select: {
+            id: true,
+            status: true,
+          },
+        });
+
+      if (!agendamento) {
+        return {
+          sucesso: false,
+          mensagem: "Agendamento não encontrado.",
+        };
+      }
+
+      if (agendamento.status !== "CONFIRMADO") {
+        return {
+          sucesso: false,
+          mensagem:
+            "Apenas agendamentos confirmados podem ser concluídos.",
+        };
+      }
+
+      const formaPagamento =
+        data.formaPagamento as FormaPagamento;
+
+      const agendamentoAtualizado =
+        await prisma.agendamento.update({
+          where: {
+            id: agendamento.id,
+          },
+          data: {
+            status: "CONCLUIDO",
+            formaPagamento,
+            valorPagoCentavos: data.valorPagoCentavos,
+            pagoEm: new Date(),
+            observacaoPagamento:
+              data.observacaoPagamento?.trim() || null,
+          },
+          select: {
+            id: true,
+            status: true,
+            formaPagamento: true,
+            valorPagoCentavos: true,
+            pagoEm: true,
+          },
+        });
+
+      return {
+        sucesso: true,
+        mensagem: "Atendimento concluído e pagamento registrado.",
+        agendamento: agendamentoAtualizado,
+      };
+    });
+export const adminListarAgenda = createServerFn({
+  method: "GET",
+}).handler(async () => {
+  await exigirDono();
+
+  return prisma.agendamento.findMany({
+    orderBy: {
+      inicio: "desc",
+    },
+    select: {
+      id: true,
+      inicio: true,
+      fim: true,
+      status: true,
+      observacaoCliente: true,
+      motivoRecusa: true,
+      criadoEm: true,
+      atualizadoEm: true,
+      formaPagamento: true,
+      valorPagoCentavos: true,
+      pagoEm: true,
+      observacaoPagamento: true,
+
+      cliente: {
+        select: {
+          id: true,
+          nome: true,
+          email: true,
+          telefone: true,
+        },
+      },
+
+      profissional: {
+        select: {
+          id: true,
+          nome: true,
+        },
+      },
+
+      servico: {
+        select: {
+          id: true,
+          nome: true,
+          duracaoMinutos: true,
+          precoCentavos: true,
+        },
+      },
+    },
+  });
+});

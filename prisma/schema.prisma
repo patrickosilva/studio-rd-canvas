@@ -27,30 +27,43 @@ enum PapelUsuario {
   DONO
 }
 
+enum StatusAgendamento {
+  SOLICITADO
+  CONFIRMADO
+  RECUSADO
+  CANCELADO_CLIENTE
+  CANCELADO_FUNCIONARIO
+  CONCLUIDO
+  FALTOU
+}
+
 model Usuario {
-  id           String       @id @default(cuid())
-  nome         String
-  email        String       @unique
-  telefone     String?      @unique
-  senhaHash    String
-  papel        PapelUsuario @default(CLIENTE)
-  ativo        Boolean      @default(true)
-  criadoEm     DateTime     @default(now())
-  atualizadoEm DateTime     @updatedAt
+  id        String       @id @default(cuid())
+  nome      String
+  email     String       @unique
+  telefone  String?      @unique
+  senhaHash String
+  papel     PapelUsuario @default(CLIENTE)
+
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
 
   sessoes      Sessao[]
   profissional Profissional?
+  agendamentos Agendamento[] @relation("AgendamentosCliente")
 }
 
 model Servico {
-  id             String   @id @default(cuid())
-  nome           String   @unique
+  id             String        @id @default(cuid())
+  nome           String        @unique
   descricao      String?
   duracaoMinutos Int
   precoCentavos  Int
-  ativo          Boolean  @default(true)
-  criadoEm       DateTime @default(now())
-  atualizadoEm   DateTime @updatedAt
+  ativo          Boolean       @default(true)
+  criadoEm       DateTime      @default(now())
+  atualizadoEm   DateTime      @updatedAt
+  agendamentos   Agendamento[]
 
   @@index([ativo])
 }
@@ -65,7 +78,8 @@ model Profissional {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  usuario      Usuario?      @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  agendamentos Agendamento[]
 
   @@index([ativo])
 }
@@ -81,4 +95,51 @@ model Sessao {
 
   @@index([usuarioId])
   @@index([expiraEm])
+}
+
+enum FormaPagamento {
+  PIX
+  DINHEIRO
+  CARTAO_DEBITO
+  CARTAO_CREDITO
+  ASSINATURA
+  CORTESIA
+  OUTRO
+}
+
+model Agendamento {
+  id String @id @default(cuid())
+
+  clienteId      String
+  profissionalId String
+  servicoId      String
+
+  inicio DateTime
+  fim    DateTime
+
+  status StatusAgendamento @default(SOLICITADO)
+
+  observacaoCliente String?
+  observacaoInterna String?
+  motivoRecusa      String?
+
+  formaPagamento      FormaPagamento?
+  valorPagoCentavos   Int?
+  pagoEm              DateTime?
+  observacaoPagamento String?
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  cliente      Usuario      @relation("AgendamentosCliente", fields: [clienteId], references: [id], onDelete: Cascade)
+  profissional Profissional @relation(fields: [profissionalId], references: [id], onDelete: Restrict)
+  servico      Servico      @relation(fields: [servicoId], references: [id], onDelete: Restrict)
+
+  @@index([clienteId])
+  @@index([profissionalId])
+  @@index([servicoId])
+  @@index([status])
+  @@index([formaPagamento])
+  @@index([inicio])
+  @@index([profissionalId, inicio])
 }
