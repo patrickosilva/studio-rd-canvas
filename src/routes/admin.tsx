@@ -10,6 +10,7 @@ import {
   DollarSign,
   LayoutDashboard,
   Settings,
+  UsersRound,
 } from "lucide-react";
 
 import { DashboardShell } from "@/components/dashboard/Sidebar";
@@ -88,10 +89,16 @@ const items = [
     icon: BarChart3,
   },
   {
+    label: "Usuários",
+    to: "/admin/usuarios",
+    icon: UsersRound,
+  },
+  {
     label: "Configurações",
     to: "/admin/configuracoes",
     icon: Settings,
   },
+
 ];
 
 function AdminLayout() {

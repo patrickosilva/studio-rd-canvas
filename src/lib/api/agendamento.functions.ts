@@ -89,6 +89,34 @@ const recusarAgendamentoSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
+const cancelarAgendamentoClienteSchema = z.object({
+  agendamentoId: z
+    .string()
+    .trim()
+    .min(1, "Agendamento inválido."),
+
+  motivoCancelamento: z
+    .string()
+    .trim()
+    .max(500, "O motivo é muito grande.")
+    .optional()
+    .or(z.literal("")),
+});
+const cancelarAgendamentoEquipeSchema = z.object({
+  agendamentoId: z
+    .string()
+    .trim()
+    .min(1, "Agendamento inválido."),
+
+  motivoCancelamento: z
+    .string()
+    .trim()
+    .max(500, "O motivo é muito grande.")
+    .optional()
+    .or(z.literal("")),
+});
+
 const concluirAgendamentoSchema = z.object({
   agendamentoId: z
     .string()
@@ -169,6 +197,92 @@ async function existeConflitoDeHorario({
 
   return Boolean(conflito);
 }
+
+export const clienteCancelarAgendamento =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(cancelarAgendamentoClienteSchema)
+    .handler(async ({ data }) => {
+      const usuario = await exigirCliente();
+
+      const agendamento =
+        await prisma.agendamento.findFirst({
+          where: {
+            id: data.agendamentoId,
+            clienteId: usuario.id,
+          },
+          select: {
+            id: true,
+            status: true,
+            inicio: true,
+          },
+        });
+
+      if (!agendamento) {
+        return {
+          sucesso: false,
+          mensagem: "Agendamento não encontrado.",
+        };
+      }
+
+      if (
+        agendamento.status !== "SOLICITADO" &&
+        agendamento.status !== "CONFIRMADO"
+      ) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Apenas agendamentos solicitados ou confirmados podem ser cancelados.",
+        };
+      }
+
+      if (agendamento.inicio <= new Date()) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Não é possível cancelar um agendamento que já passou.",
+        };
+      }
+      const cancelarAgendamentoEquipeSchema = z.object({
+        agendamentoId: z
+          .string()
+          .trim()
+          .min(1, "Agendamento inválido."),
+
+        motivoCancelamento: z
+          .string()
+          .trim()
+          .max(500, "O motivo é muito grande.")
+          .optional()
+          .or(z.literal("")),
+      });
+
+      const agendamentoAtualizado =
+        await prisma.agendamento.update({
+          where: {
+            id: agendamento.id,
+          },
+          data: {
+            status: "CANCELADO_CLIENTE",
+            motivoCancelamento:
+              data.motivoCancelamento?.trim() || null,
+            canceladoEm: new Date(),
+          },
+          select: {
+            id: true,
+            status: true,
+            motivoCancelamento: true,
+            canceladoEm: true,
+          },
+        });
+
+      return {
+        sucesso: true,
+        mensagem: "Agendamento cancelado com sucesso.",
+        agendamento: agendamentoAtualizado,
+      };
+    });
 
 export const solicitarAgendamento = createServerFn({
   method: "POST",
@@ -319,6 +433,74 @@ export const solicitarAgendamento = createServerFn({
       agendamento,
     };
   });
+  export const funcionarioCancelarAgendamento =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(cancelarAgendamentoEquipeSchema)
+    .handler(async ({ data }) => {
+      await exigirOperacional();
+
+      const agendamento =
+        await prisma.agendamento.findUnique({
+          where: {
+            id: data.agendamentoId,
+          },
+          select: {
+            id: true,
+            status: true,
+            inicio: true,
+          },
+        });
+
+      if (!agendamento) {
+        return {
+          sucesso: false,
+          mensagem: "Agendamento não encontrado.",
+        };
+      }
+
+      if (agendamento.status !== "CONFIRMADO") {
+        return {
+          sucesso: false,
+          mensagem:
+            "Apenas agendamentos confirmados podem ser cancelados pela equipe.",
+        };
+      }
+
+      if (agendamento.inicio <= new Date()) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Não é possível cancelar um agendamento que já passou.",
+        };
+      }
+
+      const agendamentoAtualizado =
+        await prisma.agendamento.update({
+          where: {
+            id: agendamento.id,
+          },
+          data: {
+            status: "CANCELADO_FUNCIONARIO",
+            motivoCancelamento:
+              data.motivoCancelamento?.trim() || null,
+            canceladoEm: new Date(),
+          },
+          select: {
+            id: true,
+            status: true,
+            motivoCancelamento: true,
+            canceladoEm: true,
+          },
+        });
+
+      return {
+        sucesso: true,
+        mensagem: "Agendamento cancelado pela equipe.",
+        agendamento: agendamentoAtualizado,
+      };
+    });
 
 export const listarMeusAgendamentos = createServerFn({
   method: "GET",
@@ -339,22 +521,29 @@ export const listarMeusAgendamentos = createServerFn({
       status: true,
       observacaoCliente: true,
       motivoRecusa: true,
+      motivoCancelamento: true,
+      canceladoEm: true,
+      criadoEm: true,
+      atualizadoEm: true,
+
+      profissional: {
+        select: {
+          id: true,
+          nome: true,
+        },
+      },
+
       servico: {
         select: {
+          id: true,
           nome: true,
           duracaoMinutos: true,
           precoCentavos: true,
         },
       },
-      profissional: {
-        select: {
-          nome: true,
-        },
-      },
     },
   });
 });
-
 export const funcionarioListarSolicitacoes =
   createServerFn({
     method: "GET",
@@ -621,6 +810,8 @@ export const adminListarAgenda = createServerFn({
       valorPagoCentavos: true,
       pagoEm: true,
       observacaoPagamento: true,
+      motivoCancelamento: true,
+      canceladoEm: true,
 
       cliente: {
         select: {

@@ -119,10 +119,11 @@ model Agendamento {
 
   status StatusAgendamento @default(SOLICITADO)
 
-  observacaoCliente String?
-  observacaoInterna String?
-  motivoRecusa      String?
-
+  observacaoCliente   String?
+  observacaoInterna   String?
+  motivoRecusa        String?
+  motivoCancelamento  String?
+  canceladoEm         DateTime?
   formaPagamento      FormaPagamento?
   valorPagoCentavos   Int?
   pagoEm              DateTime?

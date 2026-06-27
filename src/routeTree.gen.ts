@@ -25,6 +25,7 @@ import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico
 import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelidade'
 import { Route as ClienteBeneficiosRouteImport } from './routes/cliente.beneficios'
 import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
@@ -113,6 +114,11 @@ const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
   path: '/agendamentos',
   getParentRoute: () => ClienteRoute,
 } as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
+    | '/admin/usuarios'
     | '/cliente/agendamentos'
     | '/cliente/beneficios'
     | '/cliente/fidelidade'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
+    | '/admin/usuarios'
     | '/cliente/agendamentos'
     | '/cliente/beneficios'
     | '/cliente/fidelidade'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
+    | '/admin/usuarios'
     | '/cliente/agendamentos'
     | '/cliente/beneficios'
     | '/cliente/fidelidade'
@@ -421,6 +433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteAgendamentosRouteImport
       parentRoute: typeof ClienteRoute
     }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/relatorios': {
       id: '/admin/relatorios'
       path: '/relatorios'
@@ -481,6 +500,7 @@ interface AdminRouteChildren {
   AdminFinanceiroRoute: typeof AdminFinanceiroRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminRelatoriosRoute: typeof AdminRelatoriosRoute
+  AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -492,6 +512,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminFinanceiroRoute: AdminFinanceiroRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminRelatoriosRoute: AdminRelatoriosRoute,
+  AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

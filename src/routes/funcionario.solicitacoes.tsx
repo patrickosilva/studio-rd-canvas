@@ -18,6 +18,7 @@ import {
 import { PageHeader } from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import {
+  funcionarioCancelarAgendamento,
   funcionarioConfirmarAgendamento,
   funcionarioConcluirAgendamento,
   funcionarioListarSolicitacoes,
@@ -164,6 +165,9 @@ function SolicitacoesPage() {
   const concluirAgendamento = useServerFn(
     funcionarioConcluirAgendamento,
   );
+  const cancelarAgendamento = useServerFn(
+    funcionarioCancelarAgendamento,
+  );
 
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>(
     [],
@@ -303,6 +307,40 @@ function SolicitacoesPage() {
       console.error(error);
 
       setErro("Não foi possível concluir o atendimento.");
+    } finally {
+      setProcessandoId("");
+    }
+  }
+  async function handleCancelarAgendamento(agendamentoId: string) {
+    const motivoCancelamento =
+      window.prompt(
+        "Informe o motivo do cancelamento pela equipe, se quiser:",
+      ) ?? "";
+
+    setMensagem("");
+    setErro("");
+    setProcessandoId(agendamentoId);
+
+    try {
+      const resultado = await cancelarAgendamento({
+        data: {
+          agendamentoId,
+          motivoCancelamento,
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setErro(resultado.mensagem);
+        return;
+      }
+
+      setMensagem(resultado.mensagem);
+
+      await carregarDados();
+    } catch (error) {
+      console.error(error);
+
+      setErro("Não foi possível cancelar o agendamento.");
     } finally {
       setProcessandoId("");
     }
@@ -491,7 +529,7 @@ function SolicitacoesPage() {
                           <select
                             value={
                               formasPagamentoPorAgendamento[
-                                solicitacao.id
+                              solicitacao.id
                               ] ?? "PIX"
                             }
                             onChange={(event) =>
@@ -525,7 +563,7 @@ function SolicitacoesPage() {
                           <input
                             value={
                               valoresPagosPorAgendamento[
-                                solicitacao.id
+                              solicitacao.id
                               ] ??
                               String(
                                 solicitacao.servico.precoCentavos / 100,
@@ -557,6 +595,18 @@ function SolicitacoesPage() {
                           {processando
                             ? "Processando..."
                             : "Marcar concluído"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={processando}
+                          onClick={() =>
+                            void handleCancelarAgendamento(solicitacao.id)
+                          }
+                          className="w-full border-destructive/40 text-destructive hover:bg-destructive/10"
+                        >
+                          <XCircle className="mr-2 h-4 w-4" />
+                          Cancelar pela equipe
                         </Button>
                       </div>
                     )}

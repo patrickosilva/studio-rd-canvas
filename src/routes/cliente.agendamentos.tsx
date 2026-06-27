@@ -26,6 +26,7 @@ import {
   listarServicosAtivos,
 } from "@/lib/api/catalogo.functions";
 import {
+  clienteCancelarAgendamento,
   listarMeusAgendamentos,
   solicitarAgendamento,
 } from "@/lib/api/agendamento.functions";
@@ -86,6 +87,8 @@ type Agendamento = {
   status: string;
   observacaoCliente: string | null;
   motivoRecusa: string | null;
+  motivoCancelamento: string | null;
+  canceladoEm: string | Date | null;
   servico: {
     nome: string;
     duracaoMinutos: number;
@@ -263,6 +266,10 @@ function AgendamentosPage() {
     listarMeusAgendamentos,
   );
   const enviarSolicitacao = useServerFn(solicitarAgendamento);
+  const cancelarAgendamento = useServerFn(
+    clienteCancelarAgendamento,
+  );
+
 
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [profissionais, setProfissionais] = useState<Profissional[]>(
@@ -280,6 +287,7 @@ function AgendamentosPage() {
   const [observacao, setObservacao] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
+  const [cancelandoId, setCancelandoId] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
 
@@ -396,6 +404,40 @@ function AgendamentosPage() {
       setErro("Não foi possível enviar a solicitação.");
     } finally {
       setEnviando(false);
+    }
+  }
+  async function handleCancelarAgendamento(agendamentoId: string) {
+    const motivoCancelamento =
+      window.prompt(
+        "Informe o motivo do cancelamento, se quiser:",
+      ) ?? "";
+
+    setMensagem("");
+    setErro("");
+    setCancelandoId(agendamentoId);
+
+    try {
+      const resultado = await cancelarAgendamento({
+        data: {
+          agendamentoId,
+          motivoCancelamento,
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setErro(resultado.mensagem);
+        return;
+      }
+
+      setMensagem(resultado.mensagem);
+
+      await carregarDados();
+    } catch (error) {
+      console.error(error);
+
+      setErro("Não foi possível cancelar o agendamento.");
+    } finally {
+      setCancelandoId("");
     }
   }
 
@@ -522,11 +564,10 @@ function AgendamentosPage() {
                           setDataSelecionada(dia);
                           setHorarioSelecionado("");
                         }}
-                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
-                          ativo
+                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${ativo
                             ? "border-gold bg-gold-soft text-gold"
                             : "border-border bg-background/40 hover:bg-surface-elevated"
-                        }`}
+                          }`}
                       >
                         <span className="block font-medium capitalize">
                           {obterNomeDia(dia)}
@@ -557,11 +598,10 @@ function AgendamentosPage() {
                         key={horario}
                         type="button"
                         onClick={() => setHorarioSelecionado(horario)}
-                        className={`rounded-xl border px-3 py-2 text-sm transition ${
-                          ativo
+                        className={`rounded-xl border px-3 py-2 text-sm transition ${ativo
                             ? "border-gold bg-gold-soft text-gold"
                             : "border-border bg-background/40 hover:bg-surface-elevated"
-                        }`}
+                          }`}
                       >
                         {horario}
                       </button>
@@ -671,6 +711,29 @@ function AgendamentosPage() {
                       Motivo da recusa: {agendamento.motivoRecusa}
                     </p>
                   )}
+                  {agendamento.motivoCancelamento && (
+                    <p className="mt-3 text-sm text-destructive">
+                      Motivo do cancelamento:{" "}
+                      {agendamento.motivoCancelamento}
+                    </p>
+                  )}
+
+                  {["SOLICITADO", "CONFIRMADO"].includes(
+                    agendamento.status,
+                  ) && (
+                      <button
+                        type="button"
+                        disabled={cancelandoId === agendamento.id}
+                        onClick={() =>
+                          void handleCancelarAgendamento(agendamento.id)
+                        }
+                        className="mt-4 inline-flex h-9 items-center rounded-full border border-destructive/40 px-4 text-sm text-destructive transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {cancelandoId === agendamento.id
+                          ? "Cancelando..."
+                          : "Cancelar agendamento"}
+                      </button>
+                    )}
                 </article>
               ))}
             </div>
