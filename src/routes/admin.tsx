@@ -7,6 +7,7 @@ import {
 import {
   BarChart3,
   Calendar,
+  CalendarX2,
   DollarSign,
   LayoutDashboard,
   Settings,
@@ -79,6 +80,11 @@ const items = [
     icon: Calendar,
   },
   {
+    label: "Bloqueios",
+    to: "/admin/bloqueios",
+    icon: CalendarX2,
+  },
+  {
     label: "Financeiro",
     to: "/admin/financeiro",
     icon: DollarSign,
@@ -98,7 +104,7 @@ const items = [
     to: "/admin/configuracoes",
     icon: Settings,
   },
-
+  
 ];
 
 function AdminLayout() {

@@ -116,6 +116,17 @@ const cancelarAgendamentoEquipeSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+const listarIndisponibilidadesAgendaSchema = z.object({
+  profissionalId: z
+    .string()
+    .trim()
+    .min(1, "Profissional inválido."),
+
+  data: z
+    .string()
+    .trim()
+    .min(1, "Data inválida."),
+});
 
 const concluirAgendamentoSchema = z.object({
   agendamentoId: z
@@ -257,6 +268,18 @@ export const clienteCancelarAgendamento =
           .optional()
           .or(z.literal("")),
       });
+
+      const listarIndisponibilidadesAgendaSchema = z.object({
+  profissionalId: z
+    .string()
+    .trim()
+    .min(1, "Profissional inválido."),
+
+  data: z
+    .string()
+    .trim()
+    .min(1, "Data inválida."),
+});
 
       const agendamentoAtualizado =
         await prisma.agendamento.update({
@@ -839,4 +862,103 @@ export const adminListarAgenda = createServerFn({
       },
     },
   });
+  
 });
+export const listarIndisponibilidadesAgenda =
+  createServerFn({
+    method: "GET",
+  })
+    .validator(listarIndisponibilidadesAgendaSchema)
+    .handler(async ({ data }) => {
+      await exigirCliente();
+
+      const inicioDia = new Date(`${data.data}T00:00:00`);
+      const fimDia = new Date(`${data.data}T23:59:59.999`);
+
+      if (
+        Number.isNaN(inicioDia.getTime()) ||
+        Number.isNaN(fimDia.getTime())
+      ) {
+        return {
+          sucesso: false,
+          mensagem: "Data inválida.",
+          intervalos: [],
+        };
+      }
+
+      const [agendamentos, bloqueios] = await Promise.all([
+        prisma.agendamento.findMany({
+          where: {
+            profissionalId: data.profissionalId,
+            status: {
+              in: ["SOLICITADO", "CONFIRMADO"],
+            },
+            inicio: {
+              lt: fimDia,
+            },
+            fim: {
+              gt: inicioDia,
+            },
+          },
+          select: {
+            id: true,
+            inicio: true,
+            fim: true,
+            status: true,
+          },
+        }),
+
+        prisma.bloqueioAgenda.findMany({
+          where: {
+            ativo: true,
+            inicio: {
+              lt: fimDia,
+            },
+            fim: {
+              gt: inicioDia,
+            },
+            OR: [
+              {
+                profissionalId: null,
+              },
+              {
+                profissionalId: data.profissionalId,
+              },
+            ],
+          },
+          select: {
+            id: true,
+            inicio: true,
+            fim: true,
+            motivo: true,
+            profissionalId: true,
+          },
+        }),
+      ]);
+
+      const intervalos = [
+        ...agendamentos.map((agendamento) => ({
+          id: agendamento.id,
+          tipo: "AGENDAMENTO" as const,
+          inicio: agendamento.inicio,
+          fim: agendamento.fim,
+          motivo: agendamento.status,
+        })),
+
+        ...bloqueios.map((bloqueio) => ({
+          id: bloqueio.id,
+          tipo: "BLOQUEIO" as const,
+          inicio: bloqueio.inicio,
+          fim: bloqueio.fim,
+          motivo:
+            bloqueio.motivo ||
+            "Horário bloqueado pela barbearia.",
+        })),
+      ];
+
+      return {
+        sucesso: true,
+        mensagem: "Indisponibilidades carregadas.",
+        intervalos,
+      };
+    });

@@ -78,8 +78,9 @@ model Profissional {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  usuario      Usuario?      @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  usuario      Usuario?         @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
   agendamentos Agendamento[]
+  bloqueios    BloqueioAgenda[]
 
   @@index([ativo])
 }
@@ -142,5 +143,27 @@ model Agendamento {
   @@index([status])
   @@index([formaPagamento])
   @@index([inicio])
+  @@index([profissionalId, inicio])
+}
+
+model BloqueioAgenda {
+  id String @id @default(cuid())
+
+  profissionalId String?
+  inicio         DateTime
+  fim            DateTime
+
+  motivo String?
+  ativo  Boolean @default(true)
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  profissional Profissional? @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+
+  @@index([profissionalId])
+  @@index([inicio])
+  @@index([fim])
+  @@index([ativo])
   @@index([profissionalId, inicio])
 }

@@ -31,6 +31,7 @@ import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
+import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
 import { Route as AdminAssinaturasRouteImport } from './routes/admin.assinaturas'
 import { Route as AdminAgendaRouteImport } from './routes/admin.agenda'
 
@@ -144,6 +145,11 @@ const AdminClientesRoute = AdminClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBloqueiosRoute = AdminBloqueiosRouteImport.update({
+  id: '/bloqueios',
+  path: '/bloqueios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAssinaturasRoute = AdminAssinaturasRouteImport.update({
   id: '/assinaturas',
   path: '/assinaturas',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/logout': typeof LogoutRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
+  '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/logout': typeof LogoutRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
+  '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/logout': typeof LogoutRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
+  '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/logout'
     | '/admin/agenda'
     | '/admin/assinaturas'
+    | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/financeiro'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/logout'
     | '/admin/agenda'
     | '/admin/assinaturas'
+    | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/financeiro'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/logout'
     | '/admin/agenda'
     | '/admin/assinaturas'
+    | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/financeiro'
@@ -475,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/bloqueios': {
+      id: '/admin/bloqueios'
+      path: '/bloqueios'
+      fullPath: '/admin/bloqueios'
+      preLoaderRoute: typeof AdminBloqueiosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/assinaturas': {
       id: '/admin/assinaturas'
       path: '/assinaturas'
@@ -495,6 +514,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAgendaRoute: typeof AdminAgendaRoute
   AdminAssinaturasRoute: typeof AdminAssinaturasRoute
+  AdminBloqueiosRoute: typeof AdminBloqueiosRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminFinanceiroRoute: typeof AdminFinanceiroRoute
@@ -507,6 +527,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAgendaRoute: AdminAgendaRoute,
   AdminAssinaturasRoute: AdminAssinaturasRoute,
+  AdminBloqueiosRoute: AdminBloqueiosRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminFinanceiroRoute: AdminFinanceiroRoute,

@@ -27,6 +27,7 @@ import {
 } from "@/lib/api/catalogo.functions";
 import {
   clienteCancelarAgendamento,
+  listarIndisponibilidadesAgenda,
   listarMeusAgendamentos,
   solicitarAgendamento,
 } from "@/lib/api/agendamento.functions";
@@ -64,6 +65,7 @@ export const Route = createFileRoute("/cliente/agendamentos")({
   },
 
   component: AgendamentosPage,
+
 });
 
 type Servico = {
@@ -97,6 +99,14 @@ type Agendamento = {
   profissional: {
     nome: string;
   };
+};
+
+type IndisponibilidadeAgenda = {
+  id: string;
+  tipo: "AGENDAMENTO" | "BLOQUEIO";
+  inicio: string | Date;
+  fim: string | Date;
+  motivo: string | null;
 };
 
 const funcionamentoPorDia: Record<
@@ -262,6 +272,7 @@ function traduzirStatus(status: string): string {
 function AgendamentosPage() {
   const carregarServicos = useServerFn(listarServicosAtivos);
   const carregarProfissionais = useServerFn(listarProfissionaisAtivos);
+
   const carregarMeusAgendamentos = useServerFn(
     listarMeusAgendamentos,
   );
@@ -269,7 +280,9 @@ function AgendamentosPage() {
   const cancelarAgendamento = useServerFn(
     clienteCancelarAgendamento,
   );
-
+  const buscarIndisponibilidades = useServerFn(
+    listarIndisponibilidadesAgenda,
+  );
 
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [profissionais, setProfissionais] = useState<Profissional[]>(
@@ -278,7 +291,9 @@ function AgendamentosPage() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>(
     [],
   );
-
+  const [indisponibilidades, setIndisponibilidades] = useState<
+    IndisponibilidadeAgenda[]
+  >([]);
   const [servicoId, setServicoId] = useState("");
   const [profissionalId, setProfissionalId] = useState("");
   const [dataSelecionada, setDataSelecionada] = useState("");
@@ -292,24 +307,72 @@ function AgendamentosPage() {
   const [erro, setErro] = useState("");
 
   const proximosDias = useMemo(
-    () => obterProximosDiasFuncionamento(),
-    [],
-  );
+  () => obterProximosDiasFuncionamento(),
+  [],
+);
 
-  const servicoSelecionado = servicos.find(
-    (servico) => servico.id === servicoId,
-  );
+const servicoSelecionado = servicos.find(
+  (servico) => servico.id === servicoId,
+);
 
-  const horariosDisponiveis = useMemo(() => {
-    if (!dataSelecionada || !servicoSelecionado) {
-      return [];
+// primeiro precisa existir horariosDisponiveis
+const horariosDisponiveis = useMemo(() => {
+  if (!dataSelecionada || !servicoSelecionado) {
+    return [];
+  }
+
+  return gerarHorariosDisponiveis(
+    dataSelecionada,
+    servicoSelecionado.duracaoMinutos,
+  );
+}, [dataSelecionada, servicoSelecionado]);
+
+// depois você filtra os horários bloqueados/ocupados
+const horariosFiltrados = useMemo(() => {
+  return horariosDisponiveis.filter((horario) => {
+    if (!servicoSelecionado || !dataSelecionada) {
+      return false;
     }
 
-    return gerarHorariosDisponiveis(
-      dataSelecionada,
-      servicoSelecionado.duracaoMinutos,
+    const inicioHorario = new Date(
+      `${dataSelecionada}T${horario}`,
     );
-  }, [dataSelecionada, servicoSelecionado]);
+
+    const fimHorario = new Date(
+      inicioHorario.getTime() +
+        servicoSelecionado.duracaoMinutos * 60 * 1000,
+    );
+
+    return !existeConflitoComIndisponibilidade(
+      inicioHorario,
+      fimHorario,
+      indisponibilidades,
+    );
+  });
+}, [
+  horariosDisponiveis,
+  servicoSelecionado,
+  dataSelecionada,
+  indisponibilidades,
+]);
+
+  function existeConflitoComIndisponibilidade(
+    inicioHorario: Date,
+    fimHorario: Date,
+    indisponibilidades: IndisponibilidadeAgenda[],
+  ): boolean {
+    return indisponibilidades.some((indisponibilidade) => {
+      const inicioIndisponivel = new Date(
+        indisponibilidade.inicio,
+      );
+      const fimIndisponivel = new Date(indisponibilidade.fim);
+
+      return (
+        inicioIndisponivel < fimHorario &&
+        fimIndisponivel > inicioHorario
+      );
+    });
+  }
 
   async function carregarDados() {
     setCarregando(true);
@@ -355,6 +418,13 @@ function AgendamentosPage() {
   }, []);
 
   useEffect(() => {
+    void carregarIndisponibilidades(
+      profissionalId,
+      dataSelecionada,
+    );
+  }, [profissionalId, dataSelecionada]);
+
+  useEffect(() => {
     if (
       horariosDisponiveis.length > 0 &&
       !horariosDisponiveis.includes(horarioSelecionado)
@@ -362,6 +432,35 @@ function AgendamentosPage() {
       setHorarioSelecionado(horariosDisponiveis[0]);
     }
   }, [horariosDisponiveis, horarioSelecionado]);
+  async function carregarIndisponibilidades(
+    profissionalIdSelecionado: string,
+    dataSelecionadaValor: string,
+  ) {
+    if (!profissionalIdSelecionado || !dataSelecionadaValor) {
+      setIndisponibilidades([]);
+      return;
+    }
+
+    try {
+      const resultado = await buscarIndisponibilidades({
+        data: {
+          profissionalId: profissionalIdSelecionado,
+          data: dataSelecionadaValor,
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setIndisponibilidades([]);
+        return;
+      }
+
+      setIndisponibilidades(resultado.intervalos);
+    } catch (error) {
+      console.error(error);
+
+      setIndisponibilidades([]);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -565,8 +664,8 @@ function AgendamentosPage() {
                           setHorarioSelecionado("");
                         }}
                         className={`rounded-xl border px-4 py-3 text-left text-sm transition ${ativo
-                            ? "border-gold bg-gold-soft text-gold"
-                            : "border-border bg-background/40 hover:bg-surface-elevated"
+                          ? "border-gold bg-gold-soft text-gold"
+                          : "border-border bg-background/40 hover:bg-surface-elevated"
                           }`}
                       >
                         <span className="block font-medium capitalize">
@@ -599,8 +698,8 @@ function AgendamentosPage() {
                         type="button"
                         onClick={() => setHorarioSelecionado(horario)}
                         className={`rounded-xl border px-3 py-2 text-sm transition ${ativo
-                            ? "border-gold bg-gold-soft text-gold"
-                            : "border-border bg-background/40 hover:bg-surface-elevated"
+                          ? "border-gold bg-gold-soft text-gold"
+                          : "border-border bg-background/40 hover:bg-surface-elevated"
                           }`}
                       >
                         {horario}
