@@ -23,8 +23,8 @@ import {
   removerBloqueioAgenda,
 } from "@/lib/api/bloqueio-agenda.functions";
 
-export const Route = createFileRoute("/admin/bloqueios")({
-  component: AdminBloqueiosPage,
+export const Route = createFileRoute("/funcionario/bloqueios")({
+  component: FuncionarioBloqueiosPage,
 });
 
 type Profissional = {
@@ -61,7 +61,7 @@ function formatarDataHora(valor: string | Date): string {
   }).format(data);
 }
 
-function AdminBloqueiosPage() {
+function FuncionarioBloqueiosPage() {
   const buscarBloqueios = useServerFn(listarBloqueiosAgenda);
   const buscarProfissionais = useServerFn(listarProfissionaisAtivos);
   const criarBloqueio = useServerFn(criarBloqueioAgenda);

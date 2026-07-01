@@ -116,6 +116,7 @@ const cancelarAgendamentoEquipeSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
 const listarIndisponibilidadesAgendaSchema = z.object({
   profissionalId: z
     .string()

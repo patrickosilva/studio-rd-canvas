@@ -20,6 +20,7 @@ import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index
 import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as FuncionarioSolicitacoesRouteImport } from './routes/funcionario.solicitacoes'
+import { Route as FuncionarioBloqueiosRouteImport } from './routes/funcionario.bloqueios'
 import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelidade'
@@ -88,6 +89,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const FuncionarioSolicitacoesRoute = FuncionarioSolicitacoesRouteImport.update({
   id: '/solicitacoes',
   path: '/solicitacoes',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioBloqueiosRoute = FuncionarioBloqueiosRouteImport.update({
+  id: '/bloqueios',
+  path: '/bloqueios',
   getParentRoute: () => FuncionarioRoute,
 } as any)
 const ClientePerfilRoute = ClientePerfilRouteImport.update({
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
   '/cliente/': typeof ClienteIndexRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin': typeof AdminIndexRoute
   '/cliente': typeof ClienteIndexRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
   '/cliente/': typeof ClienteIndexRoute
@@ -264,6 +273,7 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/bloqueios'
     | '/funcionario/solicitacoes'
     | '/admin/'
     | '/cliente/'
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/bloqueios'
     | '/funcionario/solicitacoes'
     | '/admin'
     | '/cliente'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/bloqueios'
     | '/funcionario/solicitacoes'
     | '/admin/'
     | '/cliente/'
@@ -408,6 +420,13 @@ declare module '@tanstack/react-router' {
       path: '/solicitacoes'
       fullPath: '/funcionario/solicitacoes'
       preLoaderRoute: typeof FuncionarioSolicitacoesRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/bloqueios': {
+      id: '/funcionario/bloqueios'
+      path: '/bloqueios'
+      fullPath: '/funcionario/bloqueios'
+      preLoaderRoute: typeof FuncionarioBloqueiosRouteImport
       parentRoute: typeof FuncionarioRoute
     }
     '/cliente/perfil': {
@@ -561,11 +580,13 @@ const ClienteRouteWithChildren =
   ClienteRoute._addFileChildren(ClienteRouteChildren)
 
 interface FuncionarioRouteChildren {
+  FuncionarioBloqueiosRoute: typeof FuncionarioBloqueiosRoute
   FuncionarioSolicitacoesRoute: typeof FuncionarioSolicitacoesRoute
   FuncionarioIndexRoute: typeof FuncionarioIndexRoute
 }
 
 const FuncionarioRouteChildren: FuncionarioRouteChildren = {
+  FuncionarioBloqueiosRoute: FuncionarioBloqueiosRoute,
   FuncionarioSolicitacoesRoute: FuncionarioSolicitacoesRoute,
   FuncionarioIndexRoute: FuncionarioIndexRoute,
 }

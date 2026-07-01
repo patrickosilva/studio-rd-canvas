@@ -280,6 +280,11 @@ function AgendamentosPage() {
   const cancelarAgendamento = useServerFn(
     clienteCancelarAgendamento,
   );
+  const [agendamentoCancelamentoId, setAgendamentoCancelamentoId] =
+    useState("");
+
+  const [motivoCancelamentoModal, setMotivoCancelamentoModal] =
+    useState("");
   const buscarIndisponibilidades = useServerFn(
     listarIndisponibilidadesAgenda,
   );
@@ -307,54 +312,63 @@ function AgendamentosPage() {
   const [erro, setErro] = useState("");
 
   const proximosDias = useMemo(
-  () => obterProximosDiasFuncionamento(),
-  [],
-);
-
-const servicoSelecionado = servicos.find(
-  (servico) => servico.id === servicoId,
-);
-
-// primeiro precisa existir horariosDisponiveis
-const horariosDisponiveis = useMemo(() => {
-  if (!dataSelecionada || !servicoSelecionado) {
-    return [];
-  }
-
-  return gerarHorariosDisponiveis(
-    dataSelecionada,
-    servicoSelecionado.duracaoMinutos,
+    () => obterProximosDiasFuncionamento(),
+    [],
   );
-}, [dataSelecionada, servicoSelecionado]);
 
-// depois você filtra os horários bloqueados/ocupados
-const horariosFiltrados = useMemo(() => {
-  return horariosDisponiveis.filter((horario) => {
-    if (!servicoSelecionado || !dataSelecionada) {
-      return false;
+  const servicoSelecionado = servicos.find(
+    (servico) => servico.id === servicoId,
+  );
+
+  // primeiro precisa existir horariosDisponiveis
+  const horariosDisponiveis = useMemo(() => {
+    if (!dataSelecionada || !servicoSelecionado) {
+      return [];
     }
 
-    const inicioHorario = new Date(
-      `${dataSelecionada}T${horario}`,
+    return gerarHorariosDisponiveis(
+      dataSelecionada,
+      servicoSelecionado.duracaoMinutos,
     );
+  }, [dataSelecionada, servicoSelecionado]);
 
-    const fimHorario = new Date(
-      inicioHorario.getTime() +
+  // depois você filtra os horários bloqueados/ocupados
+  const horariosFiltrados = useMemo(() => {
+    return horariosDisponiveis.filter((horario) => {
+      if (!servicoSelecionado || !dataSelecionada) {
+        return false;
+      }
+
+      const inicioHorario = new Date(
+        `${dataSelecionada}T${horario}`,
+      );
+
+      const fimHorario = new Date(
+        inicioHorario.getTime() +
         servicoSelecionado.duracaoMinutos * 60 * 1000,
-    );
+      );
 
-    return !existeConflitoComIndisponibilidade(
-      inicioHorario,
-      fimHorario,
-      indisponibilidades,
-    );
-  });
-}, [
-  horariosDisponiveis,
-  servicoSelecionado,
-  dataSelecionada,
-  indisponibilidades,
-]);
+      return !existeConflitoComIndisponibilidade(
+        inicioHorario,
+        fimHorario,
+        indisponibilidades,
+      );
+    });
+  }, [
+    horariosDisponiveis,
+    servicoSelecionado,
+    dataSelecionada,
+    indisponibilidades,
+  ]);
+  function abrirModalCancelamento(agendamentoId: string) {
+    setMotivoCancelamentoModal("");
+    setAgendamentoCancelamentoId(agendamentoId);
+  }
+
+  function fecharModalCancelamento() {
+    setAgendamentoCancelamentoId("");
+    setMotivoCancelamentoModal("");
+  }
 
   function existeConflitoComIndisponibilidade(
     inicioHorario: Date,
@@ -505,12 +519,10 @@ const horariosFiltrados = useMemo(() => {
       setEnviando(false);
     }
   }
-  async function handleCancelarAgendamento(agendamentoId: string) {
-    const motivoCancelamento =
-      window.prompt(
-        "Informe o motivo do cancelamento, se quiser:",
-      ) ?? "";
-
+  async function handleCancelarAgendamento(
+    agendamentoId: string,
+    motivoCancelamento: string,
+  ) {
     setMensagem("");
     setErro("");
     setCancelandoId(agendamentoId);
@@ -529,6 +541,7 @@ const horariosFiltrados = useMemo(() => {
       }
 
       setMensagem(resultado.mensagem);
+      fecharModalCancelamento();
 
       await carregarDados();
     } catch (error) {
@@ -538,6 +551,16 @@ const horariosFiltrados = useMemo(() => {
     } finally {
       setCancelandoId("");
     }
+  }
+  async function handleConfirmarCancelamentoModal() {
+    if (!agendamentoCancelamentoId) {
+      return;
+    }
+
+    await handleCancelarAgendamento(
+      agendamentoCancelamentoId,
+      motivoCancelamentoModal,
+    );
   }
 
   return (
@@ -823,9 +846,7 @@ const horariosFiltrados = useMemo(() => {
                       <button
                         type="button"
                         disabled={cancelandoId === agendamento.id}
-                        onClick={() =>
-                          void handleCancelarAgendamento(agendamento.id)
-                        }
+                        onClick={() => abrirModalCancelamento(agendamento.id)}
                         className="mt-4 inline-flex h-9 items-center rounded-full border border-destructive/40 px-4 text-sm text-destructive transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {cancelandoId === agendamento.id
@@ -838,7 +859,70 @@ const horariosFiltrados = useMemo(() => {
             </div>
           )}
         </section>
-      </div>
+
+        {agendamentoCancelamentoId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-display">
+                    Cancelar agendamento
+                  </h2>
+
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Informe o motivo do cancelamento, se quiser. Esse registro ficará
+                    salvo no histórico do seu agendamento.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={fecharModalCancelamento}
+                  className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition hover:bg-surface-elevated"
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                <label className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Motivo do cancelamento
+                </label>
+
+                <textarea
+                  value={motivoCancelamentoModal}
+                  onChange={(event) =>
+                    setMotivoCancelamentoModal(event.target.value)
+                  }
+                  placeholder="Ex.: não poderei comparecer, surgiu um imprevisto..."
+                  className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={fecharModalCancelamento}
+                  disabled={cancelandoId === agendamentoCancelamentoId}
+                  className="inline-flex h-10 items-center justify-center rounded-full border border-border px-5 text-sm transition hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Voltar
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void handleConfirmarCancelamentoModal()}
+                  disabled={cancelandoId === agendamentoCancelamentoId}
+                  className="inline-flex h-10 items-center justify-center rounded-full bg-destructive px-5 text-sm text-destructive-foreground transition hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {cancelandoId === agendamentoCancelamentoId
+                    ? "Cancelando..."
+                    : "Confirmar cancelamento"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}</div>
     </div>
   );
 }

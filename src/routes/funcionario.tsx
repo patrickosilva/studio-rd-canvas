@@ -7,6 +7,7 @@ import {
 import {
   CalendarCheck,
   LayoutDashboard,
+  CalendarX2,
 } from "lucide-react";
 
 import { DashboardShell } from "@/components/dashboard/Sidebar";
@@ -70,6 +71,11 @@ const items = [
     to: "/funcionario/solicitacoes",
     icon: CalendarCheck,
   },
+  {
+    label: "Bloqueios",
+    to: "/funcionario/bloqueios",
+    icon: CalendarX2,
+  }
 ];
 
 function FuncionarioLayout() {

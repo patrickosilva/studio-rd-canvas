@@ -93,6 +93,7 @@ function formatarMoeda(precoCentavos: number): string {
   }).format(precoCentavos / 100);
 }
 
+
 function formatarDataHora(valor: string | Date): string {
   const data = new Date(valor);
 
@@ -176,6 +177,14 @@ function SolicitacoesPage() {
   const [processandoId, setProcessandoId] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
+  const [modalAcao, setModalAcao] = useState<{
+    tipo: "RECUSAR" | "CANCELAR_EQUIPE";
+    agendamentoId: string;
+    titulo: string;
+    descricao: string;
+  } | null>(null);
+
+  const [motivoModal, setMotivoModal] = useState("");
 
   const [
     formasPagamentoPorAgendamento,
@@ -207,6 +216,32 @@ function SolicitacoesPage() {
   useEffect(() => {
     void carregarDados();
   }, []);
+  function abrirModalRecusa(agendamentoId: string) {
+  setMotivoModal("");
+  setModalAcao({
+    tipo: "RECUSAR",
+    agendamentoId,
+    titulo: "Recusar solicitação",
+    descricao:
+      "Informe o motivo da recusa. O cliente verá essa informação no histórico do agendamento.",
+  });
+}
+
+function abrirModalCancelamentoEquipe(agendamentoId: string) {
+  setMotivoModal("");
+  setModalAcao({
+    tipo: "CANCELAR_EQUIPE",
+    agendamentoId,
+    titulo: "Cancelar pela equipe",
+    descricao:
+      "Informe o motivo do cancelamento. O cliente verá que o horário foi cancelado pela equipe.",
+  });
+}
+
+function fecharModalAcao() {
+  setModalAcao(null);
+  setMotivoModal("");
+}
 
   async function handleConfirmar(agendamentoId: string) {
     setMensagem("");
@@ -236,13 +271,32 @@ function SolicitacoesPage() {
       setProcessandoId("");
     }
   }
+  async function handleConfirmarModalAcao() {
+    if (!modalAcao) {
+      return;
+    }
 
-  async function handleRecusar(agendamentoId: string) {
-    const motivoRecusa =
-      window.prompt(
-        "Informe o motivo da recusa, se quiser:",
-      ) ?? "";
+    if (modalAcao.tipo === "RECUSAR") {
+      await handleRecusar(
+        modalAcao.agendamentoId,
+        motivoModal,
+      );
 
+      return;
+    }
+
+    if (modalAcao.tipo === "CANCELAR_EQUIPE") {
+      await handleCancelarAgendamento(
+        modalAcao.agendamentoId,
+        motivoModal,
+      );
+    }
+  }
+
+  async function handleRecusar(
+    agendamentoId: string,
+    motivoRecusa: string,
+  ) {
     setMensagem("");
     setErro("");
     setProcessandoId(agendamentoId);
@@ -261,6 +315,7 @@ function SolicitacoesPage() {
       }
 
       setMensagem(resultado.mensagem);
+      fecharModalAcao();
 
       await carregarDados();
     } catch (error) {
@@ -311,12 +366,10 @@ function SolicitacoesPage() {
       setProcessandoId("");
     }
   }
-  async function handleCancelarAgendamento(agendamentoId: string) {
-    const motivoCancelamento =
-      window.prompt(
-        "Informe o motivo do cancelamento pela equipe, se quiser:",
-      ) ?? "";
-
+  async function handleCancelarAgendamento(
+    agendamentoId: string,
+    motivoCancelamento: string,
+  ) {
     setMensagem("");
     setErro("");
     setProcessandoId(agendamentoId);
@@ -335,6 +388,7 @@ function SolicitacoesPage() {
       }
 
       setMensagem(resultado.mensagem);
+      fecharModalAcao();
 
       await carregarDados();
     } catch (error) {
@@ -493,9 +547,7 @@ function SolicitacoesPage() {
                         <Button
                           type="button"
                           disabled={processando}
-                          onClick={() =>
-                            void handleConfirmar(solicitacao.id)
-                          }
+                          onClick={() => abrirModalRecusa(solicitacao.id)}
                           className="w-full"
                         >
                           <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -508,9 +560,7 @@ function SolicitacoesPage() {
                           type="button"
                           variant="outline"
                           disabled={processando}
-                          onClick={() =>
-                            void handleRecusar(solicitacao.id)
-                          }
+                          onClick={() => abrirModalRecusa(solicitacao.id)}
                           className="w-full"
                         >
                           <XCircle className="mr-2 h-4 w-4" />
@@ -601,7 +651,7 @@ function SolicitacoesPage() {
                           variant="outline"
                           disabled={processando}
                           onClick={() =>
-                            void handleCancelarAgendamento(solicitacao.id)
+                            abrirModalCancelamentoEquipe(solicitacao.id)
                           }
                           className="w-full border-destructive/40 text-destructive hover:bg-destructive/10"
                         >
@@ -615,6 +665,74 @@ function SolicitacoesPage() {
               </article>
             );
           })}
+        </div>
+      )}
+      {modalAcao && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-display">
+                  {modalAcao.titulo}
+                </h2>
+
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {modalAcao.descricao}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={fecharModalAcao}
+                className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition hover:bg-surface-elevated"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-2">
+              <label className="text-xs uppercase tracking-widest text-muted-foreground">
+                Motivo
+              </label>
+
+              <textarea
+                value={motivoModal}
+                onChange={(event) =>
+                  setMotivoModal(event.target.value)
+                }
+                placeholder="Ex.: horário indisponível, ajuste interno, conflito de agenda..."
+                className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={fecharModalAcao}
+                disabled={processandoId === modalAcao.agendamentoId}
+              >
+                Voltar
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => void handleConfirmarModalAcao()}
+                disabled={processandoId === modalAcao.agendamentoId}
+                className={
+                  modalAcao.tipo === "CANCELAR_EQUIPE"
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    : undefined
+                }
+              >
+                {processandoId === modalAcao.agendamentoId
+                  ? "Processando..."
+                  : modalAcao.tipo === "RECUSAR"
+                    ? "Confirmar recusa"
+                    : "Confirmar cancelamento"}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -51,7 +51,8 @@ model Usuario {
 
   sessoes      Sessao[]
   profissional Profissional?
-  agendamentos Agendamento[] @relation("AgendamentosCliente")
+  assinaturas  AssinaturaCliente[] @relation("AssinaturasCliente")
+  agendamentos Agendamento[]       @relation("AgendamentosCliente")
 }
 
 model Servico {
@@ -108,12 +109,20 @@ enum FormaPagamento {
   OUTRO
 }
 
+enum StatusAssinatura {
+  ATIVA
+  PAUSADA
+  CANCELADA
+  EXPIRADA
+}
+
 model Agendamento {
   id String @id @default(cuid())
 
   clienteId      String
   profissionalId String
   servicoId      String
+  usoAssinatura  UsoAssinatura?
 
   inicio DateTime
   fim    DateTime
@@ -166,4 +175,87 @@ model BloqueioAgenda {
   @@index([fim])
   @@index([ativo])
   @@index([profissionalId, inicio])
+}
+
+model PlanoAssinatura {
+  id             String  @id @default(cuid())
+  nome           String  @unique
+  descricao      String?
+  precoCentavos  Int
+  cortesPorCiclo Int
+  duracaoDias    Int     @default(30)
+  ativo          Boolean @default(true)
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  assinaturas AssinaturaCliente[]
+
+  @@index([ativo])
+}
+
+model AssinaturaCliente {
+  id String @id @default(cuid())
+
+  clienteId String
+  planoId   String
+
+  status StatusAssinatura @default(ATIVA)
+
+  inicio         DateTime @default(now())
+  vigenciaInicio DateTime
+  vigenciaFim    DateTime
+
+  saldoCortes           Int
+  renovaAutomaticamente Boolean @default(false)
+
+  observacao String?
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  cliente Usuario         @relation("AssinaturasCliente", fields: [clienteId], references: [id], onDelete: Cascade)
+  plano   PlanoAssinatura @relation(fields: [planoId], references: [id], onDelete: Restrict)
+
+  usos       UsoAssinatura[]
+  pagamentos PagamentoAssinatura[]
+
+  @@index([clienteId])
+  @@index([planoId])
+  @@index([status])
+  @@index([vigenciaFim])
+}
+
+model UsoAssinatura {
+  id String @id @default(cuid())
+
+  assinaturaId  String
+  agendamentoId String @unique
+
+  quantidadeCortes Int @default(1)
+
+  criadoEm DateTime @default(now())
+
+  assinatura  AssinaturaCliente @relation(fields: [assinaturaId], references: [id], onDelete: Cascade)
+  agendamento Agendamento       @relation(fields: [agendamentoId], references: [id], onDelete: Cascade)
+
+  @@index([assinaturaId])
+}
+
+model PagamentoAssinatura {
+  id String @id @default(cuid())
+
+  assinaturaId   String
+  formaPagamento FormaPagamento
+  valorCentavos  Int
+  pagoEm         DateTime       @default(now())
+  observacao     String?
+
+  criadoEm DateTime @default(now())
+
+  assinatura AssinaturaCliente @relation(fields: [assinaturaId], references: [id], onDelete: Cascade)
+
+  @@index([assinaturaId])
+  @@index([formaPagamento])
+  @@index([pagoEm])
 }
