@@ -217,31 +217,31 @@ function SolicitacoesPage() {
     void carregarDados();
   }, []);
   function abrirModalRecusa(agendamentoId: string) {
-  setMotivoModal("");
-  setModalAcao({
-    tipo: "RECUSAR",
-    agendamentoId,
-    titulo: "Recusar solicitação",
-    descricao:
-      "Informe o motivo da recusa. O cliente verá essa informação no histórico do agendamento.",
-  });
-}
+    setMotivoModal("");
+    setModalAcao({
+      tipo: "RECUSAR",
+      agendamentoId,
+      titulo: "Recusar solicitação",
+      descricao:
+        "Informe o motivo da recusa. O cliente verá essa informação no histórico do agendamento.",
+    });
+  }
 
-function abrirModalCancelamentoEquipe(agendamentoId: string) {
-  setMotivoModal("");
-  setModalAcao({
-    tipo: "CANCELAR_EQUIPE",
-    agendamentoId,
-    titulo: "Cancelar pela equipe",
-    descricao:
-      "Informe o motivo do cancelamento. O cliente verá que o horário foi cancelado pela equipe.",
-  });
-}
+  function abrirModalCancelamentoEquipe(agendamentoId: string) {
+    setMotivoModal("");
+    setModalAcao({
+      tipo: "CANCELAR_EQUIPE",
+      agendamentoId,
+      titulo: "Cancelar pela equipe",
+      descricao:
+        "Informe o motivo do cancelamento. O cliente verá que o horário foi cancelado pela equipe.",
+    });
+  }
 
-function fecharModalAcao() {
-  setModalAcao(null);
-  setMotivoModal("");
-}
+  function fecharModalAcao() {
+    setModalAcao(null);
+    setMotivoModal("");
+  }
 
   async function handleConfirmar(agendamentoId: string) {
     setMensagem("");
@@ -547,7 +547,7 @@ function fecharModalAcao() {
                         <Button
                           type="button"
                           disabled={processando}
-                          onClick={() => abrirModalRecusa(solicitacao.id)}
+                          onClick={() => void handleConfirmar(solicitacao.id)}
                           className="w-full"
                         >
                           <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -555,7 +555,6 @@ function fecharModalAcao() {
                             ? "Processando..."
                             : "Confirmar"}
                         </Button>
-
                         <Button
                           type="button"
                           variant="outline"
@@ -612,24 +611,24 @@ function fecharModalAcao() {
 
                           <input
                             value={
-                              valoresPagosPorAgendamento[
-                              solicitacao.id
-                              ] ??
-                              String(
-                                solicitacao.servico.precoCentavos / 100,
-                              ).replace(".", ",")
+                              (formasPagamentoPorAgendamento[solicitacao.id] ?? "PIX") ===
+                                "ASSINATURA"
+                                ? "0,00"
+                                : valoresPagosPorAgendamento[solicitacao.id] ??
+                                String(solicitacao.servico.precoCentavos / 100).replace(".", ",")
                             }
                             onChange={(event) =>
-                              setValoresPagosPorAgendamento(
-                                (estadoAtual) => ({
-                                  ...estadoAtual,
-                                  [solicitacao.id]:
-                                    event.target.value,
-                                }),
-                              )
+                              setValoresPagosPorAgendamento((estadoAtual) => ({
+                                ...estadoAtual,
+                                [solicitacao.id]: event.target.value,
+                              }))
+                            }
+                            disabled={
+                              (formasPagamentoPorAgendamento[solicitacao.id] ?? "PIX") ===
+                              "ASSINATURA"
                             }
                             inputMode="decimal"
-                            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                           />
                         </div>
 

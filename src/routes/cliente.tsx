@@ -72,6 +72,11 @@ const items = [
     icon: Calendar,
   },
   {
+    label: "Assinatura",
+    to: "/cliente/assinatura",
+    icon: Crown,
+  },
+  {
     label: "Histórico",
     to: "/cliente/historico",
     icon: History,

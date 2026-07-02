@@ -8,6 +8,7 @@ import {
   BarChart3,
   Calendar,
   CalendarX2,
+  Crown,
   DollarSign,
   LayoutDashboard,
   Settings,
@@ -90,6 +91,11 @@ const items = [
     icon: DollarSign,
   },
   {
+    label: "Assinaturas",
+    to: "/admin/assinaturas",
+    icon: Crown,
+  },
+  {
     label: "Relatórios",
     to: "/admin/relatorios",
     icon: BarChart3,
@@ -104,7 +110,7 @@ const items = [
     to: "/admin/configuracoes",
     icon: Settings,
   },
-  
+
 ];
 
 function AdminLayout() {

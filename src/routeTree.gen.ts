@@ -25,6 +25,7 @@ import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelidade'
 import { Route as ClienteBeneficiosRouteImport } from './routes/cliente.beneficios'
+import { Route as ClienteAssinaturaRouteImport } from './routes/cliente.assinatura'
 import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
@@ -116,6 +117,11 @@ const ClienteBeneficiosRoute = ClienteBeneficiosRouteImport.update({
   path: '/beneficios',
   getParentRoute: () => ClienteRoute,
 } as any)
+const ClienteAssinaturaRoute = ClienteAssinaturaRouteImport.update({
+  id: '/assinatura',
+  path: '/assinatura',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
   id: '/agendamentos',
   path: '/agendamentos',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/admin/relatorios'
     | '/admin/usuarios'
     | '/cliente/agendamentos'
+    | '/cliente/assinatura'
     | '/cliente/beneficios'
     | '/cliente/fidelidade'
     | '/cliente/historico'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin/relatorios'
     | '/admin/usuarios'
     | '/cliente/agendamentos'
+    | '/cliente/assinatura'
     | '/cliente/beneficios'
     | '/cliente/fidelidade'
     | '/cliente/historico'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/admin/relatorios'
     | '/admin/usuarios'
     | '/cliente/agendamentos'
+    | '/cliente/assinatura'
     | '/cliente/beneficios'
     | '/cliente/fidelidade'
     | '/cliente/historico'
@@ -457,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteBeneficiosRouteImport
       parentRoute: typeof ClienteRoute
     }
+    '/cliente/assinatura': {
+      id: '/cliente/assinatura'
+      path: '/assinatura'
+      fullPath: '/cliente/assinatura'
+      preLoaderRoute: typeof ClienteAssinaturaRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/cliente/agendamentos': {
       id: '/cliente/agendamentos'
       path: '/agendamentos'
@@ -560,6 +579,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ClienteRouteChildren {
   ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
+  ClienteAssinaturaRoute: typeof ClienteAssinaturaRoute
   ClienteBeneficiosRoute: typeof ClienteBeneficiosRoute
   ClienteFidelidadeRoute: typeof ClienteFidelidadeRoute
   ClienteHistoricoRoute: typeof ClienteHistoricoRoute
@@ -569,6 +589,7 @@ interface ClienteRouteChildren {
 
 const ClienteRouteChildren: ClienteRouteChildren = {
   ClienteAgendamentosRoute: ClienteAgendamentosRoute,
+  ClienteAssinaturaRoute: ClienteAssinaturaRoute,
   ClienteBeneficiosRoute: ClienteBeneficiosRoute,
   ClienteFidelidadeRoute: ClienteFidelidadeRoute,
   ClienteHistoricoRoute: ClienteHistoricoRoute,

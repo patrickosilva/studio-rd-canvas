@@ -148,7 +148,8 @@ const concluirAgendamentoSchema = z.object({
   valorPagoCentavos: z
     .number()
     .int("O valor precisa estar em centavos.")
-    .min(0, "O valor não pode ser negativo."),
+    .min(0, "O valor não pode ser negativo.")
+    .optional(),
 
   observacaoPagamento: z
     .string()
@@ -157,7 +158,8 @@ const concluirAgendamentoSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
-function converterData(valor: string): Date | null {
+
+ function converterData(valor: string): Date | null {
   const data = new Date(valor);
 
   if (Number.isNaN(data.getTime())) {
@@ -166,6 +168,7 @@ function converterData(valor: string): Date | null {
 
   return data;
 }
+
 
 function calcularFim(inicio: Date, duracaoMinutos: number): Date {
   return new Date(
@@ -762,7 +765,22 @@ export const funcionarioConcluirAgendamento =
           },
           select: {
             id: true,
+            clienteId: true,
             status: true,
+
+            usoAssinatura: {
+              select: {
+                id: true,
+              },
+            },
+
+            servico: {
+              select: {
+                id: true,
+                nome: true,
+                precoCentavos: true,
+              },
+            },
           },
         });
 
@@ -781,8 +799,112 @@ export const funcionarioConcluirAgendamento =
         };
       }
 
+      if (agendamento.usoAssinatura) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Esse agendamento já possui uso de assinatura registrado.",
+        };
+      }
+
       const formaPagamento =
         data.formaPagamento as FormaPagamento;
+
+      if (formaPagamento === "ASSINATURA") {
+        const agora = new Date();
+
+        const assinatura =
+          await prisma.assinaturaCliente.findFirst({
+            where: {
+              clienteId: agendamento.clienteId,
+              status: "ATIVA",
+              vigenciaInicio: {
+                lte: agora,
+              },
+              vigenciaFim: {
+                gte: agora,
+              },
+              saldoCortes: {
+                gt: 0,
+              },
+            },
+            orderBy: {
+              criadoEm: "desc",
+            },
+            select: {
+              id: true,
+              saldoCortes: true,
+              plano: {
+                select: {
+                  nome: true,
+                },
+              },
+            },
+          });
+
+        if (!assinatura) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Este cliente não possui assinatura ativa com saldo disponível.",
+          };
+        }
+
+        const agendamentoAtualizado =
+          await prisma.$transaction(async (tx) => {
+            await tx.assinaturaCliente.update({
+              where: {
+                id: assinatura.id,
+              },
+              data: {
+                saldoCortes: {
+                  decrement: 1,
+                },
+              },
+            });
+
+            await tx.usoAssinatura.create({
+              data: {
+                assinaturaId: assinatura.id,
+                agendamentoId: agendamento.id,
+                quantidadeCortes: 1,
+              },
+            });
+
+            return tx.agendamento.update({
+              where: {
+                id: agendamento.id,
+              },
+              data: {
+                status: "CONCLUIDO",
+                formaPagamento: "ASSINATURA",
+                valorPagoCentavos: 0,
+                pagoEm: new Date(),
+                observacaoPagamento:
+                  data.observacaoPagamento?.trim() ||
+                  `Atendimento descontado da assinatura ${assinatura.plano.nome}.`,
+              },
+              select: {
+                id: true,
+                status: true,
+                formaPagamento: true,
+                valorPagoCentavos: true,
+                pagoEm: true,
+              },
+            });
+          });
+
+        return {
+          sucesso: true,
+          mensagem:
+            "Atendimento concluído e 1 corte foi descontado da assinatura.",
+          agendamento: agendamentoAtualizado,
+        };
+      }
+
+      const valorPagoCentavos =
+        data.valorPagoCentavos ??
+        agendamento.servico.precoCentavos;
 
       const agendamentoAtualizado =
         await prisma.agendamento.update({
@@ -792,7 +914,7 @@ export const funcionarioConcluirAgendamento =
           data: {
             status: "CONCLUIDO",
             formaPagamento,
-            valorPagoCentavos: data.valorPagoCentavos,
+            valorPagoCentavos,
             pagoEm: new Date(),
             observacaoPagamento:
               data.observacaoPagamento?.trim() || null,
@@ -808,7 +930,7 @@ export const funcionarioConcluirAgendamento =
 
       return {
         sucesso: true,
-        mensagem: "Atendimento concluído e pagamento registrado.",
+        mensagem: "Atendimento concluído com sucesso.",
         agendamento: agendamentoAtualizado,
       };
     });
