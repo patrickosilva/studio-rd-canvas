@@ -1085,3 +1085,45 @@ export const listarIndisponibilidadesAgenda =
         intervalos,
       };
     });
+    export const adminListarPagamentosAssinatura = createServerFn({
+  method: "GET",
+}).handler(async () => {
+  await exigirDono();
+
+  return prisma.pagamentoAssinatura.findMany({
+    orderBy: {
+      pagoEm: "desc",
+    },
+    select: {
+      id: true,
+      formaPagamento: true,
+      valorCentavos: true,
+      pagoEm: true,
+      observacao: true,
+
+      assinatura: {
+        select: {
+          id: true,
+          status: true,
+
+          cliente: {
+            select: {
+              id: true,
+              nome: true,
+              email: true,
+              telefone: true,
+            },
+          },
+
+          plano: {
+            select: {
+              id: true,
+              nome: true,
+              precoCentavos: true,
+            },
+          },
+        },
+      },
+    },
+  });
+});

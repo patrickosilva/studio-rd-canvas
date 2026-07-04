@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Clock,
   CreditCard,
+  Crown,
   DollarSign,
   Receipt,
   Scissors,
@@ -21,6 +22,7 @@ import {
 
 import { PageHeader } from "@/components/dashboard/Sidebar";
 import { adminListarAgenda } from "@/lib/api/agendamento.functions";
+import { adminListarPagamentosAssinatura } from "@/lib/api/assinatura.functions";
 
 export const Route = createFileRoute("/admin/financeiro")({
   component: FinanceiroPage,
@@ -68,6 +70,38 @@ function formatarMoeda(precoCentavos: number): string {
     currency: "BRL",
   }).format(precoCentavos / 100);
 }
+type PagamentoAssinatura = {
+  id: string;
+  formaPagamento:
+  | "PIX"
+  | "DINHEIRO"
+  | "CARTAO_DEBITO"
+  | "CARTAO_CREDITO"
+  | "ASSINATURA"
+  | "CORTESIA"
+  | "OUTRO";
+  valorCentavos: number;
+  pagoEm: string | Date;
+  observacao: string | null;
+
+  assinatura: {
+    id: string;
+    status: string;
+
+    cliente: {
+      id: string;
+      nome: string;
+      email: string;
+      telefone: string | null;
+    };
+
+    plano: {
+      id: string;
+      nome: string;
+      precoCentavos: number;
+    };
+  };
+};
 
 function formatarDataHora(valor: string | Date): string {
   const data = new Date(valor);
@@ -165,6 +199,12 @@ function obterClasseStatus(status: string): string {
 
 function FinanceiroPage() {
   const carregarAgenda = useServerFn(adminListarAgenda);
+  const listarPagamentosAssinatura = useServerFn(
+    adminListarPagamentosAssinatura,
+  );
+  const [pagamentosAssinatura, setPagamentosAssinatura] = useState<
+    PagamentoAssinatura[]
+  >([]);
 
   const [agendamentos, setAgendamentos] = useState<
     AgendamentoFinanceiro[]
@@ -179,9 +219,14 @@ function FinanceiroPage() {
     setErro("");
 
     try {
-      const resposta = await carregarAgenda();
+      const [agendaResposta, pagamentosAssinaturaResposta] =
+        await Promise.all([
+          carregarAgenda(),
+          listarPagamentosAssinatura(),
+        ]);
 
-      setAgendamentos(resposta);
+      setAgendamentos(agendaResposta);
+      setPagamentosAssinatura(pagamentosAssinaturaResposta);
     } catch (error) {
       console.error(error);
 
@@ -190,7 +235,6 @@ function FinanceiroPage() {
       setCarregando(false);
     }
   }
-
   useEffect(() => {
     void carregarDados();
   }, []);
@@ -207,9 +251,27 @@ function FinanceiroPage() {
         estaNosUltimos30Dias(agendamento.inicio),
       );
     }
+    
 
     return agendamentos;
   }, [agendamentos, periodo]);
+  
+  const pagamentosAssinaturaFiltrados = useMemo(() => {
+  if (periodo === "mesAtual") {
+    return pagamentosAssinatura.filter((pagamento) =>
+      estaNoMesAtual(pagamento.pagoEm),
+    );
+  }
+
+  if (periodo === "ultimos30") {
+    return pagamentosAssinatura.filter((pagamento) =>
+      estaNosUltimos30Dias(pagamento.pagoEm),
+    );
+  }
+
+  return pagamentosAssinatura;
+}, [pagamentosAssinatura, periodo]);
+
 
   const resumo = useMemo(() => {
     const concluidos = agendamentosFiltrados.filter(
@@ -229,11 +291,19 @@ function FinanceiroPage() {
       ].includes(agendamento.status),
     );
 
-    const receitaRealizada = concluidos.reduce(
+    const receitaAtendimentos = concluidos.reduce(
       (total, agendamento) =>
         total + obterValorRealizado(agendamento),
       0,
     );
+
+    const receitaAssinaturas = pagamentosAssinaturaFiltrados.reduce(
+      (total, pagamento) => total + pagamento.valorCentavos,
+      0,
+    );
+
+    const receitaRealizada =
+      receitaAtendimentos + receitaAssinaturas;
 
     const receitaPrevista = previstos.reduce(
       (total, agendamento) =>
@@ -249,7 +319,7 @@ function FinanceiroPage() {
 
     const ticketMedio =
       concluidos.length > 0
-        ? Math.round(receitaRealizada / concluidos.length)
+        ? Math.round(receitaAtendimentos / concluidos.length)
         : 0;
 
     return {
@@ -257,12 +327,18 @@ function FinanceiroPage() {
       concluidos: concluidos.length,
       previstos: previstos.length,
       perdidos: perdidos.length,
+
+      receitaAtendimentos,
+      receitaAssinaturas,
       receitaRealizada,
       receitaPrevista,
       receitaPerdida,
       ticketMedio,
+
+      quantidadePagamentosAssinatura:
+        pagamentosAssinaturaFiltrados.length,
     };
-  }, [agendamentosFiltrados]);
+  }, [agendamentosFiltrados, pagamentosAssinaturaFiltrados]);
 
   const faturamentoPorPagamento = useMemo(() => {
     const mapa = new Map<
@@ -296,8 +372,25 @@ function FinanceiroPage() {
       mapa.set(chave, registro);
     }
 
+    for (const pagamento of pagamentosAssinaturaFiltrados) {
+      const chave = pagamento.formaPagamento;
+
+      const registro =
+        mapa.get(chave) ??
+        {
+          formaPagamento: chave,
+          quantidade: 0,
+          valor: 0,
+        };
+
+      registro.quantidade += 1;
+      registro.valor += pagamento.valorCentavos;
+
+      mapa.set(chave, registro);
+    }
+
     return [...mapa.values()].sort((a, b) => b.valor - a.valor);
-  }, [agendamentosFiltrados]);
+  }, [agendamentosFiltrados, pagamentosAssinaturaFiltrados]);
 
   const ultimosMovimentos = useMemo(
     () =>
@@ -331,19 +424,25 @@ function FinanceiroPage() {
       label: "Realizado",
       value: formatarMoeda(resumo.receitaRealizada),
       icon: DollarSign,
-      descricao: "Somente pagamentos de atendimentos concluídos.",
+      descricao: "Atendimentos concluídos + assinaturas pagas.",
+    },
+    {
+      label: "Atendimentos",
+      value: formatarMoeda(resumo.receitaAtendimentos),
+      icon: Scissors,
+      descricao: "Somente atendimentos concluídos.",
+    },
+    {
+      label: "Assinaturas",
+      value: formatarMoeda(resumo.receitaAssinaturas),
+      icon: Crown,
+      descricao: "Pagamentos de planos RD Black.",
     },
     {
       label: "Previsto",
       value: formatarMoeda(resumo.receitaPrevista),
       icon: TrendingUp,
       descricao: "Solicitados e confirmados ainda não recebidos.",
-    },
-    {
-      label: "Ticket médio",
-      value: formatarMoeda(resumo.ticketMedio),
-      icon: Receipt,
-      descricao: "Média recebida por atendimento concluído.",
     },
     {
       label: "Perdido",
@@ -386,11 +485,10 @@ function FinanceiroPage() {
               key={filtro.value}
               type="button"
               onClick={() => setPeriodo(filtro.value)}
-              className={`rounded-full border px-4 py-2 text-sm transition ${
-                ativo
-                  ? "border-gold bg-gold-soft text-gold"
-                  : "border-border bg-surface text-muted-foreground hover:bg-surface-elevated"
-              }`}
+              className={`rounded-full border px-4 py-2 text-sm transition ${ativo
+                ? "border-gold bg-gold-soft text-gold"
+                : "border-border bg-surface text-muted-foreground hover:bg-surface-elevated"
+                }`}
             >
               {filtro.label}
             </button>
@@ -398,7 +496,7 @@ function FinanceiroPage() {
         })}
       </div>
 
-      <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {cards.map((card) => (
           <section
             key={card.label}
@@ -506,7 +604,7 @@ function FinanceiroPage() {
               </h2>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                Considera apenas atendimentos concluídos.
+                Considera atendimentos concluídos e pagamentos de assinatura.
               </p>
             </div>
 
@@ -632,8 +730,8 @@ function FinanceiroPage() {
                           Pagamento:{" "}
                           {agendamento.status === "CONCLUIDO"
                             ? traduzirFormaPagamento(
-                                agendamento.formaPagamento,
-                              )
+                              agendamento.formaPagamento,
+                            )
                             : "ainda não recebido"}
                         </p>
                       </div>
@@ -647,7 +745,7 @@ function FinanceiroPage() {
                           {agendamento.status === "CONCLUIDO"
                             ? "realizado"
                             : agendamento.status === "SOLICITADO" ||
-                                agendamento.status === "CONFIRMADO"
+                              agendamento.status === "CONFIRMADO"
                               ? "previsto"
                               : "não realizado"}
                         </p>
