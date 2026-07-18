@@ -5,9 +5,10 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import {
+  ArrowLeftCircle,
   CalendarCheck,
-  LayoutDashboard,
   CalendarX2,
+  LayoutDashboard,
 } from "lucide-react";
 
 import { DashboardShell } from "@/components/dashboard/Sidebar";
@@ -16,7 +17,6 @@ export const Route = createFileRoute("/funcionario")({
   beforeLoad: ({ context, location }) => {
     const { usuario } = context;
 
-    // Visitante tentando acessar área privada.
     if (!usuario) {
       throw redirect({
         to: "/login",
@@ -26,17 +26,12 @@ export const Route = createFileRoute("/funcionario")({
       });
     }
 
-    // Cliente fica na área de cliente.
     if (usuario.papel === "CLIENTE") {
       throw redirect({
         to: "/cliente",
       });
     }
 
-    /*
-     * O DONO pode acessar a área do funcionário porque ele também
-     * pode atuar operacionalmente na barbearia, se necessário.
-     */
     if (
       usuario.papel !== "FUNCIONARIO" &&
       usuario.papel !== "DONO"
@@ -60,7 +55,7 @@ export const Route = createFileRoute("/funcionario")({
 
 const rootRoute = getRouteApi("__root__");
 
-const items = [
+const itemsFuncionario = [
   {
     label: "Painel",
     to: "/funcionario",
@@ -75,11 +70,23 @@ const items = [
     label: "Bloqueios",
     to: "/funcionario/bloqueios",
     icon: CalendarX2,
-  }
+  },
 ];
 
 function FuncionarioLayout() {
   const { usuario } = rootRoute.useRouteContext();
+
+  const items =
+    usuario?.papel === "DONO"
+      ? [
+          {
+            label: "Voltar ao admin",
+            to: "/admin",
+            icon: ArrowLeftCircle,
+          },
+          ...itemsFuncionario,
+        ]
+      : itemsFuncionario;
 
   return (
     <DashboardShell

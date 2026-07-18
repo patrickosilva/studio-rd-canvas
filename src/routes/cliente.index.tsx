@@ -183,19 +183,7 @@ function ClientDashboard() {
   ];
 
   return (
-    <div className="max-w-7xl p-8 lg:p-12">
-      <PageHeader
-        title={`Olá, ${primeiroNome}.`}
-        subtitle="Acompanhe seus agendamentos, benefícios e histórico no Studio RD."
-        actions={
-          <Link
-            to="/cliente/agendamentos"
-            className="inline-flex h-10 items-center rounded-full bg-gold px-5 text-sm font-medium text-gold-foreground transition hover:opacity-90"
-          >
-            Novo agendamento
-          </Link>
-        }
-      />
+    <div className="flex flex-col gap-10">
 
       {erro && (
         <div

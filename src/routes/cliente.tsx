@@ -81,6 +81,7 @@ const items = [
     to: "/cliente/historico",
     icon: History,
   },
+  
   {
     label: "Benefícios",
     to: "/cliente/beneficios",

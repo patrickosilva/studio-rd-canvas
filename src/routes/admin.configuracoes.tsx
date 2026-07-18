@@ -9,6 +9,7 @@ import {
   Clock,
   Plus,
   Scissors,
+  Trash2,
   UserRound,
 } from "lucide-react";
 
@@ -17,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  adminDesativarProfissional,
+  adminDesativarServico,
   cadastrarProfissional,
   cadastrarServico,
   listarProfissionais,
@@ -101,6 +104,10 @@ function ConfiguracoesPage() {
   const carregarProfissionais = useServerFn(listarProfissionais);
   const criarServico = useServerFn(cadastrarServico);
   const criarProfissional = useServerFn(cadastrarProfissional);
+  const desativarServico = useServerFn(adminDesativarServico);
+  const desativarProfissional = useServerFn(
+    adminDesativarProfissional,
+  );
 
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -108,6 +115,11 @@ function ConfiguracoesPage() {
   const [carregando, setCarregando] = useState(true);
   const [salvandoServico, setSalvandoServico] = useState(false);
   const [salvandoProfissional, setSalvandoProfissional] = useState(false);
+  const [removendoServicoId, setRemovendoServicoId] = useState("");
+  const [removendoProfissionalId, setRemovendoProfissionalId] =
+    useState("");
+
+
 
   const [mensagemServico, setMensagemServico] = useState("");
   const [mensagemProfissional, setMensagemProfissional] = useState("");
@@ -140,6 +152,7 @@ function ConfiguracoesPage() {
   useEffect(() => {
     void carregarDados();
   }, []);
+
 
   async function handleCadastrarServico(
     event: FormEvent<HTMLFormElement>,
@@ -185,43 +198,118 @@ function ConfiguracoesPage() {
       setSalvandoServico(false);
     }
   }
+async function handleCadastrarProfissional(
+  event: FormEvent<HTMLFormElement>,
+) {
+  event.preventDefault();
 
-  async function handleCadastrarProfissional(
-    event: FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault();
+  setSalvandoProfissional(true);
+  setMensagemProfissional("");
 
-    setSalvandoProfissional(true);
-    setMensagemProfissional("");
+  const formulario = event.currentTarget;
+  const formData = new FormData(formulario);
 
-    const formulario = event.currentTarget;
-    const formData = new FormData(formulario);
+  try {
+    const resultado = await criarProfissional({
+      data: {
+        nome: String(formData.get("nome") ?? ""),
+        telefone: String(formData.get("telefone") ?? ""),
+        descricao: String(formData.get("descricao") ?? ""),
+        ativo: true,
+      },
+    });
+
+    setMensagemProfissional(resultado.mensagem);
+
+    if (resultado.sucesso) {
+      formulario.reset();
+      await carregarDados();
+    }
+  } catch (error) {
+    console.error(error);
+
+    setMensagemProfissional(
+      "Não foi possível cadastrar o profissional.",
+    );
+  } finally {
+    setSalvandoProfissional(false);
+  }
+}
+  async function handleDesativarServico(servico: Servico) {
+    const confirmar = window.confirm(
+      `Tem certeza que deseja excluir o serviço "${servico.nome}"? Ele ficará indisponível para novos agendamentos.`,
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    setMensagemServico("");
+    setErro("");
+    setRemovendoServicoId(servico.id);
 
     try {
-      const resultado = await criarProfissional({
+      const resultado = await desativarServico({
         data: {
-          usuarioId: "",
-          nome: String(formData.get("nome") ?? ""),
-          telefone: String(formData.get("telefone") ?? ""),
-          descricao: String(formData.get("descricao") ?? ""),
-          ativo: true,
+          id: servico.id,
         },
       });
 
+      if (!resultado.sucesso) {
+        setMensagemServico(resultado.mensagem);
+        return;
+      }
+
+      setMensagemServico(resultado.mensagem);
+
+      await carregarDados();
+    } catch (error) {
+      console.error(error);
+
+      setMensagemServico("Não foi possível excluir o serviço.");
+    } finally {
+      setRemovendoServicoId("");
+    }
+  }
+
+  async function handleDesativarProfissional(
+    profissional: Profissional,
+  ) {
+    const confirmar = window.confirm(
+      `Tem certeza que deseja excluir o profissional "${profissional.nome}"? Ele ficará indisponível para novos agendamentos.`,
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    setMensagemProfissional("");
+    setErro("");
+    setRemovendoProfissionalId(profissional.id);
+
+    try {
+      const resultado = await desativarProfissional({
+        data: {
+          id: profissional.id,
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setMensagemProfissional(resultado.mensagem);
+        return;
+      }
+
       setMensagemProfissional(resultado.mensagem);
 
-      if (resultado.sucesso) {
-        formulario.reset();
-        await carregarDados();
-      }
+      await carregarDados();
     } catch (error) {
       console.error(error);
 
       setMensagemProfissional(
-        "Não foi possível cadastrar o profissional.",
+        "Não foi possível excluir o profissional.",
       );
     } finally {
-      setSalvandoProfissional(false);
+      setRemovendoProfissionalId("");
     }
   }
 
@@ -372,9 +460,27 @@ function ConfiguracoesPage() {
                         )}
                       </div>
 
-                      <span className="rounded-full bg-gold-soft px-3 py-1 text-xs text-gold">
-                        {servico.ativo ? "Ativo" : "Inativo"}
-                      </span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="rounded-full bg-gold-soft px-3 py-1 text-xs text-gold">
+                          {servico.ativo ? "Ativo" : "Inativo"}
+                        </span>
+
+                        {servico.ativo && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={removendoServicoId === servico.id}
+                            onClick={() => void handleDesativarServico(servico)}
+                            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {removendoServicoId === servico.id
+                              ? "Excluindo..."
+                              : "Excluir"}
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-3 text-sm text-muted-foreground">
@@ -508,9 +614,29 @@ function ConfiguracoesPage() {
                         )}
                       </div>
 
-                      <span className="rounded-full bg-gold-soft px-3 py-1 text-xs text-gold">
-                        {profissional.ativo ? "Ativo" : "Inativo"}
-                      </span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="rounded-full bg-gold-soft px-3 py-1 text-xs text-gold">
+                          {profissional.ativo ? "Ativo" : "Inativo"}
+                        </span>
+
+                        {profissional.ativo && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={removendoProfissionalId === profissional.id}
+                            onClick={() =>
+                              void handleDesativarProfissional(profissional)
+                            }
+                            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {removendoProfissionalId === profissional.id
+                              ? "Excluindo..."
+                              : "Excluir"}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </article>
                 ))}

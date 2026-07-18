@@ -1,13 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { prisma } from "../prisma.server";
-import { obterUsuarioAtual } from "../session.server";
+async function getPrisma() {
+  const { prisma } = await import("../prisma.server");
 
-async function exigirDono() {
+  return prisma;
+}
+
+async function exigirDonoCatalogo() {
+  const { obterUsuarioAtual } = await import("../session.server");
+
   const usuario = await obterUsuarioAtual();
 
-  if (!usuario || usuario.papel !== "DONO") {
+  if (!usuario) {
+    throw new Error("Você precisa estar logado.");
+  }
+
+  if (usuario.papel !== "DONO") {
     throw new Error("Acesso negado.");
   }
 
@@ -72,24 +81,26 @@ const profissionalSchema = z.object({
   ativo: z.boolean().default(true),
 });
 
+const desativarItemCatalogoSchema = z.object({
+  id: z
+    .string()
+    .trim()
+    .min(1, "Item inválido."),
+});
+
 export const listarServicos = createServerFn({
   method: "GET",
 }).handler(async () => {
-  await exigirDono();
+  await exigirDonoCatalogo();
+
+  const prisma = await getPrisma();
 
   return prisma.servico.findMany({
-    orderBy: {
-      nome: "asc",
-    },
-    select: {
-      id: true,
-      nome: true,
-      descricao: true,
-      duracaoMinutos: true,
-      precoCentavos: true,
+    where: {
       ativo: true,
-      criadoEm: true,
-      atualizadoEm: true,
+    },
+    orderBy: {
+      criadoEm: "desc",
     },
   });
 });
@@ -97,19 +108,14 @@ export const listarServicos = createServerFn({
 export const listarServicosAtivos = createServerFn({
   method: "GET",
 }).handler(async () => {
+  const prisma = await getPrisma();
+
   return prisma.servico.findMany({
     where: {
       ativo: true,
     },
     orderBy: {
       nome: "asc",
-    },
-    select: {
-      id: true,
-      nome: true,
-      descricao: true,
-      duracaoMinutos: true,
-      precoCentavos: true,
     },
   });
 });
@@ -119,43 +125,57 @@ export const cadastrarServico = createServerFn({
 })
   .validator(servicoSchema)
   .handler(async ({ data }) => {
-    await exigirDono();
+    await exigirDonoCatalogo();
 
-    const nome = data.nome.trim();
+    const prisma = await getPrisma();
 
     const servicoExistente = await prisma.servico.findFirst({
       where: {
         nome: {
-          equals: nome,
+          equals: data.nome,
           mode: "insensitive",
         },
       },
       select: {
         id: true,
+        nome: true,
+        ativo: true,
       },
     });
 
-    if (servicoExistente) {
+    if (servicoExistente?.ativo) {
       return {
         sucesso: false,
-        mensagem: "Já existe um serviço com esse nome.",
+        mensagem: "Já existe um serviço ativo com esse nome.",
       };
     }
 
-    const servico = await prisma.servico.create({
+    if (servicoExistente && !servicoExistente.ativo) {
+      await prisma.servico.update({
+        where: {
+          id: servicoExistente.id,
+        },
+        data: {
+          nome: data.nome,
+          descricao: data.descricao?.trim() || null,
+          duracaoMinutos: data.duracaoMinutos,
+          precoCentavos: data.precoCentavos,
+          ativo: true,
+        },
+      });
+
+      return {
+        sucesso: true,
+        mensagem: `Serviço "${data.nome}" foi reativado com sucesso.`,
+      };
+    }
+
+    await prisma.servico.create({
       data: {
-        nome,
+        nome: data.nome,
         descricao: data.descricao?.trim() || null,
         duracaoMinutos: data.duracaoMinutos,
         precoCentavos: data.precoCentavos,
-        ativo: data.ativo,
-      },
-      select: {
-        id: true,
-        nome: true,
-        descricao: true,
-        duracaoMinutos: true,
-        precoCentavos: true,
         ativo: true,
       },
     });
@@ -163,36 +183,22 @@ export const cadastrarServico = createServerFn({
     return {
       sucesso: true,
       mensagem: "Serviço cadastrado com sucesso.",
-      servico,
     };
   });
 
 export const listarProfissionais = createServerFn({
   method: "GET",
 }).handler(async () => {
-  await exigirDono();
+  await exigirDonoCatalogo();
+
+  const prisma = await getPrisma();
 
   return prisma.profissional.findMany({
-    orderBy: {
-      nome: "asc",
-    },
-    select: {
-      id: true,
-      usuarioId: true,
-      nome: true,
-      telefone: true,
-      descricao: true,
+    where: {
       ativo: true,
-      criadoEm: true,
-      atualizadoEm: true,
-      usuario: {
-        select: {
-          id: true,
-          nome: true,
-          email: true,
-          papel: true,
-        },
-      },
+    },
+    orderBy: {
+      criadoEm: "desc",
     },
   });
 });
@@ -200,17 +206,14 @@ export const listarProfissionais = createServerFn({
 export const listarProfissionaisAtivos = createServerFn({
   method: "GET",
 }).handler(async () => {
+  const prisma = await getPrisma();
+
   return prisma.profissional.findMany({
     where: {
       ativo: true,
     },
     orderBy: {
       nome: "asc",
-    },
-    select: {
-      id: true,
-      nome: true,
-      descricao: true,
     },
   });
 });
@@ -220,56 +223,59 @@ export const cadastrarProfissional = createServerFn({
 })
   .validator(profissionalSchema)
   .handler(async ({ data }) => {
-    await exigirDono();
+    await exigirDonoCatalogo();
 
-    const usuarioId = data.usuarioId?.trim() || null;
-    const telefoneNormalizado =
-      data.telefone?.replace(/\D/g, "") || null;
+    const prisma = await getPrisma();
 
-    if (usuarioId) {
-      const usuario = await prisma.usuario.findUnique({
+    const profissionalExistente =
+      await prisma.profissional.findFirst({
         where: {
-          id: usuarioId,
+          nome: {
+            equals: data.nome,
+            mode: "insensitive",
+          },
         },
         select: {
           id: true,
-          papel: true,
+          nome: true,
+          ativo: true,
         },
       });
 
-      if (!usuario) {
-        return {
-          sucesso: false,
-          mensagem: "Usuário vinculado não encontrado.",
-        };
-      }
-
-      if (
-        usuario.papel !== "FUNCIONARIO" &&
-        usuario.papel !== "DONO"
-      ) {
-        return {
-          sucesso: false,
-          mensagem:
-            "O profissional só pode ser vinculado a um funcionário ou administrador.",
-        };
-      }
+    if (profissionalExistente?.ativo) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Já existe um profissional ativo com esse nome.",
+      };
     }
 
-    const profissional = await prisma.profissional.create({
+    if (profissionalExistente && !profissionalExistente.ativo) {
+      await prisma.profissional.update({
+        where: {
+          id: profissionalExistente.id,
+        },
+        data: {
+          usuarioId: data.usuarioId?.trim() || null,
+          nome: data.nome,
+          telefone: data.telefone?.trim() || null,
+          descricao: data.descricao?.trim() || null,
+          ativo: true,
+        },
+      });
+
+      return {
+        sucesso: true,
+        mensagem: `Profissional "${data.nome}" foi reativado com sucesso.`,
+      };
+    }
+
+    await prisma.profissional.create({
       data: {
-        usuarioId,
-        nome: data.nome.trim(),
-        telefone: telefoneNormalizado,
+        usuarioId: data.usuarioId?.trim() || null,
+        nome: data.nome,
+        telefone: data.telefone?.trim() || null,
         descricao: data.descricao?.trim() || null,
-        ativo: data.ativo,
-      },
-      select: {
-        id: true,
-        usuarioId: true,
-        nome: true,
-        telefone: true,
-        descricao: true,
         ativo: true,
       },
     });
@@ -277,6 +283,149 @@ export const cadastrarProfissional = createServerFn({
     return {
       sucesso: true,
       mensagem: "Profissional cadastrado com sucesso.",
-      profissional,
+    };
+  });
+
+export const adminDesativarServico = createServerFn({
+  method: "POST",
+})
+  .validator(desativarItemCatalogoSchema)
+  .handler(async ({ data }) => {
+    await exigirDonoCatalogo();
+
+    const prisma = await getPrisma();
+
+    const servico = await prisma.servico.findUnique({
+      where: {
+        id: data.id,
+      },
+      select: {
+        id: true,
+        nome: true,
+        ativo: true,
+      },
+    });
+
+    if (!servico) {
+      return {
+        sucesso: false,
+        mensagem: "Serviço não encontrado.",
+      };
+    }
+
+    if (!servico.ativo) {
+      return {
+        sucesso: false,
+        mensagem: "Esse serviço já está desativado.",
+      };
+    }
+
+    const agendamentoFuturo = await prisma.agendamento.findFirst({
+      where: {
+        servicoId: servico.id,
+        status: {
+          in: ["SOLICITADO", "CONFIRMADO"],
+        },
+        inicio: {
+          gte: new Date(),
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (agendamentoFuturo) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Não é possível excluir este serviço porque existem agendamentos futuros solicitados ou confirmados.",
+      };
+    }
+
+    await prisma.servico.update({
+      where: {
+        id: servico.id,
+      },
+      data: {
+        ativo: false,
+      },
+    });
+
+    return {
+      sucesso: true,
+      mensagem: `Serviço "${servico.nome}" desativado com sucesso.`,
+    };
+  });
+
+export const adminDesativarProfissional = createServerFn({
+  method: "POST",
+})
+  .validator(desativarItemCatalogoSchema)
+  .handler(async ({ data }) => {
+    await exigirDonoCatalogo();
+
+    const prisma = await getPrisma();
+
+    const profissional = await prisma.profissional.findUnique({
+      where: {
+        id: data.id,
+      },
+      select: {
+        id: true,
+        nome: true,
+        ativo: true,
+      },
+    });
+
+    if (!profissional) {
+      return {
+        sucesso: false,
+        mensagem: "Funcionário/profissional não encontrado.",
+      };
+    }
+
+    if (!profissional.ativo) {
+      return {
+        sucesso: false,
+        mensagem: "Esse profissional já está desativado.",
+      };
+    }
+
+    const agendamentoFuturo = await prisma.agendamento.findFirst({
+      where: {
+        profissionalId: profissional.id,
+        status: {
+          in: ["SOLICITADO", "CONFIRMADO"],
+        },
+        inicio: {
+          gte: new Date(),
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (agendamentoFuturo) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Não é possível excluir este profissional porque existem agendamentos futuros solicitados ou confirmados.",
+      };
+    }
+
+    await prisma.profissional.update({
+      where: {
+        id: profissional.id,
+      },
+      data: {
+        ativo: false,
+      },
+    });
+
+    return {
+      sucesso: true,
+      mensagem: `Profissional "${profissional.nome}" desativado com sucesso.`,
     };
   });

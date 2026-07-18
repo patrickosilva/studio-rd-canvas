@@ -139,6 +139,9 @@ export const adminListarPlanosAssinatura = createServerFn({
   await exigirDono();
 
   return prisma.planoAssinatura.findMany({
+    where: {
+      ativo: true,
+    },
     orderBy: {
       criadoEm: "desc",
     },
@@ -173,13 +176,49 @@ export const adminCriarPlanoAssinatura = createServerFn({
         },
         select: {
           id: true,
+          nome: true,
+          ativo: true,
         },
       });
 
-    if (planoExistente) {
+    if (planoExistente?.ativo) {
       return {
         sucesso: false,
-        mensagem: "Já existe um plano com esse nome.",
+        mensagem: "Já existe um plano ativo com esse nome.",
+      };
+    }
+
+    if (planoExistente && !planoExistente.ativo) {
+      const planoReativado =
+        await prisma.planoAssinatura.update({
+          where: {
+            id: planoExistente.id,
+          },
+          data: {
+            nome: data.nome,
+            descricao: data.descricao?.trim() || null,
+            precoCentavos: data.precoCentavos,
+            cortesPorCiclo: data.cortesPorCiclo,
+            duracaoDias: data.duracaoDias,
+            ativo: true,
+          },
+          select: {
+            id: true,
+            nome: true,
+            descricao: true,
+            precoCentavos: true,
+            cortesPorCiclo: true,
+            duracaoDias: true,
+            ativo: true,
+            criadoEm: true,
+            atualizadoEm: true,
+          },
+        });
+
+      return {
+        sucesso: true,
+        mensagem: `Plano "${data.nome}" foi reativado com sucesso.`,
+        plano: planoReativado,
       };
     }
 
@@ -220,7 +259,14 @@ export const adminListarClientesParaAssinatura = createServerFn({
   return prisma.usuario.findMany({
     where: {
       papel: "CLIENTE",
-      ativo: true,
+      assinaturas: {
+        none: {
+          status: "ATIVA",
+          vigenciaFim: {
+            gte: new Date(),
+          },
+        },
+      },
     },
     orderBy: {
       nome: "asc",
@@ -240,6 +286,12 @@ export const adminListarAssinaturas = createServerFn({
   await exigirDono();
 
   return prisma.assinaturaCliente.findMany({
+    where: {
+      status: "ATIVA",
+      vigenciaFim: {
+        gte: new Date(),
+      },
+    },
     orderBy: {
       criadoEm: "desc",
     },
@@ -643,3 +695,79 @@ export const adminListarPagamentosAssinatura = createServerFn({
     },
   });
 });
+const desativarPlanoAssinaturaSchema = z.object({
+  planoId: z
+    .string()
+    .trim()
+    .min(1, "Plano inválido."),
+});
+
+export const adminDesativarPlanoAssinatura = createServerFn({
+  method: "POST",
+})
+  .validator(desativarPlanoAssinaturaSchema)
+  .handler(async ({ data }) => {
+    await exigirDono();
+
+    const plano = await prisma.planoAssinatura.findUnique({
+      where: {
+        id: data.planoId,
+        ativo: true,
+      },
+      select: {
+        id: true,
+        nome: true,
+        ativo: true,
+      },
+    });
+
+    if (!plano) {
+      return {
+        sucesso: false,
+        mensagem: "Plano não encontrado.",
+      };
+    }
+
+    if (!plano.ativo) {
+      return {
+        sucesso: false,
+        mensagem: "Esse plano já está desativado.",
+      };
+    }
+
+    const assinaturaAtiva =
+      await prisma.assinaturaCliente.findFirst({
+        where: {
+          planoId: plano.id,
+          status: "ATIVA",
+          vigenciaFim: {
+            gte: new Date(),
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+    if (assinaturaAtiva) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Não é possível excluir este plano porque existem clientes com assinatura ativa nele.",
+      };
+    }
+
+    await prisma.planoAssinatura.update({
+      where: {
+        id: plano.id,
+      },
+      data: {
+        ativo: false,
+      },
+    });
+
+    return {
+      sucesso: true,
+      mensagem: `Plano "${plano.nome}" excluído com sucesso.`,
+    };
+  });

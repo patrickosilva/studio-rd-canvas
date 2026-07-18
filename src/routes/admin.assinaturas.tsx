@@ -9,6 +9,7 @@ import {
   Plus,
   Receipt,
   Scissors,
+  Trash2,
   UserRound,
 } from "lucide-react";
 
@@ -18,6 +19,7 @@ import {
   adminAtivarAssinaturaCliente,
   adminCancelarAssinaturaCliente,
   adminCriarPlanoAssinatura,
+  adminDesativarPlanoAssinatura,
   adminListarAssinaturas,
   adminListarClientesParaAssinatura,
   adminListarPlanosAssinatura,
@@ -162,6 +164,7 @@ function formaPagamentoLabel(forma: FormaPagamento): string {
 function AdminAssinaturasPage() {
   const listarPlanos = useServerFn(adminListarPlanosAssinatura);
   const criarPlano = useServerFn(adminCriarPlanoAssinatura);
+  const desativarPlano = useServerFn(adminDesativarPlanoAssinatura);
   const listarClientes = useServerFn(
     adminListarClientesParaAssinatura,
   );
@@ -205,6 +208,7 @@ function AdminAssinaturasPage() {
   const [salvandoPlano, setSalvandoPlano] = useState(false);
   const [ativando, setAtivando] = useState(false);
   const [cancelandoId, setCancelandoId] = useState("");
+  const [removendoPlanoId, setRemovendoPlanoId] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
 
@@ -322,7 +326,42 @@ function AdminAssinaturasPage() {
       setSalvandoPlano(false);
     }
   }
+  async function handleDesativarPlano(plano: PlanoAssinatura) {
+  const confirmar = window.confirm(
+    `Tem certeza que deseja excluir o plano "${plano.nome}"? Ele ficará indisponível para novas assinaturas.`,
+  );
 
+  if (!confirmar) {
+    return;
+  }
+
+  setMensagem("");
+  setErro("");
+  setRemovendoPlanoId(plano.id);
+
+  try {
+    const resultado = await desativarPlano({
+      data: {
+        planoId: plano.id,
+      },
+    });
+
+    if (!resultado.sucesso) {
+      setErro(resultado.mensagem);
+      return;
+    }
+
+    setMensagem(resultado.mensagem);
+
+    await carregarDados();
+  } catch (error) {
+    console.error(error);
+
+    setErro("Não foi possível excluir o plano.");
+  } finally {
+    setRemovendoPlanoId("");
+  }
+}
   async function handleAtivarAssinatura(
     event: FormEvent<HTMLFormElement>,
   ) {
@@ -623,23 +662,36 @@ function AdminAssinaturasPage() {
               </p>
             ) : (
               planos.map((plano) => (
-                <div
-                  key={plano.id}
-                  className="rounded-xl border border-border bg-background/40 p-4"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h4 className="font-medium">{plano.nome}</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {plano.cortesPorCiclo} cortes a cada{" "}
-                        {plano.duracaoDias} dias
-                      </p>
-                    </div>
+                <div className="flex items-start justify-between gap-4">
+  <div>
+    <h4 className="font-medium">{plano.nome}</h4>
 
-                    <span className="text-sm font-medium text-gold">
-                      {formatarDinheiro(plano.precoCentavos)}
-                    </span>
-                  </div>
+    <p className="mt-1 text-xs text-muted-foreground">
+      {plano.cortesPorCiclo} cortes a cada{" "}
+      {plano.duracaoDias} dias
+    </p>
+  </div>
+
+  <div className="flex flex-col items-end gap-2">
+    <span className="text-sm font-medium text-gold">
+      {formatarDinheiro(plano.precoCentavos)}
+    </span>
+
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      disabled={removendoPlanoId === plano.id}
+      onClick={() => void handleDesativarPlano(plano)}
+      className="border-destructive/40 text-destructive hover:bg-destructive/10"
+    >
+      <Trash2 className="mr-2 h-4 w-4" />
+      {removendoPlanoId === plano.id
+        ? "Excluindo..."
+        : "Excluir"}
+    </Button>
+  </div>
+
 
                   {plano.descricao && (
                     <p className="mt-3 text-sm text-muted-foreground">
