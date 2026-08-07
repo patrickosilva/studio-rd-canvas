@@ -1,11 +1,11 @@
-
-
-#arquivos sensíveis
-
+node_modules
+dist
+.output
 
 .env
 .env.local
 .env.production
-node_modules
-dist
-.output
+.env.*.local
+
+.DS_Store
+*.log
