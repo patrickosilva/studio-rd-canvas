@@ -1,10 +1,11 @@
 
 
 #arquivos sensíveis
-node_modules/
+
+
 .env
-.env.*
-dist/
-build/
-
-
+.env.local
+.env.production
+node_modules
+dist
+.output
