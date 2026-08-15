@@ -1,69 +1,72 @@
-import { useState } from "react";
-import {
-  getRouteApi,
-  Link,
-} from "@tanstack/react-router";
-import {
-  LogIn,
-  LogOut,
-  Menu,
-  Scissors,
-  UserRound,
-  X,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { getRouteApi, Link } from "@tanstack/react-router";
+import { LogIn, LogOut, Menu, UserRound, X } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 const rootRoute = getRouteApi("__root__");
 
+const navLinks = [
+  { href: "/#servicos", label: "Serviços" },
+  { href: "/#ritual", label: "Ritual" },
+  { href: "/#ambiente", label: "Ambiente" },
+  { href: "/#assinatura", label: "RD Black" },
+];
+
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const { usuario } = rootRoute.useRouteContext();
 
-  const primeiroNome =
-    usuario?.nome.trim().split(/\s+/)[0] ?? "";
+  const primeiroNome = usuario?.nome.trim().split(/\s+/)[0] ?? "";
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 24);
+    }
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   function fecharMenu() {
     setOpen(false);
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <Link
-          to="/"
-          className="flex items-center gap-2"
-          onClick={fecharMenu}
-        >
-          <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-gold">
-            <Scissors className="h-4 w-4 text-primary-foreground" />
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,border-color] duration-300",
+        scrolled || open
+          ? "border-b border-border bg-background/85 backdrop-blur-xl"
+          : "border-b border-transparent bg-transparent",
+      )}
+    >
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:h-20 lg:px-10">
+        <Link to="/" className="flex items-center gap-3" onClick={fecharMenu}>
+          <span className="font-display-landing grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gold/50 text-[13px] tracking-wide text-gold">
+            RD
           </span>
 
-          <span className="font-display text-base tracking-tight">
-            Studio <span className="text-gold">RD</span>
+          <span className="flex flex-col leading-none">
+            <span className="font-display-landing text-[15px] tracking-[0.01em] text-foreground">
+              Studio RD
+            </span>
+            <span className="mt-1 text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+              Barbearia
+            </span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <a
-            href="/#servicos"
-            className="transition hover:text-foreground"
-          >
-            Serviços
-          </a>
-
-          <a
-            href="/#black"
-            className="transition hover:text-foreground"
-          >
-            RD Black
-          </a>
-
-          <a
-            href="/#depoimentos"
-            className="transition hover:text-foreground"
-          >
-            Depoimentos
-          </a>
+        <nav className="hidden items-center gap-9 text-[13px] uppercase tracking-[0.12em] text-muted-foreground lg:flex">
+          {navLinks.map((link) => (
+            <a key={link.href} href={link.href} className="transition hover:text-gold">
+              {link.label}
+            </a>
+          ))}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -71,21 +74,17 @@ export function Navbar() {
             <>
               <Link
                 to="/login"
-                search={{
-                  redirect: undefined,
-                }}
-                className="hidden items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground md:inline-flex"
+                search={{ redirect: undefined }}
+                className="hidden items-center gap-2 text-[13px] text-muted-foreground transition hover:text-foreground lg:inline-flex"
               >
-                <LogIn className="h-4 w-4" />
-                Conecte-se agora
+                <LogIn className="h-4 w-4" aria-hidden="true" />
+                Entrar
               </Link>
 
               <Link
                 to="/login"
-                search={{
-                  redirect: "/cliente/agendamentos",
-                }}
-                className="hidden h-9 items-center rounded-full bg-gold px-4 text-sm font-medium text-gold-foreground transition hover:opacity-90 md:inline-flex"
+                search={{ redirect: "/cliente/agendamentos" }}
+                className="hidden h-10 items-center rounded-full bg-gold px-5 text-[13px] font-medium text-gold-foreground transition hover:opacity-90 lg:inline-flex"
               >
                 Agendar
               </Link>
@@ -93,44 +92,44 @@ export function Navbar() {
           ) : usuario.papel === "DONO" ? (
             <Link
               to="/admin"
-              className="hidden h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium transition hover:bg-surface md:inline-flex"
+              className="hidden h-10 items-center gap-2 rounded-full border border-border px-5 text-[13px] font-medium transition hover:bg-surface lg:inline-flex"
             >
-              <UserRound className="h-4 w-4 text-gold" />
+              <UserRound className="h-4 w-4 text-gold" aria-hidden="true" />
               {primeiroNome}
             </Link>
           ) : usuario.papel === "CLIENTE" ? (
             <>
               <Link
                 to="/cliente"
-                className="hidden items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground md:inline-flex"
+                className="hidden items-center gap-2 text-[13px] text-muted-foreground transition hover:text-foreground lg:inline-flex"
               >
-                <UserRound className="h-4 w-4 text-gold" />
+                <UserRound className="h-4 w-4 text-gold" aria-hidden="true" />
                 {primeiroNome}
               </Link>
 
               <Link
                 to="/cliente/agendamentos"
-                className="hidden h-9 items-center rounded-full bg-gold px-4 text-sm font-medium text-gold-foreground transition hover:opacity-90 md:inline-flex"
+                className="hidden h-10 items-center rounded-full bg-gold px-5 text-[13px] font-medium text-gold-foreground transition hover:opacity-90 lg:inline-flex"
               >
                 Agendar
               </Link>
             </>
           ) : (
             <Link
-        to="/funcionario"
-        className="hidden h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium transition hover:bg-surface md:inline-flex"
-  >
-    <UserRound className="h-4 w-4 text-gold" />
-    {primeiroNome}
-  </Link>
+              to="/funcionario"
+              className="hidden h-10 items-center gap-2 rounded-full border border-border px-5 text-[13px] font-medium transition hover:bg-surface lg:inline-flex"
+            >
+              <UserRound className="h-4 w-4 text-gold" aria-hidden="true" />
+              {primeiroNome}
+            </Link>
           )}
 
           {usuario && (
             <Link
               to="/logout"
-              className="hidden h-9 items-center gap-2 rounded-full border border-border px-4 text-sm text-muted-foreground transition hover:bg-surface hover:text-foreground md:inline-flex"
+              className="hidden h-10 items-center gap-2 rounded-full border border-border px-5 text-[13px] text-muted-foreground transition hover:bg-surface hover:text-foreground lg:inline-flex"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" aria-hidden="true" />
               Sair
             </Link>
           )}
@@ -138,70 +137,52 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setOpen((estadoAtual) => !estadoAtual)}
-            className="p-2 md:hidden"
-            aria-label={
-              open
-                ? "Fechar menu"
-                : "Abrir menu"
-            }
+            className="grid h-11 w-11 place-items-center text-foreground lg:hidden"
+            aria-label={open ? "Fechar menu" : "Abrir menu"}
             aria-expanded={open}
+            aria-controls="landing-mobile-menu"
           >
-            {open ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
       {open && (
-        <div className="border-t border-border bg-background/95 md:hidden">
-          <div className="flex flex-col gap-4 px-6 py-5 text-sm">
-            <a
-              href="/#servicos"
-              onClick={fecharMenu}
-            >
-              Serviços
-            </a>
+        <div
+          id="landing-mobile-menu"
+          className="border-t border-border bg-background/95 backdrop-blur-xl lg:hidden"
+        >
+          <div className="flex flex-col gap-1 px-6 py-4 text-base">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={fecharMenu}
+                className="rounded-lg px-2 py-3 text-foreground/90 transition hover:bg-surface"
+              >
+                {link.label}
+              </a>
+            ))}
 
-            <a
-              href="/#black"
-              onClick={fecharMenu}
-            >
-              RD Black
-            </a>
-
-            <a
-              href="/#depoimentos"
-              onClick={fecharMenu}
-            >
-              Depoimentos
-            </a>
-
-            <div className="h-px bg-border" />
+            <div className="my-3 hairline" />
 
             {!usuario ? (
               <>
                 <Link
                   to="/login"
-                  search={{
-                    redirect: undefined,
-                  }}
+                  search={{ redirect: undefined }}
                   onClick={fecharMenu}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 rounded-lg px-2 py-3"
                 >
-                  <LogIn className="h-4 w-4 text-gold" />
-                  Conecte-se agora
+                  <LogIn className="h-4 w-4 text-gold" aria-hidden="true" />
+                  Entrar
                 </Link>
 
                 <Link
                   to="/login"
-                  search={{
-                    redirect: "/cliente/agendamentos",
-                  }}
+                  search={{ redirect: "/cliente/agendamentos" }}
                   onClick={fecharMenu}
-                  className="inline-flex h-10 items-center justify-center rounded-full bg-gold px-4 font-medium text-gold-foreground"
+                  className="mt-2 inline-flex h-12 items-center justify-center rounded-full bg-gold px-4 font-medium text-gold-foreground"
                 >
                   Agendar
                 </Link>
@@ -210,9 +191,9 @@ export function Navbar() {
               <Link
                 to="/admin"
                 onClick={fecharMenu}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 rounded-lg px-2 py-3"
               >
-                <UserRound className="h-4 w-4 text-gold" />
+                <UserRound className="h-4 w-4 text-gold" aria-hidden="true" />
                 Minha área — {primeiroNome}
               </Link>
             ) : usuario.papel === "CLIENTE" ? (
@@ -220,38 +201,38 @@ export function Navbar() {
                 <Link
                   to="/cliente"
                   onClick={fecharMenu}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 rounded-lg px-2 py-3"
                 >
-                  <UserRound className="h-4 w-4 text-gold" />
+                  <UserRound className="h-4 w-4 text-gold" aria-hidden="true" />
                   Minha área — {primeiroNome}
                 </Link>
 
                 <Link
                   to="/cliente/agendamentos"
                   onClick={fecharMenu}
-                  className="inline-flex h-10 items-center justify-center rounded-full bg-gold px-4 font-medium text-gold-foreground"
+                  className="mt-2 inline-flex h-12 items-center justify-center rounded-full bg-gold px-4 font-medium text-gold-foreground"
                 >
                   Agendar
                 </Link>
               </>
             ) : (
-               <Link
-    to="/funcionario"
-    onClick={fecharMenu}
-    className="flex items-center gap-2"
-  >
-    <UserRound className="h-4 w-4 text-gold" />
-    Minha área — {primeiroNome}
-  </Link>
+              <Link
+                to="/funcionario"
+                onClick={fecharMenu}
+                className="flex items-center gap-2 rounded-lg px-2 py-3"
+              >
+                <UserRound className="h-4 w-4 text-gold" aria-hidden="true" />
+                Minha área — {primeiroNome}
+              </Link>
             )}
 
             {usuario && (
               <Link
                 to="/logout"
                 onClick={fecharMenu}
-                className="flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground"
+                className="mt-2 flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4" aria-hidden="true" />
                 Sair
               </Link>
             )}
