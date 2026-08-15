@@ -9,57 +9,37 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LogoutRouteImport } from './routes/logout'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as FuncionarioRouteImport } from './routes/funcionario'
-import { Route as ClienteRouteImport } from './routes/cliente'
-import { Route as CadastroRouteImport } from './routes/cadastro'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
-import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as ClienteRouteImport } from './routes/cliente'
+import { Route as FuncionarioRouteImport } from './routes/funcionario'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as FuncionarioSolicitacoesRouteImport } from './routes/funcionario.solicitacoes'
-import { Route as FuncionarioBloqueiosRouteImport } from './routes/funcionario.bloqueios'
-import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
-import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
-import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelidade'
-import { Route as ClienteBeneficiosRouteImport } from './routes/cliente.beneficios'
-import { Route as ClienteAssinaturaRouteImport } from './routes/cliente.assinatura'
-import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
-import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
-import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
-import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
-import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
-import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
-import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
-import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
-import { Route as AdminAssinaturasRouteImport } from './routes/admin.assinaturas'
 import { Route as AdminAgendaRouteImport } from './routes/admin.agenda'
+import { Route as AdminAssinaturasRouteImport } from './routes/admin.assinaturas'
+import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
+import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
+import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
+import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
+import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
+import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
+import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
+import { Route as ClienteAssinaturaRouteImport } from './routes/cliente.assinatura'
+import { Route as ClienteBeneficiosRouteImport } from './routes/cliente.beneficios'
+import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelidade'
+import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
+import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
+import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
+import { Route as FuncionarioBloqueiosRouteImport } from './routes/funcionario.bloqueios'
+import { Route as FuncionarioSolicitacoesRouteImport } from './routes/funcionario.solicitacoes'
 
-const LogoutRoute = LogoutRouteImport.update({
-  id: '/logout',
-  path: '/logout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FuncionarioRoute = FuncionarioRouteImport.update({
-  id: '/funcionario',
-  path: '/funcionario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClienteRoute = ClienteRouteImport.update({
-  id: '/cliente',
-  path: '/cliente',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CadastroRoute = CadastroRouteImport.update({
-  id: '/cadastro',
-  path: '/cadastro',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -67,99 +47,39 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FuncionarioIndexRoute = FuncionarioIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => FuncionarioRoute,
+const ClienteRoute = ClienteRouteImport.update({
+  id: '/cliente',
+  path: '/cliente',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const ClienteIndexRoute = ClienteIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ClienteRoute,
+const FuncionarioRoute = FuncionarioRouteImport.update({
+  id: '/funcionario',
+  path: '/funcionario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogoutRoute = LogoutRouteImport.update({
+  id: '/logout',
+  path: '/logout',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const FuncionarioSolicitacoesRoute = FuncionarioSolicitacoesRouteImport.update({
-  id: '/solicitacoes',
-  path: '/solicitacoes',
-  getParentRoute: () => FuncionarioRoute,
-} as any)
-const FuncionarioBloqueiosRoute = FuncionarioBloqueiosRouteImport.update({
-  id: '/bloqueios',
-  path: '/bloqueios',
-  getParentRoute: () => FuncionarioRoute,
-} as any)
-const ClientePerfilRoute = ClientePerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => ClienteRoute,
-} as any)
-const ClienteHistoricoRoute = ClienteHistoricoRouteImport.update({
-  id: '/historico',
-  path: '/historico',
-  getParentRoute: () => ClienteRoute,
-} as any)
-const ClienteFidelidadeRoute = ClienteFidelidadeRouteImport.update({
-  id: '/fidelidade',
-  path: '/fidelidade',
-  getParentRoute: () => ClienteRoute,
-} as any)
-const ClienteBeneficiosRoute = ClienteBeneficiosRouteImport.update({
-  id: '/beneficios',
-  path: '/beneficios',
-  getParentRoute: () => ClienteRoute,
-} as any)
-const ClienteAssinaturaRoute = ClienteAssinaturaRouteImport.update({
-  id: '/assinatura',
-  path: '/assinatura',
-  getParentRoute: () => ClienteRoute,
-} as any)
-const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
-  id: '/agendamentos',
-  path: '/agendamentos',
-  getParentRoute: () => ClienteRoute,
-} as any)
-const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
-  id: '/usuarios',
-  path: '/usuarios',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
-  id: '/relatorios',
-  path: '/relatorios',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMarketingRoute = AdminMarketingRouteImport.update({
-  id: '/marketing',
-  path: '/marketing',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
-  id: '/financeiro',
-  path: '/financeiro',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
-  id: '/configuracoes',
-  path: '/configuracoes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminClientesRoute = AdminClientesRouteImport.update({
-  id: '/clientes',
-  path: '/clientes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminBloqueiosRoute = AdminBloqueiosRouteImport.update({
-  id: '/bloqueios',
-  path: '/bloqueios',
+const AdminAgendaRoute = AdminAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAssinaturasRoute = AdminAssinaturasRouteImport.update({
@@ -167,10 +87,90 @@ const AdminAssinaturasRoute = AdminAssinaturasRouteImport.update({
   path: '/assinaturas',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAgendaRoute = AdminAgendaRouteImport.update({
-  id: '/agenda',
-  path: '/agenda',
+const AdminBloqueiosRoute = AdminBloqueiosRouteImport.update({
+  id: '/bloqueios',
+  path: '/bloqueios',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminClientesRoute = AdminClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ClienteIndexRoute = ClienteIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
+  id: '/agendamentos',
+  path: '/agendamentos',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteAssinaturaRoute = ClienteAssinaturaRouteImport.update({
+  id: '/assinatura',
+  path: '/assinatura',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteBeneficiosRoute = ClienteBeneficiosRouteImport.update({
+  id: '/beneficios',
+  path: '/beneficios',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteFidelidadeRoute = ClienteFidelidadeRouteImport.update({
+  id: '/fidelidade',
+  path: '/fidelidade',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteHistoricoRoute = ClienteHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClientePerfilRoute = ClientePerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const FuncionarioIndexRoute = FuncionarioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioBloqueiosRoute = FuncionarioBloqueiosRouteImport.update({
+  id: '/bloqueios',
+  path: '/bloqueios',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioSolicitacoesRoute = FuncionarioSolicitacoesRouteImport.update({
+  id: '/solicitacoes',
+  path: '/solicitacoes',
+  getParentRoute: () => FuncionarioRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -357,39 +357,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/logout': {
-      id: '/logout'
-      path: '/logout'
-      fullPath: '/logout'
-      preLoaderRoute: typeof LogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/funcionario': {
-      id: '/funcionario'
-      path: '/funcionario'
-      fullPath: '/funcionario'
-      preLoaderRoute: typeof FuncionarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cliente': {
-      id: '/cliente'
-      path: '/cliente'
-      fullPath: '/cliente'
-      preLoaderRoute: typeof ClienteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cadastro': {
-      id: '/cadastro'
-      path: '/cadastro'
-      fullPath: '/cadastro'
-      preLoaderRoute: typeof CadastroRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -399,26 +371,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/funcionario/': {
-      id: '/funcionario/'
-      path: '/'
-      fullPath: '/funcionario/'
-      preLoaderRoute: typeof FuncionarioIndexRouteImport
-      parentRoute: typeof FuncionarioRoute
+    '/cliente': {
+      id: '/cliente'
+      path: '/cliente'
+      fullPath: '/cliente'
+      preLoaderRoute: typeof ClienteRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/cliente/': {
-      id: '/cliente/'
-      path: '/'
-      fullPath: '/cliente/'
-      preLoaderRoute: typeof ClienteIndexRouteImport
-      parentRoute: typeof ClienteRoute
+    '/funcionario': {
+      id: '/funcionario'
+      path: '/funcionario'
+      fullPath: '/funcionario'
+      preLoaderRoute: typeof FuncionarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logout': {
+      id: '/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof LogoutRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/': {
       id: '/admin/'
@@ -427,109 +413,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/funcionario/solicitacoes': {
-      id: '/funcionario/solicitacoes'
-      path: '/solicitacoes'
-      fullPath: '/funcionario/solicitacoes'
-      preLoaderRoute: typeof FuncionarioSolicitacoesRouteImport
-      parentRoute: typeof FuncionarioRoute
-    }
-    '/funcionario/bloqueios': {
-      id: '/funcionario/bloqueios'
-      path: '/bloqueios'
-      fullPath: '/funcionario/bloqueios'
-      preLoaderRoute: typeof FuncionarioBloqueiosRouteImport
-      parentRoute: typeof FuncionarioRoute
-    }
-    '/cliente/perfil': {
-      id: '/cliente/perfil'
-      path: '/perfil'
-      fullPath: '/cliente/perfil'
-      preLoaderRoute: typeof ClientePerfilRouteImport
-      parentRoute: typeof ClienteRoute
-    }
-    '/cliente/historico': {
-      id: '/cliente/historico'
-      path: '/historico'
-      fullPath: '/cliente/historico'
-      preLoaderRoute: typeof ClienteHistoricoRouteImport
-      parentRoute: typeof ClienteRoute
-    }
-    '/cliente/fidelidade': {
-      id: '/cliente/fidelidade'
-      path: '/fidelidade'
-      fullPath: '/cliente/fidelidade'
-      preLoaderRoute: typeof ClienteFidelidadeRouteImport
-      parentRoute: typeof ClienteRoute
-    }
-    '/cliente/beneficios': {
-      id: '/cliente/beneficios'
-      path: '/beneficios'
-      fullPath: '/cliente/beneficios'
-      preLoaderRoute: typeof ClienteBeneficiosRouteImport
-      parentRoute: typeof ClienteRoute
-    }
-    '/cliente/assinatura': {
-      id: '/cliente/assinatura'
-      path: '/assinatura'
-      fullPath: '/cliente/assinatura'
-      preLoaderRoute: typeof ClienteAssinaturaRouteImport
-      parentRoute: typeof ClienteRoute
-    }
-    '/cliente/agendamentos': {
-      id: '/cliente/agendamentos'
-      path: '/agendamentos'
-      fullPath: '/cliente/agendamentos'
-      preLoaderRoute: typeof ClienteAgendamentosRouteImport
-      parentRoute: typeof ClienteRoute
-    }
-    '/admin/usuarios': {
-      id: '/admin/usuarios'
-      path: '/usuarios'
-      fullPath: '/admin/usuarios'
-      preLoaderRoute: typeof AdminUsuariosRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/relatorios': {
-      id: '/admin/relatorios'
-      path: '/relatorios'
-      fullPath: '/admin/relatorios'
-      preLoaderRoute: typeof AdminRelatoriosRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/marketing': {
-      id: '/admin/marketing'
-      path: '/marketing'
-      fullPath: '/admin/marketing'
-      preLoaderRoute: typeof AdminMarketingRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/financeiro': {
-      id: '/admin/financeiro'
-      path: '/financeiro'
-      fullPath: '/admin/financeiro'
-      preLoaderRoute: typeof AdminFinanceiroRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/configuracoes': {
-      id: '/admin/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/admin/configuracoes'
-      preLoaderRoute: typeof AdminConfiguracoesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/clientes': {
-      id: '/admin/clientes'
-      path: '/clientes'
-      fullPath: '/admin/clientes'
-      preLoaderRoute: typeof AdminClientesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/bloqueios': {
-      id: '/admin/bloqueios'
-      path: '/bloqueios'
-      fullPath: '/admin/bloqueios'
-      preLoaderRoute: typeof AdminBloqueiosRouteImport
+    '/admin/agenda': {
+      id: '/admin/agenda'
+      path: '/agenda'
+      fullPath: '/admin/agenda'
+      preLoaderRoute: typeof AdminAgendaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/assinaturas': {
@@ -539,12 +427,124 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAssinaturasRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/agenda': {
-      id: '/admin/agenda'
-      path: '/agenda'
-      fullPath: '/admin/agenda'
-      preLoaderRoute: typeof AdminAgendaRouteImport
+    '/admin/bloqueios': {
+      id: '/admin/bloqueios'
+      path: '/bloqueios'
+      fullPath: '/admin/bloqueios'
+      preLoaderRoute: typeof AdminBloqueiosRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/admin/clientes': {
+      id: '/admin/clientes'
+      path: '/clientes'
+      fullPath: '/admin/clientes'
+      preLoaderRoute: typeof AdminClientesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/configuracoes': {
+      id: '/admin/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AdminConfiguracoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/financeiro': {
+      id: '/admin/financeiro'
+      path: '/financeiro'
+      fullPath: '/admin/financeiro'
+      preLoaderRoute: typeof AdminFinanceiroRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/relatorios': {
+      id: '/admin/relatorios'
+      path: '/relatorios'
+      fullPath: '/admin/relatorios'
+      preLoaderRoute: typeof AdminRelatoriosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/cliente/': {
+      id: '/cliente/'
+      path: '/'
+      fullPath: '/cliente/'
+      preLoaderRoute: typeof ClienteIndexRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/agendamentos': {
+      id: '/cliente/agendamentos'
+      path: '/agendamentos'
+      fullPath: '/cliente/agendamentos'
+      preLoaderRoute: typeof ClienteAgendamentosRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/assinatura': {
+      id: '/cliente/assinatura'
+      path: '/assinatura'
+      fullPath: '/cliente/assinatura'
+      preLoaderRoute: typeof ClienteAssinaturaRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/beneficios': {
+      id: '/cliente/beneficios'
+      path: '/beneficios'
+      fullPath: '/cliente/beneficios'
+      preLoaderRoute: typeof ClienteBeneficiosRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/fidelidade': {
+      id: '/cliente/fidelidade'
+      path: '/fidelidade'
+      fullPath: '/cliente/fidelidade'
+      preLoaderRoute: typeof ClienteFidelidadeRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/historico': {
+      id: '/cliente/historico'
+      path: '/historico'
+      fullPath: '/cliente/historico'
+      preLoaderRoute: typeof ClienteHistoricoRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/perfil': {
+      id: '/cliente/perfil'
+      path: '/perfil'
+      fullPath: '/cliente/perfil'
+      preLoaderRoute: typeof ClientePerfilRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/funcionario/': {
+      id: '/funcionario/'
+      path: '/'
+      fullPath: '/funcionario/'
+      preLoaderRoute: typeof FuncionarioIndexRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/bloqueios': {
+      id: '/funcionario/bloqueios'
+      path: '/bloqueios'
+      fullPath: '/funcionario/bloqueios'
+      preLoaderRoute: typeof FuncionarioBloqueiosRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/solicitacoes': {
+      id: '/funcionario/solicitacoes'
+      path: '/solicitacoes'
+      fullPath: '/funcionario/solicitacoes'
+      preLoaderRoute: typeof FuncionarioSolicitacoesRouteImport
+      parentRoute: typeof FuncionarioRoute
     }
   }
 }
