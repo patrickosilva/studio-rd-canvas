@@ -69,6 +69,35 @@ const solicitarAgendamentoSchema = z.object({
     .or(z.literal("")),
 });
 
+const funcionarioCriarAgendamentoParaClienteSchema = z.object({
+  clienteId: z
+    .string()
+    .trim()
+    .min(1, "Escolha um cliente."),
+
+  profissionalId: z
+    .string()
+    .trim()
+    .min(1, "Escolha um profissional."),
+
+  servicoId: z
+    .string()
+    .trim()
+    .min(1, "Escolha um serviço."),
+
+  inicio: z
+    .string()
+    .trim()
+    .min(1, "Escolha uma data e horário."),
+
+  observacaoCliente: z
+    .string()
+    .trim()
+    .max(500, "A observação é muito grande.")
+    .optional()
+    .or(z.literal("")),
+});
+
 const alterarStatusSchema = z.object({
   agendamentoId: z
     .string()
@@ -159,7 +188,7 @@ const concluirAgendamentoSchema = z.object({
     .or(z.literal("")),
 });
 
- function converterData(valor: string): Date | null {
+function converterData(valor: string): Date | null {
   const data = new Date(valor);
 
   if (Number.isNaN(data.getTime())) {
@@ -211,6 +240,40 @@ async function existeConflitoDeHorario({
   });
 
   return Boolean(conflito);
+}
+async function existeBloqueioAgenda({
+  profissionalId,
+  inicio,
+  fim,
+}: {
+  profissionalId: string;
+  inicio: Date;
+  fim: Date;
+}) {
+  const bloqueio = await prisma.bloqueioAgenda.findFirst({
+    where: {
+      ativo: true,
+      inicio: {
+        lt: fim,
+      },
+      fim: {
+        gt: inicio,
+      },
+      OR: [
+        {
+          profissionalId: null,
+        },
+        {
+          profissionalId,
+        },
+      ],
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return Boolean(bloqueio);
 }
 
 export const clienteCancelarAgendamento =
@@ -274,16 +337,16 @@ export const clienteCancelarAgendamento =
       });
 
       const listarIndisponibilidadesAgendaSchema = z.object({
-  profissionalId: z
-    .string()
-    .trim()
-    .min(1, "Profissional inválido."),
+        profissionalId: z
+          .string()
+          .trim()
+          .min(1, "Profissional inválido."),
 
-  data: z
-    .string()
-    .trim()
-    .min(1, "Data inválida."),
-});
+        data: z
+          .string()
+          .trim()
+          .min(1, "Data inválida."),
+      });
 
       const agendamentoAtualizado =
         await prisma.agendamento.update({
@@ -460,7 +523,269 @@ export const solicitarAgendamento = createServerFn({
       agendamento,
     };
   });
-  export const funcionarioCancelarAgendamento =
+
+  export const funcionarioListarDadosParaAgendarCliente =
+  createServerFn({
+    method: "GET",
+  }).handler(async () => {
+    await exigirOperacional();
+
+    const [clientes, servicos, profissionais] =
+      await Promise.all([
+        prisma.usuario.findMany({
+          where: {
+            papel: "CLIENTE",
+          },
+          orderBy: {
+            nome: "asc",
+          },
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+            telefone: true,
+          },
+        }),
+
+        prisma.servico.findMany({
+          where: {
+            ativo: true,
+          },
+          orderBy: {
+            nome: "asc",
+          },
+          select: {
+            id: true,
+            nome: true,
+            duracaoMinutos: true,
+            precoCentavos: true,
+          },
+        }),
+
+        prisma.profissional.findMany({
+          where: {
+            ativo: true,
+          },
+          orderBy: {
+            nome: "asc",
+          },
+          select: {
+            id: true,
+            nome: true,
+          },
+        }),
+      ]);
+
+    return {
+      clientes,
+      servicos,
+      profissionais,
+    };
+  });
+
+export const funcionarioCriarAgendamentoParaCliente =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(funcionarioCriarAgendamentoParaClienteSchema)
+    .handler(async ({ data }) => {
+      await exigirOperacional();
+
+      const inicio = converterData(data.inicio);
+
+      if (!inicio) {
+        return {
+          sucesso: false,
+          mensagem: "Data ou horário inválido.",
+        };
+      }
+
+      const agora = new Date();
+
+      if (inicio.getTime() <= agora.getTime()) {
+        return {
+          sucesso: false,
+          mensagem: "Escolha um horário futuro.",
+        };
+      }
+
+      const [cliente, servico, profissional] =
+        await Promise.all([
+          prisma.usuario.findFirst({
+            where: {
+              id: data.clienteId,
+              papel: "CLIENTE",
+            },
+            select: {
+              id: true,
+              nome: true,
+              email: true,
+              telefone: true,
+            },
+          }),
+
+          prisma.servico.findFirst({
+            where: {
+              id: data.servicoId,
+              ativo: true,
+            },
+            select: {
+              id: true,
+              nome: true,
+              duracaoMinutos: true,
+              precoCentavos: true,
+            },
+          }),
+
+          prisma.profissional.findFirst({
+            where: {
+              id: data.profissionalId,
+              ativo: true,
+            },
+            select: {
+              id: true,
+              nome: true,
+            },
+          }),
+        ]);
+
+      if (!cliente) {
+        return {
+          sucesso: false,
+          mensagem: "Cliente não encontrado.",
+        };
+      }
+
+      if (!servico) {
+        return {
+          sucesso: false,
+          mensagem: "Serviço não encontrado ou inativo.",
+        };
+      }
+
+      if (!profissional) {
+        return {
+          sucesso: false,
+          mensagem: "Profissional não encontrado ou inativo.",
+        };
+      }
+
+      const fim = calcularFim(
+        inicio,
+        servico.duracaoMinutos,
+      );
+
+      const horarioBloqueado = await existeBloqueioAgenda({
+        profissionalId: profissional.id,
+        inicio,
+        fim,
+      });
+
+      if (horarioBloqueado) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Esse horário está bloqueado na agenda da barbearia.",
+        };
+      }
+
+      const profissionalOcupado =
+        await existeConflitoDeHorario({
+          profissionalId: profissional.id,
+          inicio,
+          fim,
+        });
+
+      if (profissionalOcupado) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Esse profissional já possui uma solicitação ou agendamento nesse horário.",
+        };
+      }
+
+      const clienteOcupado =
+        await prisma.agendamento.findFirst({
+          where: {
+            clienteId: cliente.id,
+            status: {
+              in: ["SOLICITADO", "CONFIRMADO"],
+            },
+            inicio: {
+              lt: fim,
+            },
+            fim: {
+              gt: inicio,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (clienteOcupado) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Esse cliente já possui uma solicitação ou agendamento nesse horário.",
+        };
+      }
+
+      const agendamento = await prisma.agendamento.create({
+        data: {
+          clienteId: cliente.id,
+          profissionalId: profissional.id,
+          servicoId: servico.id,
+          inicio,
+          fim,
+          status: "CONFIRMADO",
+          observacaoCliente:
+            data.observacaoCliente?.trim() ||
+            "Agendamento criado pela equipe.",
+        },
+        select: {
+          id: true,
+          inicio: true,
+          fim: true,
+          status: true,
+
+          cliente: {
+            select: {
+              id: true,
+              nome: true,
+              email: true,
+              telefone: true,
+            },
+          },
+
+          servico: {
+            select: {
+              id: true,
+              nome: true,
+              duracaoMinutos: true,
+              precoCentavos: true,
+            },
+          },
+
+          profissional: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+      });
+
+      return {
+        sucesso: true,
+        mensagem: "Agendamento criado e confirmado com sucesso.",
+        agendamento,
+      };
+    });
+
+
+    
+export const funcionarioCancelarAgendamento =
   createServerFn({
     method: "POST",
   })
@@ -985,7 +1310,7 @@ export const adminListarAgenda = createServerFn({
       },
     },
   });
-  
+
 });
 export const listarIndisponibilidadesAgenda =
   createServerFn({
@@ -1085,7 +1410,7 @@ export const listarIndisponibilidadesAgenda =
         intervalos,
       };
     });
-    export const adminListarPagamentosAssinatura = createServerFn({
+export const adminListarPagamentosAssinatura = createServerFn({
   method: "GET",
 }).handler(async () => {
   await exigirDono();

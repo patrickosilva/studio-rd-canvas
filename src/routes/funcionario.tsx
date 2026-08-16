@@ -8,6 +8,7 @@ import {
   ArrowLeftCircle,
   CalendarCheck,
   CalendarX2,
+  CalendarPlus,
   LayoutDashboard,
 } from "lucide-react";
 
@@ -71,6 +72,11 @@ const itemsFuncionario = [
     to: "/funcionario/bloqueios",
     icon: CalendarX2,
   },
+  {
+    label: "Agendar Cliente",
+    to: "/funcionario/agendar-cliente",
+    icon: CalendarPlus,
+  }
 ];
 
 function FuncionarioLayout() {

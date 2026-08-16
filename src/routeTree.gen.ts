@@ -34,6 +34,7 @@ import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelida
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
+import { Route as FuncionarioAgendarClienteRouteImport } from './routes/funcionario.agendar-cliente'
 import { Route as FuncionarioBloqueiosRouteImport } from './routes/funcionario.bloqueios'
 import { Route as FuncionarioSolicitacoesRouteImport } from './routes/funcionario.solicitacoes'
 
@@ -162,6 +163,12 @@ const FuncionarioIndexRoute = FuncionarioIndexRouteImport.update({
   path: '/',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const FuncionarioAgendarClienteRoute =
+  FuncionarioAgendarClienteRouteImport.update({
+    id: '/agendar-cliente',
+    path: '/agendar-cliente',
+    getParentRoute: () => FuncionarioRoute,
+  } as any)
 const FuncionarioBloqueiosRoute = FuncionarioBloqueiosRouteImport.update({
   id: '/bloqueios',
   path: '/bloqueios',
@@ -196,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
@@ -222,6 +230,7 @@ export interface FileRoutesByTo {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin': typeof AdminIndexRoute
@@ -252,6 +261,7 @@ export interface FileRoutesById {
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
+  '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
     | '/funcionario/solicitacoes'
     | '/admin/'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
     | '/funcionario/solicitacoes'
     | '/admin'
@@ -338,6 +350,7 @@ export interface FileRouteTypes {
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
+    | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
     | '/funcionario/solicitacoes'
     | '/admin/'
@@ -532,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioIndexRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/funcionario/agendar-cliente': {
+      id: '/funcionario/agendar-cliente'
+      path: '/agendar-cliente'
+      fullPath: '/funcionario/agendar-cliente'
+      preLoaderRoute: typeof FuncionarioAgendarClienteRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/funcionario/bloqueios': {
       id: '/funcionario/bloqueios'
       path: '/bloqueios'
@@ -601,12 +621,14 @@ const ClienteRouteWithChildren =
   ClienteRoute._addFileChildren(ClienteRouteChildren)
 
 interface FuncionarioRouteChildren {
+  FuncionarioAgendarClienteRoute: typeof FuncionarioAgendarClienteRoute
   FuncionarioBloqueiosRoute: typeof FuncionarioBloqueiosRoute
   FuncionarioSolicitacoesRoute: typeof FuncionarioSolicitacoesRoute
   FuncionarioIndexRoute: typeof FuncionarioIndexRoute
 }
 
 const FuncionarioRouteChildren: FuncionarioRouteChildren = {
+  FuncionarioAgendarClienteRoute: FuncionarioAgendarClienteRoute,
   FuncionarioBloqueiosRoute: FuncionarioBloqueiosRoute,
   FuncionarioSolicitacoesRoute: FuncionarioSolicitacoesRoute,
   FuncionarioIndexRoute: FuncionarioIndexRoute,
