@@ -1,7 +1,7 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand":  "npm ci --include=dev && npm run db:generate && npm run build"
+    "buildCommand": "npm install -g npm@12.0.1 && npm ci --allow-remote=all && npx prisma generate && npm run build"
   },
   "deploy": {
     "startCommand": "npm run db:deploy && npm run start",
