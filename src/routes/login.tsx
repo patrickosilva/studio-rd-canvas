@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,7 +30,7 @@ function LoginPage() {
 
   const [carregando, setCarregando] = useState(false);
   const [mensagem, setMensagem] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
@@ -106,18 +106,34 @@ function LoginPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="senha">Senha</Label>
+           <div className="space-y-2">
+  <Label htmlFor="senha">Senha</Label>
 
-              <Input
-                id="senha"
-                name="senha"
-                type="password"
-                required
-                autoComplete="current-password"
-                placeholder="Digite sua senha"
-              />
-            </div>
+  <div className="relative">
+    <Input
+      id="senha"
+      name="senha"
+      type={showPassword ? "text" : "password"}
+      required
+      autoComplete="current-password"
+      placeholder="Digite sua senha"
+      className="pr-10"
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword((prev) => !prev)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+    >
+      {showPassword ? (
+        <EyeOff className="h-4 w-4" />
+      ) : (
+        <Eye className="h-4 w-4" />
+      )}
+    </button>
+  </div>
+</div>
 
             <label
               htmlFor="manterConectado"
