@@ -31,8 +31,135 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+function ClienteAutocomplete({
+  clientes,
+  clienteBusca,
+  clienteSelecionadoId,
+  onAlterarBusca,
+  onSelecionarCliente,
+}: {
+  clientes: Cliente[];
+  clienteBusca: string;
+  clienteSelecionadoId: string;
+  onAlterarBusca: (valor: string) => void;
+  onSelecionarCliente: (cliente: Cliente) => void;
+}) {
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+
+  const clienteSelecionado = clientes.find(
+    (cliente) => cliente.id === clienteSelecionadoId,
+  );
+
+  const clientesFiltrados = useMemo(() => {
+    const termoTexto = normalizarTexto(clienteBusca.trim());
+    const termoNumeros = apenasNumeros(clienteBusca);
+
+    if (!termoTexto && !termoNumeros) {
+      return clientes.slice(0, 8);
+    }
+
+    return clientes
+      .filter((cliente) => {
+        const nome = normalizarTexto(cliente.nome);
+        const email = normalizarTexto(cliente.email);
+        const telefone = apenasNumeros(cliente.telefone);
+
+        return (
+          nome.includes(termoTexto) ||
+          email.includes(termoTexto) ||
+          Boolean(termoNumeros && telefone.includes(termoNumeros))
+        );
+      })
+      .slice(0, 8);
+  }, [clientes, clienteBusca]);
+
+  return (
+    <div className="relative space-y-2">
+      <label className="text-xs uppercase tracking-widest text-muted-foreground">
+        Cliente
+      </label>
+
+      <input
+        type="text"
+        value={clienteBusca}
+        onChange={(event) => {
+          onAlterarBusca(event.target.value);
+          setMostrarSugestoes(true);
+        }}
+        onFocus={() => setMostrarSugestoes(true)}
+        onBlur={() => {
+          window.setTimeout(() => setMostrarSugestoes(false), 150);
+        }}
+        placeholder="Digite nome, telefone ou e-mail do cliente"
+        className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+      />
+
+      {mostrarSugestoes && (
+        <div className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-xl border border-border bg-surface p-2 shadow-xl">
+          {clientesFiltrados.length === 0 ? (
+            <div className="px-3 py-4 text-sm text-muted-foreground">
+              Nenhum cliente encontrado.
+            </div>
+          ) : (
+            clientesFiltrados.map((cliente) => (
+              <button
+                key={cliente.id}
+                type="button"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  onSelecionarCliente(cliente);
+                  setMostrarSugestoes(false);
+                }}
+                className="w-full rounded-lg px-3 py-3 text-left transition hover:bg-surface-elevated"
+              >
+                <p className="text-sm font-medium">{cliente.nome}</p>
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formatarContatoCliente(cliente)}
+                </p>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+
+      {clienteSelecionado && (
+        <div className="rounded-xl border border-gold/30 bg-gold-soft px-3 py-2 text-sm text-gold">
+          Cliente selecionado:{" "}
+          <strong>{clienteSelecionado.nome}</strong>
+        </div>
+      )}
+
+      {!clienteSelecionadoId && clienteBusca && (
+        <p className="text-xs text-muted-foreground">
+          Selecione um cliente da lista para continuar.
+        </p>
+      )}
+    </div>
+  );
+}
+function normalizarTexto(valor: string | null | undefined): string {
+  return (valor ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function apenasNumeros(valor: string | null | undefined): string {
+  return (valor ?? "").replace(/\D/g, "");
+}
+
+function formatarContatoCliente(cliente: Cliente): string {
+  if (cliente.telefone) {
+    return cliente.telefone;
+  }
+
+  return cliente.email;
+}
+
 export const Route = createFileRoute(
   "/funcionario/agendar-cliente",
+
 )({
   component: FuncionarioAgendarClientePage,
 
@@ -79,7 +206,8 @@ function FuncionarioAgendarClientePage() {
     Profissional[]
   >([]);
 
-  const [clienteId, setClienteId] = useState("");
+  const [clienteBusca, setClienteBusca] = useState("");
+  const [clienteSelecionadoId, setClienteSelecionadoId] = useState("");
   const [servicoId, setServicoId] = useState("");
   const [profissionalId, setProfissionalId] = useState("");
   const [inicio, setInicio] = useState("");
@@ -115,9 +243,9 @@ function FuncionarioAgendarClientePage() {
 
   const clienteSelecionado = useMemo(
     () =>
-      clientes.find((cliente) => cliente.id === clienteId) ??
+      clientes.find((cliente) => cliente.id === clienteSelecionadoId) ??
       null,
-    [clientes, clienteId],
+    [clientes, clienteSelecionadoId]
   );
 
   const servicoSelecionado = useMemo(
@@ -136,47 +264,54 @@ function FuncionarioAgendarClientePage() {
   );
 
   const formularioCompleto =
-    clienteId && servicoId && profissionalId && inicio;
+    clienteSelecionadoId && servicoId && profissionalId && inicio;
 
   async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault();
+  event: FormEvent<HTMLFormElement>,
+) {
+  event.preventDefault();
 
-    setMensagem("");
-    setErro("");
-    setSalvando(true);
+  setMensagem("");
+  setErro("");
 
-    try {
-      const resultado = await criarAgendamento({
-        data: {
-          clienteId,
-          servicoId,
-          profissionalId,
-          inicio,
-          observacaoCliente,
-        },
-      });
-
-      if (!resultado.sucesso) {
-        setErro(resultado.mensagem);
-        return;
-      }
-
-      setMensagem(resultado.mensagem);
-
-      setClienteId("");
-      setServicoId("");
-      setProfissionalId("");
-      setInicio("");
-      setObservacaoCliente("");
-    } catch (error) {
-      console.error(error);
-      setErro("Não foi possível criar o agendamento.");
-    } finally {
-      setSalvando(false);
-    }
+  if (!clienteSelecionadoId) {
+    setErro("Digite e selecione um cliente da lista.");
+    return;
   }
+
+  setSalvando(true);
+
+  try {
+    const resultado = await criarAgendamento({
+      data: {
+        clienteId: clienteSelecionadoId,
+        servicoId,
+        profissionalId,
+        inicio,
+        observacaoCliente,
+      },
+    });
+
+    if (!resultado.sucesso) {
+      setErro(resultado.mensagem);
+      return;
+    }
+
+    setMensagem(resultado.mensagem);
+
+    setClienteBusca("");
+    setClienteSelecionadoId("");
+    setServicoId("");
+    setProfissionalId("");
+    setInicio("");
+    setObservacaoCliente("");
+  } catch (error) {
+    console.error(error);
+    setErro("Não foi possível criar o agendamento.");
+  } finally {
+    setSalvando(false);
+  }
+}
 
   return (
     <div className="min-h-screen bg-background px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
@@ -256,30 +391,19 @@ function FuncionarioAgendarClientePage() {
                     titulo="Escolha o cliente"
                     descricao="Selecione para quem o horário será marcado."
                   >
-                    <div className="grid gap-2">
-                      <Label htmlFor="clienteId">Cliente</Label>
-
-                      <select
-                        id="clienteId"
-                        value={clienteId}
-                        onChange={(event) =>
-                          setClienteId(event.target.value)
-                        }
-                        className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
-                        required
-                      >
-                        <option value="">Selecione um cliente</option>
-
-                        {clientes.map((cliente) => (
-                          <option
-                            key={cliente.id}
-                            value={cliente.id}
-                          >
-                            {cliente.nome} — {cliente.email}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <ClienteAutocomplete
+                      clientes={clientes}
+                      clienteBusca={clienteBusca}
+                      clienteSelecionadoId={clienteSelecionadoId}
+                      onAlterarBusca={(valor) => {
+                        setClienteBusca(valor);
+                        setClienteSelecionadoId("");
+                      }}
+                      onSelecionarCliente={(cliente) => {
+                        setClienteSelecionadoId(cliente.id);
+                        setClienteBusca(`${cliente.nome} — ${formatarContatoCliente(cliente)}`);
+                      }}
+                    />
                   </EtapaFormulario>
 
                   <EtapaFormulario
@@ -451,8 +575,8 @@ function FuncionarioAgendarClientePage() {
                   texto={
                     servicoSelecionado
                       ? `${servicoSelecionado.nome} — ${formatarDinheiro(
-                          servicoSelecionado.precoCentavos,
-                        )}`
+                        servicoSelecionado.precoCentavos,
+                      )}`
                       : "Nenhum serviço selecionado."
                   }
                 />
