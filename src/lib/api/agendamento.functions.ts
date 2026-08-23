@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { FormaPagamento } from "../../generated/prisma/client";
+import { enviarNotificacaoAgendamento } from "../notificacao-agendamento.server";
 import { prisma } from "../prisma.server";
 import { obterUsuarioAtual } from "../session.server";
 
@@ -294,6 +295,16 @@ export const clienteCancelarAgendamento =
             id: true,
             status: true,
             inicio: true,
+            servico: {
+              select: {
+                nome: true,
+              },
+            },
+            profissional: {
+              select: {
+                nome: true,
+              },
+            },
           },
         });
 
@@ -366,6 +377,24 @@ export const clienteCancelarAgendamento =
             canceladoEm: true,
           },
         });
+
+      await enviarNotificacaoAgendamento({
+        tipo: "AGENDAMENTO_CANCELADO",
+        agendamentoId: agendamento.id,
+        cliente: {
+          nome: usuario.nome,
+          telefone: usuario.telefone,
+          email: usuario.email,
+        },
+        servico: {
+          nome: agendamento.servico.nome,
+        },
+        profissional: {
+          nome: agendamento.profissional.nome,
+        },
+        inicio: agendamento.inicio,
+        motivoCancelamento: agendamentoAtualizado.motivoCancelamento,
+      });
 
       return {
         sucesso: true,
@@ -514,6 +543,23 @@ export const solicitarAgendamento = createServerFn({
           },
         },
       },
+    });
+
+    await enviarNotificacaoAgendamento({
+      tipo: "NOVO_AGENDAMENTO",
+      agendamentoId: agendamento.id,
+      cliente: {
+        nome: usuario.nome,
+        telefone: usuario.telefone,
+        email: usuario.email,
+      },
+      servico: {
+        nome: agendamento.servico.nome,
+      },
+      profissional: {
+        nome: agendamento.profissional.nome,
+      },
+      inicio: agendamento.inicio,
     });
 
     return {
