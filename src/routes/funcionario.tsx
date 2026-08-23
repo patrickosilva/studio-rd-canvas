@@ -63,7 +63,7 @@ const itemsFuncionario = [
     icon: LayoutDashboard,
   },
   {
-    label: "Solicitações",
+    label: "Agenda",
     to: "/funcionario/solicitacoes",
     icon: CalendarCheck,
   },

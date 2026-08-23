@@ -183,7 +183,7 @@ function FuncionarioDashboard() {
             to="/funcionario/solicitacoes"
             className="inline-flex h-10 items-center rounded-full bg-gold px-5 text-sm font-medium text-gold-foreground transition hover:opacity-90"
           >
-            Ver solicitações
+            Ver agenda
           </Link>
         }
       />
