@@ -7,6 +7,7 @@ import nodemailer, { type Transporter } from "nodemailer";
 
 const EMAIL_NOTIFICACAO_PADRAO = "studiordbarber00@gmail.com";
 const FUSO_HORARIO_BARBEARIA = "America/Sao_Paulo";
+const LOG_PREFIX = "[AppointmentNotification]";
 
 type TipoNotificacaoAgendamento = "NOVO_AGENDAMENTO" | "AGENDAMENTO_CANCELADO";
 
@@ -30,24 +31,37 @@ interface DadosNotificacaoAgendamento {
 
 let transportadorCache: Transporter | null | undefined;
 
+function variaveisSmtpAusentes(): string[] {
+  const ausentes: string[] = [];
+
+  if (!process.env.SMTP_HOST) ausentes.push("SMTP_HOST");
+  if (!process.env.SMTP_PORT) ausentes.push("SMTP_PORT");
+  if (!process.env.SMTP_USER) ausentes.push("SMTP_USER");
+  if (!process.env.SMTP_PASSWORD) ausentes.push("SMTP_PASSWORD");
+
+  return ausentes;
+}
+
 function obterTransportador(): Transporter | null {
   if (transportadorCache !== undefined) {
     return transportadorCache;
   }
 
-  const host = process.env.SMTP_HOST;
-  const port = process.env.SMTP_PORT;
-  const usuario = process.env.SMTP_USER;
-  const senha = process.env.SMTP_PASSWORD;
+  const ausentes = variaveisSmtpAusentes();
 
-  if (!host || !port || !usuario || !senha) {
+  if (ausentes.length > 0) {
     console.warn(
-      "[notificacao-agendamento] Variáveis SMTP não configuradas — notificações por e-mail estão desativadas.",
+      `${LOG_PREFIX} SMTP não configurado — notificações desativadas. Variáveis ausentes: ${ausentes.join(", ")}.`,
     );
 
     transportadorCache = null;
     return transportadorCache;
   }
+
+  const host = process.env.SMTP_HOST as string;
+  const port = process.env.SMTP_PORT as string;
+  const usuario = process.env.SMTP_USER as string;
+  const senha = process.env.SMTP_PASSWORD as string;
 
   transportadorCache = nodemailer.createTransport({
     host,
@@ -58,6 +72,23 @@ function obterTransportador(): Transporter | null {
       pass: senha,
     },
   });
+
+  // Diagnóstico único de conexão/autenticação SMTP, feito só na primeira
+  // vez que o transportador é criado — não a cada envio.
+  transportadorCache
+    .verify()
+    .then(() => {
+      console.log(
+        `${LOG_PREFIX} Conexão SMTP verificada com sucesso (host, porta e autenticação OK).`,
+      );
+    })
+    .catch((error) => {
+      console.error(
+        `${LOG_PREFIX} Falha ao verificar conexão SMTP: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    });
 
   return transportadorCache;
 }
@@ -140,12 +171,20 @@ export async function enviarNotificacaoAgendamento(
   const transportador = obterTransportador();
 
   if (!transportador) {
+    console.warn(
+      `${LOG_PREFIX} Envio ignorado (SMTP não configurado). event: ${dados.tipo}, appointmentId: ${dados.agendamentoId}`,
+    );
+
     return;
   }
 
   const destinatario = process.env.NOTIFICATION_EMAIL?.trim() || EMAIL_NOTIFICACAO_PADRAO;
 
   const { assunto, texto } = montarConteudo(dados);
+
+  console.log(
+    `${LOG_PREFIX} Attempting ${dados.tipo} (appointmentId: ${dados.agendamentoId}, to: ${destinatario})`,
+  );
 
   try {
     await transportador.sendMail({
@@ -154,10 +193,13 @@ export async function enviarNotificacaoAgendamento(
       subject: assunto,
       text: texto,
     });
+
+    console.log(`${LOG_PREFIX} Sent successfully (appointmentId: ${dados.agendamentoId})`);
   } catch (error) {
     console.error(
-      "[notificacao-agendamento] Falha ao enviar e-mail de notificação:",
-      error instanceof Error ? error.message : error,
+      `${LOG_PREFIX} Failed: ${
+        error instanceof Error ? error.message : String(error)
+      } (event: ${dados.tipo}, appointmentId: ${dados.agendamentoId})`,
     );
   }
 }
