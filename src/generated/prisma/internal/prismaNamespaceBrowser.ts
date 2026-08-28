@@ -61,7 +61,8 @@ export const ModelName = {
   PlanoAssinatura: 'PlanoAssinatura',
   AssinaturaCliente: 'AssinaturaCliente',
   UsoAssinatura: 'UsoAssinatura',
-  PagamentoAssinatura: 'PagamentoAssinatura'
+  PagamentoAssinatura: 'PagamentoAssinatura',
+  Notificacao: 'Notificacao'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -239,6 +240,21 @@ export const PagamentoAssinaturaScalarFieldEnum = {
 } as const
 
 export type PagamentoAssinaturaScalarFieldEnum = (typeof PagamentoAssinaturaScalarFieldEnum)[keyof typeof PagamentoAssinaturaScalarFieldEnum]
+
+
+export const NotificacaoScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  titulo: 'titulo',
+  mensagem: 'mensagem',
+  link: 'link',
+  tipo: 'tipo',
+  lida: 'lida',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type NotificacaoScalarFieldEnum = (typeof NotificacaoScalarFieldEnum)[keyof typeof NotificacaoScalarFieldEnum]
 
 
 export const SortOrder = {

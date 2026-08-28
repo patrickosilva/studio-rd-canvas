@@ -53,6 +53,7 @@ model Usuario {
   profissional Profissional?
   assinaturas  AssinaturaCliente[] @relation("AssinaturasCliente")
   agendamentos Agendamento[]       @relation("AgendamentosCliente")
+  notificacoes Notificacao[]
 }
 
 model Servico {
@@ -258,4 +259,26 @@ model PagamentoAssinatura {
   @@index([assinaturaId])
   @@index([formaPagamento])
   @@index([pagoEm])
+}
+
+model Notificacao {
+  id        String @id @default(cuid())
+  usuarioId String
+
+  titulo   String
+  mensagem String
+  link     String?
+  tipo     String  @default("AGENDAMENTO")
+
+  lida Boolean @default(false)
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([lida])
+  @@index([criadoEm])
+  @@index([usuarioId, lida])
 }

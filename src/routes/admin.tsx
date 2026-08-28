@@ -14,7 +14,7 @@ import {
   Settings,
   UsersRound,
 } from "lucide-react";
-
+import { NotificadorNativo } from "@/components/notificacoes/NotificadorNativo";
 import { DashboardShell } from "@/components/dashboard/Sidebar";
 
 export const Route = createFileRoute("/admin")({
@@ -125,6 +125,7 @@ function AdminLayout() {
         role: "Administrador",
       }}
     >
+      <NotificadorNativo />
       <Outlet />
     </DashboardShell>
   );

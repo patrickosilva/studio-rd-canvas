@@ -394,7 +394,8 @@ export const ModelName = {
   PlanoAssinatura: 'PlanoAssinatura',
   AssinaturaCliente: 'AssinaturaCliente',
   UsoAssinatura: 'UsoAssinatura',
-  PagamentoAssinatura: 'PagamentoAssinatura'
+  PagamentoAssinatura: 'PagamentoAssinatura',
+  Notificacao: 'Notificacao'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -410,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "cliente" | "usuario" | "servico" | "profissional" | "sessao" | "agendamento" | "bloqueioAgenda" | "planoAssinatura" | "assinaturaCliente" | "usoAssinatura" | "pagamentoAssinatura"
+    modelProps: "cliente" | "usuario" | "servico" | "profissional" | "sessao" | "agendamento" | "bloqueioAgenda" | "planoAssinatura" | "assinaturaCliente" | "usoAssinatura" | "pagamentoAssinatura" | "notificacao"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1228,6 +1229,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Notificacao: {
+      payload: Prisma.$NotificacaoPayload<ExtArgs>
+      fields: Prisma.NotificacaoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NotificacaoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NotificacaoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>
+        }
+        findFirst: {
+          args: Prisma.NotificacaoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NotificacaoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>
+        }
+        findMany: {
+          args: Prisma.NotificacaoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>[]
+        }
+        create: {
+          args: Prisma.NotificacaoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>
+        }
+        createMany: {
+          args: Prisma.NotificacaoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NotificacaoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>[]
+        }
+        delete: {
+          args: Prisma.NotificacaoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>
+        }
+        update: {
+          args: Prisma.NotificacaoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>
+        }
+        deleteMany: {
+          args: Prisma.NotificacaoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NotificacaoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NotificacaoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>[]
+        }
+        upsert: {
+          args: Prisma.NotificacaoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificacaoPayload>
+        }
+        aggregate: {
+          args: Prisma.NotificacaoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNotificacao>
+        }
+        groupBy: {
+          args: Prisma.NotificacaoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotificacaoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NotificacaoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotificacaoCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1426,6 +1501,21 @@ export const PagamentoAssinaturaScalarFieldEnum = {
 } as const
 
 export type PagamentoAssinaturaScalarFieldEnum = (typeof PagamentoAssinaturaScalarFieldEnum)[keyof typeof PagamentoAssinaturaScalarFieldEnum]
+
+
+export const NotificacaoScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  titulo: 'titulo',
+  mensagem: 'mensagem',
+  link: 'link',
+  tipo: 'tipo',
+  lida: 'lida',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type NotificacaoScalarFieldEnum = (typeof NotificacaoScalarFieldEnum)[keyof typeof NotificacaoScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1697,6 +1787,7 @@ export type GlobalOmitConfig = {
   assinaturaCliente?: Prisma.AssinaturaClienteOmit
   usoAssinatura?: Prisma.UsoAssinaturaOmit
   pagamentoAssinatura?: Prisma.PagamentoAssinaturaOmit
+  notificacao?: Prisma.NotificacaoOmit
 }
 
 /* Types for Logging */

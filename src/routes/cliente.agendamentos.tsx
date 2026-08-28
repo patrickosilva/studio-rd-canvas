@@ -33,6 +33,9 @@ import {
 } from "@/lib/api/agendamento.functions";
 
 export const Route = createFileRoute("/cliente/agendamentos")({
+  component: AgendamentosPage,
+
+ 
   beforeLoad: ({ context, location }) => {
     const { usuario } = context;
 
@@ -64,7 +67,7 @@ export const Route = createFileRoute("/cliente/agendamentos")({
     }
   },
 
-  component: AgendamentosPage,
+ 
 
 });
 
@@ -252,6 +255,7 @@ function formatarDataHora(valor: string | Date): string {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
+    timeZone: "America/Sao_Paulo",
   }).format(data);
 }
 
@@ -712,7 +716,7 @@ function AgendamentosPage() {
                 </Label>
 
                 <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
-                  {horariosDisponiveis.map((horario) => {
+                  {horariosFiltrados.map((horario) => {
                     const ativo = horario === horarioSelecionado;
 
                     return (
@@ -925,4 +929,4 @@ function AgendamentosPage() {
         )}</div>
     </div>
   );
-}
+} 

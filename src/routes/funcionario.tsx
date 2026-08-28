@@ -4,15 +4,17 @@ import {
   Outlet,
   redirect,
 } from "@tanstack/react-router";
+
 import {
   ArrowLeftCircle,
   CalendarCheck,
-  CalendarX2,
   CalendarPlus,
+  CalendarX2,
   LayoutDashboard,
 } from "lucide-react";
 
 import { DashboardShell } from "@/components/dashboard/Sidebar";
+import { NotificadorNativo } from "@/components/notificacoes/NotificadorNativo";
 
 export const Route = createFileRoute("/funcionario")({
   beforeLoad: ({ context, location }) => {
@@ -76,7 +78,7 @@ const itemsFuncionario = [
     label: "Agendar Cliente",
     to: "/funcionario/agendar-cliente",
     icon: CalendarPlus,
-  }
+  },
 ];
 
 function FuncionarioLayout() {
@@ -106,6 +108,7 @@ function FuncionarioLayout() {
             : "Funcionário Studio RD",
       }}
     >
+      <NotificadorNativo />
       <Outlet />
     </DashboardShell>
   );
