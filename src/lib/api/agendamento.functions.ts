@@ -122,6 +122,17 @@ const recusarAgendamentoSchema = z.object({
     .or(z.literal("")),
 });
 
+const remarcarAgendamentoSchema = z.object({
+  agendamentoId: z
+    .string()
+    .trim()
+    .min(1, "Agendamento inválido."),
+
+  inicio: z
+    .string()
+    .trim()
+    .min(1, "Escolha uma nova data e horário."),
+});
 const cancelarAgendamentoClienteSchema = z.object({
   agendamentoId: z
     .string()
@@ -193,6 +204,36 @@ const concluirAgendamentoSchema = z.object({
 });
 
 const TIMEZONE_PADRAO = "America/Sao_Paulo";
+const INTERVALO_GRADE_MINUTOS = 40;
+
+const funcionamentoPorDia: Record<
+  number,
+  {
+    abre: string;
+    fecha: string;
+  }
+> = {
+  2: {
+    abre: "09:30",
+    fecha: "19:30",
+  },
+  3: {
+    abre: "09:30",
+    fecha: "19:30",
+  },
+  4: {
+    abre: "09:00",
+    fecha: "19:30",
+  },
+  5: {
+    abre: "08:00",
+    fecha: "21:00",
+  },
+  6: {
+    abre: "08:30",
+    fecha: "19:00",
+  },
+};
 
 function converterData(valor: string): Date | null {
   const texto = valor.trim();
@@ -245,6 +286,91 @@ function calcularFim(inicio: Date, duracaoMinutos: number): Date {
   );
 }
 
+function converterHoraParaMinutos(hora: string): number {
+  const [horas, minutos] = hora.split(":").map(Number);
+
+  return horas * 60 + minutos;
+}
+
+function obterPartesDataSaoPaulo(data: Date) {
+  const partes = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: TIMEZONE_PADRAO,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(data);
+
+  const mapa = Object.fromEntries(
+    partes.map((parte) => [parte.type, parte.value]),
+  );
+
+  const ano = Number(mapa.year);
+  const mes = Number(mapa.month);
+  const dia = Number(mapa.day);
+  const hora = Number(mapa.hour);
+  const minuto = Number(mapa.minute);
+
+  const dataLocal = new Date(ano, mes - 1, dia);
+
+  return {
+    diaSemana: dataLocal.getDay(),
+    hora,
+    minuto,
+  };
+}
+
+function validarHorarioNaGrade({
+  inicio,
+  duracaoMinutos,
+}: {
+  inicio: Date;
+  duracaoMinutos: number;
+}): {
+  valido: boolean;
+  mensagem?: string;
+} {
+  const partes = obterPartesDataSaoPaulo(inicio);
+  const regra = funcionamentoPorDia[partes.diaSemana];
+
+  if (!regra) {
+    return {
+      valido: false,
+      mensagem: "A barbearia não atende nesse dia.",
+    };
+  }
+
+  const minutosInicio = partes.hora * 60 + partes.minuto;
+  const minutosAbertura = converterHoraParaMinutos(regra.abre);
+  const minutosFechamento = converterHoraParaMinutos(regra.fecha);
+
+  if (
+    minutosInicio < minutosAbertura ||
+    minutosInicio + duracaoMinutos > minutosFechamento
+  ) {
+    return {
+      valido: false,
+      mensagem: "Escolha um horário dentro do funcionamento da barbearia.",
+    };
+  }
+
+  const distanciaDaAbertura = minutosInicio - minutosAbertura;
+
+  if (distanciaDaAbertura % INTERVALO_GRADE_MINUTOS !== 0) {
+    return {
+      valido: false,
+      mensagem:
+        "Escolha um horário dentro da grade oficial de 40 minutos.",
+    };
+  }
+
+  return {
+    valido: true,
+  };
+}
+
 async function existeConflitoDeHorario({
   profissionalId,
   inicio,
@@ -261,8 +387,8 @@ async function existeConflitoDeHorario({
       profissionalId,
       id: ignorarAgendamentoId
         ? {
-            not: ignorarAgendamentoId,
-          }
+          not: ignorarAgendamentoId,
+        }
         : undefined,
       status: {
         in: ["SOLICITADO", "CONFIRMADO"],
@@ -364,6 +490,52 @@ async function criarNotificacaoNovoAgendamento({
   }
 }
 
+
+async function criarNotificacaoCancelamentoCliente({
+  clienteNome,
+  servicoNome,
+  inicio,
+}: {
+  clienteNome: string;
+  servicoNome: string;
+  inicio: Date;
+}) {
+  try {
+    const destinatarios = await prisma.usuario.findMany({
+      where: {
+        papel: {
+          in: ["FUNCIONARIO", "DONO"],
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (destinatarios.length === 0) {
+      return;
+    }
+
+    const dataFormatada = new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+      timeZone: TIMEZONE_PADRAO,
+    }).format(inicio);
+
+    await prisma.notificacao.createMany({
+      data: destinatarios.map((usuario) => ({
+        usuarioId: usuario.id,
+        titulo: "Agendamento cancelado",
+        mensagem: `Cliente ${clienteNome} cancelou ${servicoNome} de ${dataFormatada}.`,
+        link: "/funcionario/solicitacoes",
+        tipo: "CANCELAMENTO",
+      })),
+    });
+  } catch (error) {
+    console.error("Erro ao criar notificação de cancelamento:", error);
+  }
+}
+
 export const clienteCancelarAgendamento =
   createServerFn({
     method: "POST",
@@ -439,6 +611,12 @@ export const clienteCancelarAgendamento =
             canceladoEm: true,
           },
         });
+
+      await criarNotificacaoCancelamentoCliente({
+        clienteNome: usuario.nome,
+        servicoNome: agendamento.servico.nome,
+        inicio: agendamento.inicio,
+      });
 
       await enviarNotificacaoAgendamento({
         tipo: "AGENDAMENTO_CANCELADO",
@@ -534,6 +712,20 @@ export const solicitarAgendamento = createServerFn({
       inicio,
       servico.duracaoMinutos,
     );
+
+    const horarioNaGrade = validarHorarioNaGrade({
+      inicio,
+      duracaoMinutos: servico.duracaoMinutos,
+    });
+
+    if (!horarioNaGrade.valido) {
+      return {
+        sucesso: false,
+        mensagem:
+          horarioNaGrade.mensagem ||
+          "Escolha um horário válido na grade da barbearia.",
+      };
+    }
 
     const horarioBloqueado = await existeBloqueioAgenda({
       profissionalId: profissional.id,
@@ -803,6 +995,20 @@ export const funcionarioCriarAgendamentoParaCliente =
         inicio,
         servico.duracaoMinutos,
       );
+
+      const horarioNaGrade = validarHorarioNaGrade({
+        inicio,
+        duracaoMinutos: servico.duracaoMinutos,
+      });
+
+      if (!horarioNaGrade.valido) {
+        return {
+          sucesso: false,
+          mensagem:
+            horarioNaGrade.mensagem ||
+            "Escolha um horário válido na grade da barbearia.",
+        };
+      }
 
       const horarioBloqueado = await existeBloqueioAgenda({
         profissionalId: profissional.id,
@@ -1392,6 +1598,148 @@ export const funcionarioConcluirAgendamento =
       return {
         sucesso: true,
         mensagem: "Atendimento concluído com sucesso.",
+        agendamento: agendamentoAtualizado,
+      };
+    });
+export const operacionalRemarcarAgendamento =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(remarcarAgendamentoSchema)
+    .handler(async ({ data }) => {
+      await exigirOperacional();
+
+      const novoInicio = converterData(data.inicio);
+
+      if (!novoInicio) {
+        return {
+          sucesso: false,
+          mensagem: "Nova data ou horário inválido.",
+        };
+      }
+
+      if (novoInicio.getTime() <= new Date().getTime()) {
+        return {
+          sucesso: false,
+          mensagem: "Escolha um horário futuro.",
+        };
+      }
+
+      const agendamento = await prisma.agendamento.findUnique({
+        where: {
+          id: data.agendamentoId,
+        },
+        select: {
+          id: true,
+          status: true,
+          profissionalId: true,
+          cliente: {
+            select: {
+              nome: true,
+            },
+          },
+          servico: {
+            select: {
+              nome: true,
+              duracaoMinutos: true,
+            },
+          },
+        },
+      });
+
+      if (!agendamento) {
+        return {
+          sucesso: false,
+          mensagem: "Agendamento não encontrado.",
+        };
+      }
+
+      if (
+        agendamento.status !== "SOLICITADO" &&
+        agendamento.status !== "CONFIRMADO"
+      ) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Apenas agendamentos solicitados ou confirmados podem ser remarcados.",
+        };
+      }
+
+      const novoFim = calcularFim(
+        novoInicio,
+        agendamento.servico.duracaoMinutos,
+      );
+
+      const horarioNaGrade = validarHorarioNaGrade({
+        inicio: novoInicio,
+        duracaoMinutos: agendamento.servico.duracaoMinutos,
+      });
+
+      if (!horarioNaGrade.valido) {
+        return {
+          sucesso: false,
+          mensagem:
+            horarioNaGrade.mensagem ||
+            "Escolha um horário válido na grade da barbearia.",
+        };
+      }
+
+      const horarioBloqueado = await existeBloqueioAgenda({
+        profissionalId: agendamento.profissionalId,
+        inicio: novoInicio,
+        fim: novoFim,
+      });
+
+      if (horarioBloqueado) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Esse horário está bloqueado na agenda da barbearia.",
+        };
+      }
+
+      const conflito = await existeConflitoDeHorario({
+        profissionalId: agendamento.profissionalId,
+        inicio: novoInicio,
+        fim: novoFim,
+        ignorarAgendamentoId: agendamento.id,
+      });
+
+      if (conflito) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Já existe outro agendamento ocupando esse horário.",
+        };
+      }
+
+      const agendamentoAtualizado =
+        await prisma.agendamento.update({
+          where: {
+            id: agendamento.id,
+          },
+          data: {
+            inicio: novoInicio,
+            fim: novoFim,
+          },
+          select: {
+            id: true,
+            inicio: true,
+            fim: true,
+            status: true,
+          },
+        });
+
+      await criarNotificacaoNovoAgendamento({
+        clienteNome: agendamento.cliente.nome,
+        servicoNome: agendamento.servico.nome,
+        inicio: agendamentoAtualizado.inicio,
+        acao: "agendou",
+      });
+
+      return {
+        sucesso: true,
+        mensagem: "Agendamento remarcado com sucesso.",
         agendamento: agendamentoAtualizado,
       };
     });

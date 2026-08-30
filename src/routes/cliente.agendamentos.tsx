@@ -211,6 +211,8 @@ function formatarMinutosComoHora(totalMinutos: number): string {
 
   return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
 }
+const INTERVALO_GRADE_MINUTOS = 40;
+  
 
 function gerarHorariosDisponiveis(
   dataInput: string,
@@ -228,13 +230,13 @@ function gerarHorariosDisponiveis(
   const horarios: string[] = [];
 
   /*
-   * Grade inicial de 30 em 30 minutos.
+   * Grade inicial de 40 em 40 minutos.
    * Depois podemos trocar isso por disponibilidade real por funcionário.
    */
   for (
     let horario = abertura;
     horario + duracaoMinutos <= fechamento;
-    horario += 30
+    horario += INTERVALO_GRADE_MINUTOS
   ) {
     horarios.push(formatarMinutosComoHora(horario));
   }

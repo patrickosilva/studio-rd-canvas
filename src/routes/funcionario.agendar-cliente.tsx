@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import {
   type FormEvent,
+  type ReactNode,
   useEffect,
   useMemo,
   useState,
@@ -19,6 +20,7 @@ import {
 import {
   funcionarioCriarAgendamentoParaCliente,
   funcionarioListarDadosParaAgendarCliente,
+  listarIndisponibilidadesAgenda,
 } from "@/lib/api/agendamento.functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,8 +30,207 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+export const Route = createFileRoute(
+  "/funcionario/agendar-cliente",
+)({
+  component: FuncionarioAgendarClientePage,
+
+  head: () => ({
+    meta: [
+      {
+        title: "Agendar cliente · Funcionário · Studio RD",
+      },
+    ],
+  }),
+});
+
+type Cliente = {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string | null;
+};
+
+type Servico = {
+  id: string;
+  nome: string;
+  duracaoMinutos: number;
+  precoCentavos: number;
+};
+
+type Profissional = {
+  id: string;
+  nome: string;
+};
+
+type IndisponibilidadeAgenda = {
+  id: string;
+  tipo: "AGENDAMENTO" | "BLOQUEIO";
+  inicio: string | Date;
+  fim: string | Date;
+  motivo: string | null;
+};
+
+const INTERVALO_GRADE_MINUTOS = 40;
+
+const funcionamentoPorDia: Record<
+  number,
+  {
+    abre: string;
+    fecha: string;
+  }
+> = {
+  2: {
+    abre: "09:30",
+    fecha: "19:30",
+  },
+  3: {
+    abre: "09:30",
+    fecha: "19:30",
+  },
+  4: {
+    abre: "09:00",
+    fecha: "19:30",
+  },
+  5: {
+    abre: "08:00",
+    fecha: "21:00",
+  },
+  6: {
+    abre: "08:30",
+    fecha: "19:00",
+  },
+};
+
+function normalizarTexto(valor: string | null | undefined): string {
+  return (valor ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function apenasNumeros(valor: string | null | undefined): string {
+  return (valor ?? "").replace(/\D/g, "");
+}
+
+function formatarContatoCliente(cliente: Cliente): string {
+  if (cliente.telefone) {
+    return cliente.telefone;
+  }
+
+  return cliente.email;
+}
+
+function formatarDataInput(data: Date): string {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+function criarDataLocal(dataInput: string): Date {
+  const [ano, mes, dia] = dataInput.split("-").map(Number);
+
+  return new Date(ano, mes - 1, dia);
+}
+
+function obterNomeDia(dataInput: string): string {
+  const data = criarDataLocal(dataInput);
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  }).format(data);
+}
+
+function obterProximosDiasFuncionamento(
+  quantidadeDias = 21,
+): string[] {
+  const dias: string[] = [];
+  const hoje = new Date();
+
+  hoje.setHours(0, 0, 0, 0);
+
+  for (let indice = 0; indice < quantidadeDias; indice += 1) {
+    const data = new Date(hoje);
+
+    data.setDate(hoje.getDate() + indice);
+
+    const diaSemana = data.getDay();
+
+    if (funcionamentoPorDia[diaSemana]) {
+      dias.push(formatarDataInput(data));
+    }
+  }
+
+  return dias;
+}
+
+function converterHoraParaMinutos(hora: string): number {
+  const [horas, minutos] = hora.split(":").map(Number);
+
+  return horas * 60 + minutos;
+}
+
+function formatarMinutosComoHora(totalMinutos: number): string {
+  const horas = Math.floor(totalMinutos / 60);
+  const minutos = totalMinutos % 60;
+
+  return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
+}
+
+function gerarHorariosDisponiveis(
+  dataInput: string,
+  duracaoMinutos: number,
+): string[] {
+  const data = criarDataLocal(dataInput);
+  const regra = funcionamentoPorDia[data.getDay()];
+
+  if (!regra) {
+    return [];
+  }
+
+  const abertura = converterHoraParaMinutos(regra.abre);
+  const fechamento = converterHoraParaMinutos(regra.fecha);
+  const horarios: string[] = [];
+
+  for (
+    let horario = abertura;
+    horario + duracaoMinutos <= fechamento;
+    horario += INTERVALO_GRADE_MINUTOS
+  ) {
+    horarios.push(formatarMinutosComoHora(horario));
+  }
+
+  return horarios;
+}
+
+function criarInicioIsoLocal(
+  dataInput: string,
+  horario: string,
+): string {
+  return `${dataInput}T${horario}`;
+}
+
+function existeConflitoComIndisponibilidade(
+  inicioHorario: Date,
+  fimHorario: Date,
+  indisponibilidades: IndisponibilidadeAgenda[],
+): boolean {
+  return indisponibilidades.some((indisponibilidade) => {
+    const inicioIndisponivel = new Date(indisponibilidade.inicio);
+    const fimIndisponivel = new Date(indisponibilidade.fim);
+
+    return (
+      inicioIndisponivel < fimHorario &&
+      fimIndisponivel > inicioHorario
+    );
+  });
+}
 
 function ClienteAutocomplete({
   clientes,
@@ -138,58 +339,6 @@ function ClienteAutocomplete({
     </div>
   );
 }
-function normalizarTexto(valor: string | null | undefined): string {
-  return (valor ?? "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
-
-function apenasNumeros(valor: string | null | undefined): string {
-  return (valor ?? "").replace(/\D/g, "");
-}
-
-function formatarContatoCliente(cliente: Cliente): string {
-  if (cliente.telefone) {
-    return cliente.telefone;
-  }
-
-  return cliente.email;
-}
-
-export const Route = createFileRoute(
-  "/funcionario/agendar-cliente",
-
-)({
-  component: FuncionarioAgendarClientePage,
-
-  head: () => ({
-    meta: [
-      {
-        title: "Agendar cliente · Funcionário · Studio RD",
-      },
-    ],
-  }),
-});
-
-type Cliente = {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string | null;
-};
-
-type Servico = {
-  id: string;
-  nome: string;
-  duracaoMinutos: number;
-  precoCentavos: number;
-};
-
-type Profissional = {
-  id: string;
-  nome: string;
-};
 
 function FuncionarioAgendarClientePage() {
   const carregarDados = useServerFn(
@@ -198,6 +347,10 @@ function FuncionarioAgendarClientePage() {
 
   const criarAgendamento = useServerFn(
     funcionarioCriarAgendamentoParaCliente,
+  );
+
+  const buscarIndisponibilidades = useServerFn(
+    listarIndisponibilidadesAgenda,
   );
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -210,7 +363,11 @@ function FuncionarioAgendarClientePage() {
   const [clienteSelecionadoId, setClienteSelecionadoId] = useState("");
   const [servicoId, setServicoId] = useState("");
   const [profissionalId, setProfissionalId] = useState("");
-  const [inicio, setInicio] = useState("");
+  const [dataSelecionada, setDataSelecionada] = useState("");
+  const [horarioSelecionado, setHorarioSelecionado] = useState("");
+  const [indisponibilidades, setIndisponibilidades] = useState<
+    IndisponibilidadeAgenda[]
+  >([]);
   const [observacaoCliente, setObservacaoCliente] =
     useState("");
 
@@ -237,15 +394,16 @@ function FuncionarioAgendarClientePage() {
     }
   }
 
-  useEffect(() => {
-    void buscarDados();
-  }, []);
+  const proximosDias = useMemo(
+    () => obterProximosDiasFuncionamento(),
+    [],
+  );
 
   const clienteSelecionado = useMemo(
     () =>
       clientes.find((cliente) => cliente.id === clienteSelecionadoId) ??
       null,
-    [clientes, clienteSelecionadoId]
+    [clientes, clienteSelecionadoId],
   );
 
   const servicoSelecionado = useMemo(
@@ -263,55 +421,166 @@ function FuncionarioAgendarClientePage() {
     [profissionais, profissionalId],
   );
 
-  const formularioCompleto =
-    clienteSelecionadoId && servicoId && profissionalId && inicio;
+  const horariosDisponiveis = useMemo(() => {
+    if (!dataSelecionada || !servicoSelecionado) {
+      return [];
+    }
 
-  async function handleSubmit(
-  event: FormEvent<HTMLFormElement>,
-) {
-  event.preventDefault();
+    return gerarHorariosDisponiveis(
+      dataSelecionada,
+      servicoSelecionado.duracaoMinutos,
+    );
+  }, [dataSelecionada, servicoSelecionado]);
 
-  setMensagem("");
-  setErro("");
+  const horariosFiltrados = useMemo(() => {
+    return horariosDisponiveis.filter((horario) => {
+      if (!servicoSelecionado || !dataSelecionada) {
+        return false;
+      }
 
-  if (!clienteSelecionadoId) {
-    setErro("Digite e selecione um cliente da lista.");
-    return;
-  }
+      const inicioHorario = new Date(`${dataSelecionada}T${horario}`);
 
-  setSalvando(true);
+      const fimHorario = new Date(
+        inicioHorario.getTime() +
+          servicoSelecionado.duracaoMinutos * 60 * 1000,
+      );
 
-  try {
-    const resultado = await criarAgendamento({
-      data: {
-        clienteId: clienteSelecionadoId,
-        servicoId,
-        profissionalId,
-        inicio,
-        observacaoCliente,
-      },
+      return !existeConflitoComIndisponibilidade(
+        inicioHorario,
+        fimHorario,
+        indisponibilidades,
+      );
     });
+  }, [
+    horariosDisponiveis,
+    servicoSelecionado,
+    dataSelecionada,
+    indisponibilidades,
+  ]);
 
-    if (!resultado.sucesso) {
-      setErro(resultado.mensagem);
+  const formularioCompleto = Boolean(
+    clienteSelecionadoId &&
+      servicoId &&
+      profissionalId &&
+      dataSelecionada &&
+      horarioSelecionado,
+  );
+
+  async function carregarIndisponibilidades(
+    profissionalIdSelecionado: string,
+    dataSelecionadaValor: string,
+  ) {
+    if (!profissionalIdSelecionado || !dataSelecionadaValor) {
+      setIndisponibilidades([]);
       return;
     }
 
-    setMensagem(resultado.mensagem);
+    try {
+      const resultado = await buscarIndisponibilidades({
+        data: {
+          profissionalId: profissionalIdSelecionado,
+          data: dataSelecionadaValor,
+        },
+      });
 
-    setClienteBusca("");
-    setClienteSelecionadoId("");
-    setServicoId("");
-    setProfissionalId("");
-    setInicio("");
-    setObservacaoCliente("");
-  } catch (error) {
-    console.error(error);
-    setErro("Não foi possível criar o agendamento.");
-  } finally {
-    setSalvando(false);
+      if (!resultado.sucesso) {
+        setIndisponibilidades([]);
+        return;
+      }
+
+      setIndisponibilidades(resultado.intervalos);
+    } catch (error) {
+      console.error(error);
+      setIndisponibilidades([]);
+    }
   }
-}
+
+  useEffect(() => {
+    void buscarDados();
+  }, []);
+
+  useEffect(() => {
+    if (!dataSelecionada && proximosDias[0]) {
+      setDataSelecionada(proximosDias[0]);
+    }
+  }, [dataSelecionada, proximosDias]);
+
+  useEffect(() => {
+    void carregarIndisponibilidades(
+      profissionalId,
+      dataSelecionada,
+    );
+  }, [profissionalId, dataSelecionada]);
+
+  useEffect(() => {
+    if (
+      horariosFiltrados.length > 0 &&
+      !horariosFiltrados.includes(horarioSelecionado)
+    ) {
+      setHorarioSelecionado(horariosFiltrados[0]);
+    }
+
+    if (horariosFiltrados.length === 0) {
+      setHorarioSelecionado("");
+    }
+  }, [horariosFiltrados, horarioSelecionado]);
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    setMensagem("");
+    setErro("");
+
+    if (
+      !clienteSelecionadoId ||
+      !servicoId ||
+      !profissionalId ||
+      !dataSelecionada ||
+      !horarioSelecionado
+    ) {
+      setErro("Escolha cliente, serviço, profissional, dia e horário.");
+      return;
+    }
+
+    setSalvando(true);
+
+    try {
+      const resultado = await criarAgendamento({
+        data: {
+          clienteId: clienteSelecionadoId,
+          servicoId,
+          profissionalId,
+          inicio: criarInicioIsoLocal(
+            dataSelecionada,
+            horarioSelecionado,
+          ),
+          observacaoCliente,
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setErro(resultado.mensagem);
+        return;
+      }
+
+      setMensagem(resultado.mensagem);
+
+      setClienteBusca("");
+      setClienteSelecionadoId("");
+      setServicoId("");
+      setProfissionalId("");
+      setHorarioSelecionado("");
+      setIndisponibilidades([]);
+      setObservacaoCliente("");
+    } catch (error) {
+      console.error(error);
+      setErro("Não foi possível criar o agendamento.");
+    } finally {
+      setSalvando(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
@@ -401,7 +670,9 @@ function FuncionarioAgendarClientePage() {
                       }}
                       onSelecionarCliente={(cliente) => {
                         setClienteSelecionadoId(cliente.id);
-                        setClienteBusca(`${cliente.nome} — ${formatarContatoCliente(cliente)}`);
+                        setClienteBusca(
+                          `${cliente.nome} — ${formatarContatoCliente(cliente)}`,
+                        );
                       }}
                     />
                   </EtapaFormulario>
@@ -417,9 +688,10 @@ function FuncionarioAgendarClientePage() {
                       <select
                         id="servicoId"
                         value={servicoId}
-                        onChange={(event) =>
-                          setServicoId(event.target.value)
-                        }
+                        onChange={(event) => {
+                          setServicoId(event.target.value);
+                          setHorarioSelecionado("");
+                        }}
                         className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
                         required
                       >
@@ -454,9 +726,10 @@ function FuncionarioAgendarClientePage() {
                       <select
                         id="profissionalId"
                         value={profissionalId}
-                        onChange={(event) =>
-                          setProfissionalId(event.target.value)
-                        }
+                        onChange={(event) => {
+                          setProfissionalId(event.target.value);
+                          setHorarioSelecionado("");
+                        }}
                         className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
                         required
                       >
@@ -479,21 +752,81 @@ function FuncionarioAgendarClientePage() {
                   <EtapaFormulario
                     numero="4"
                     titulo="Data e horário"
-                    descricao="Escolha um horário futuro disponível."
+                    descricao="Escolha um dia e um horário disponível na grade oficial."
                   >
-                    <div className="grid gap-2">
-                      <Label htmlFor="inicio">Data e horário</Label>
+                    <div className="space-y-5">
+                      <div>
+                        <Label>Dia</Label>
 
-                      <Input
-                        id="inicio"
-                        type="datetime-local"
-                        value={inicio}
-                        onChange={(event) =>
-                          setInicio(event.target.value)
-                        }
-                        className="h-12 rounded-xl"
-                        required
-                      />
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          {proximosDias.map((dia) => {
+                            const ativo = dia === dataSelecionada;
+                            const regra =
+                              funcionamentoPorDia[
+                                criarDataLocal(dia).getDay()
+                              ];
+
+                            return (
+                              <button
+                                key={dia}
+                                type="button"
+                                onClick={() => {
+                                  setDataSelecionada(dia);
+                                  setHorarioSelecionado("");
+                                }}
+                                className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
+                                  ativo
+                                    ? "border-gold bg-gold-soft text-gold"
+                                    : "border-border bg-background/40 hover:bg-surface-elevated"
+                                }`}
+                              >
+                                <span className="block font-medium capitalize">
+                                  {obterNomeDia(dia)}
+                                </span>
+
+                                <span className="mt-1 block text-xs text-muted-foreground">
+                                  {regra.abre} às {regra.fecha}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label>Horário</Label>
+
+                        {horariosFiltrados.length === 0 ? (
+                          <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                            Nenhum horário disponível para este dia e
+                            profissional.
+                          </div>
+                        ) : (
+                          <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+                            {horariosFiltrados.map((horario) => {
+                              const ativo =
+                                horario === horarioSelecionado;
+
+                              return (
+                                <button
+                                  key={horario}
+                                  type="button"
+                                  onClick={() =>
+                                    setHorarioSelecionado(horario)
+                                  }
+                                  className={`rounded-xl border px-3 py-2 text-sm transition ${
+                                    ativo
+                                      ? "border-gold bg-gold-soft text-gold"
+                                      : "border-border bg-background/40 hover:bg-surface-elevated"
+                                  }`}
+                                >
+                                  {horario}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </EtapaFormulario>
 
@@ -542,7 +875,7 @@ function FuncionarioAgendarClientePage() {
 
                     {!formularioCompleto && (
                       <p className="mt-2 text-center text-xs text-muted-foreground">
-                        Preencha cliente, serviço, profissional e
+                        Preencha cliente, serviço, profissional, dia e
                         horário para liberar o botão.
                       </p>
                     )}
@@ -575,8 +908,8 @@ function FuncionarioAgendarClientePage() {
                   texto={
                     servicoSelecionado
                       ? `${servicoSelecionado.nome} — ${formatarDinheiro(
-                        servicoSelecionado.precoCentavos,
-                      )}`
+                          servicoSelecionado.precoCentavos,
+                        )}`
                       : "Nenhum serviço selecionado."
                   }
                 />
@@ -600,6 +933,16 @@ function FuncionarioAgendarClientePage() {
                       : "Selecione um serviço para ver a duração."
                   }
                 />
+
+                <ResumoLinha
+                  icon={Clock}
+                  titulo="Horário"
+                  texto={
+                    dataSelecionada && horarioSelecionado
+                      ? `${obterNomeDia(dataSelecionada)} às ${horarioSelecionado}`
+                      : "Nenhum horário selecionado."
+                  }
+                />
               </CardContent>
             </Card>
 
@@ -614,6 +957,11 @@ function FuncionarioAgendarClientePage() {
                 <p>
                   O agendamento criado pela equipe entra direto como
                   confirmado.
+                </p>
+
+                <p>
+                  O sistema mostra apenas horários da grade oficial de
+                  40 minutos.
                 </p>
 
                 <p>
@@ -644,7 +992,7 @@ function EtapaFormulario({
   numero: string;
   titulo: string;
   descricao: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section className="rounded-2xl border border-border bg-surface/40 p-4">

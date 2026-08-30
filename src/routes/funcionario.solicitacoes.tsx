@@ -1,6 +1,5 @@
 import {
   type FormEvent,
-  type ReactNode,
   useEffect,
   useMemo,
   useState,
@@ -159,6 +158,9 @@ function SolicitacoesPage() {
     agendamentoId: string;
     titulo: string;
     descricao: string;
+    clienteNome: string;
+    servicoNome: string;
+    horario: string;
   } | null>(null);
 
   const [motivoModal, setMotivoModal] = useState("");
@@ -294,25 +296,39 @@ function SolicitacoesPage() {
     setAgendamentoAbertoId(null);
   }
 
-  function abrirModalRecusa(agendamentoId: string) {
+  function montarHorarioResumo(agendamento: Solicitacao): string {
+    return `${formatarDataCompleta(agendamento.inicio)} · ${formatarHora(
+      agendamento.inicio,
+    )} – ${formatarHora(agendamento.fim)}`;
+  }
+
+  function abrirModalRecusa(agendamento: Solicitacao) {
     setMotivoModal("");
+    setAgendamentoAbertoId(null);
     setModalAcao({
       tipo: "RECUSAR",
-      agendamentoId,
+      agendamentoId: agendamento.id,
       titulo: "Recusar solicitação",
       descricao:
-        "Informe o motivo da recusa. O cliente verá essa informação no histórico do agendamento.",
+        "Confirme a recusa deste pedido. O motivo é opcional, mas ajuda o cliente a entender a decisão.",
+      clienteNome: agendamento.cliente.nome,
+      servicoNome: agendamento.servico.nome,
+      horario: montarHorarioResumo(agendamento),
     });
   }
 
-  function abrirModalCancelamentoEquipe(agendamentoId: string) {
+  function abrirModalCancelamentoEquipe(agendamento: Solicitacao) {
     setMotivoModal("");
+    setAgendamentoAbertoId(null);
     setModalAcao({
       tipo: "CANCELAR_EQUIPE",
-      agendamentoId,
+      agendamentoId: agendamento.id,
       titulo: "Cancelar pela equipe",
       descricao:
-        "Informe o motivo do cancelamento. O cliente verá que o horário foi cancelado pela equipe.",
+        "Confirme o cancelamento deste horário. O motivo é opcional, mas ficará visível para o cliente.",
+      clienteNome: agendamento.cliente.nome,
+      servicoNome: agendamento.servico.nome,
+      horario: montarHorarioResumo(agendamento),
     });
   }
 
@@ -665,7 +681,7 @@ function SolicitacoesPage() {
         }}
         onAbrirRecusa={() => {
           if (agendamentoSelecionado) {
-            abrirModalRecusa(agendamentoSelecionado.id);
+            abrirModalRecusa(agendamentoSelecionado);
           }
         }}
         onConcluir={() => {
@@ -675,7 +691,7 @@ function SolicitacoesPage() {
         }}
         onAbrirCancelamento={() => {
           if (agendamentoSelecionado) {
-            abrirModalCancelamentoEquipe(agendamentoSelecionado.id);
+            abrirModalCancelamentoEquipe(agendamentoSelecionado);
           }
         }}
       />
@@ -703,6 +719,16 @@ function SolicitacoesPage() {
               </button>
             </div>
 
+            <div className="mt-5 rounded-2xl border border-border bg-background/40 p-4 text-sm">
+              <p className="font-medium">{modalAcao.clienteNome}</p>
+              <p className="mt-1 text-muted-foreground">
+                {modalAcao.servicoNome}
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                {modalAcao.horario}
+              </p>
+            </div>
+
             <form
               className="mt-6"
               onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -712,16 +738,21 @@ function SolicitacoesPage() {
             >
               <div className="space-y-2">
                 <label className="text-xs uppercase tracking-widest text-muted-foreground">
-                  Motivo
+                  Motivo opcional
                 </label>
 
                 <textarea
+                  autoFocus
                   value={motivoModal}
                   onChange={(event) =>
                     setMotivoModal(event.target.value)
                   }
-                  placeholder="Ex.: horário indisponível, ajuste interno, conflito de agenda..."
-                  className="min-h-32 w-full rounded-xl border border-input bg-background px-3 py-3 text-sm outline-none transition focus:border-gold"
+                  placeholder={
+                    modalAcao.tipo === "RECUSAR"
+                      ? "Ex.: horário indisponível, conflito de agenda..."
+                      : "Ex.: ajuste interno, imprevisto da equipe..."
+                  }
+                  className="min-h-28 w-full rounded-xl border border-input bg-background px-3 py-3 text-sm outline-none transition focus:border-gold"
                 />
               </div>
 
@@ -751,9 +782,9 @@ function SolicitacoesPage() {
                       Processando...
                     </>
                   ) : modalAcao.tipo === "RECUSAR" ? (
-                    "Confirmar recusa"
+                    "Recusar solicitação"
                   ) : (
-                    "Confirmar cancelamento"
+                    "Cancelar horário"
                   )}
                 </Button>
               </div>
