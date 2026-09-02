@@ -73,7 +73,7 @@ type IndisponibilidadeAgenda = {
   motivo: string | null;
 };
 
-const INTERVALO_GRADE_MINUTOS = 40;
+const INTERVALO_INICIO_MINUTOS = 10;
 
 const funcionamentoPorDia: Record<
   number,
@@ -183,6 +183,24 @@ function formatarMinutosComoHora(totalMinutos: number): string {
   return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
 }
 
+function criarInicioIsoLocal(
+  dataInput: string,
+  horario: string,
+): string {
+  return `${dataInput}T${horario}`;
+}
+
+function horarioJaPassou(
+  dataInput: string,
+  horario: string,
+): boolean {
+  const inicioHorario = new Date(
+    criarInicioIsoLocal(dataInput, horario),
+  );
+
+  return inicioHorario.getTime() <= Date.now();
+}
+
 function gerarHorariosDisponiveis(
   dataInput: string,
   duracaoMinutos: number,
@@ -201,19 +219,16 @@ function gerarHorariosDisponiveis(
   for (
     let horario = abertura;
     horario + duracaoMinutos <= fechamento;
-    horario += INTERVALO_GRADE_MINUTOS
+    horario += INTERVALO_INICIO_MINUTOS
   ) {
-    horarios.push(formatarMinutosComoHora(horario));
+    const horarioFormatado = formatarMinutosComoHora(horario);
+
+    if (!horarioJaPassou(dataInput, horarioFormatado)) {
+      horarios.push(horarioFormatado);
+    }
   }
 
   return horarios;
-}
-
-function criarInicioIsoLocal(
-  dataInput: string,
-  horario: string,
-): string {
-  return `${dataInput}T${horario}`;
 }
 
 function existeConflitoComIndisponibilidade(
@@ -438,7 +453,9 @@ function FuncionarioAgendarClientePage() {
         return false;
       }
 
-      const inicioHorario = new Date(`${dataSelecionada}T${horario}`);
+      const inicioHorario = new Date(
+        criarInicioIsoLocal(dataSelecionada, horario),
+      );
 
       const fimHorario = new Date(
         inicioHorario.getTime() +
@@ -680,7 +697,7 @@ function FuncionarioAgendarClientePage() {
                   <EtapaFormulario
                     numero="2"
                     titulo="Escolha o serviço"
-                    descricao="O tempo do serviço define o fim automático do horário."
+                    descricao="A duração cadastrada define quanto tempo o agendamento ocupa."
                   >
                     <div className="grid gap-2">
                       <Label htmlFor="servicoId">Serviço</Label>
@@ -716,7 +733,7 @@ function FuncionarioAgendarClientePage() {
                   <EtapaFormulario
                     numero="3"
                     titulo="Escolha o profissional"
-                    descricao="O sistema impede conflito de horário para o profissional."
+                    descricao="A disponibilidade é calculada para o profissional selecionado."
                   >
                     <div className="grid gap-2">
                       <Label htmlFor="profissionalId">
@@ -752,7 +769,7 @@ function FuncionarioAgendarClientePage() {
                   <EtapaFormulario
                     numero="4"
                     titulo="Data e horário"
-                    descricao="Escolha um dia e um horário disponível na grade oficial."
+                    descricao="Escolha um dia e um horário em que o serviço caiba inteiro."
                   >
                     <div className="space-y-5">
                       <div>
@@ -798,8 +815,8 @@ function FuncionarioAgendarClientePage() {
 
                         {horariosFiltrados.length === 0 ? (
                           <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
-                            Nenhum horário disponível para este dia e
-                            profissional.
+                            Nenhum horário disponível para este dia,
+                            profissional e serviço.
                           </div>
                         ) : (
                           <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
@@ -960,8 +977,9 @@ function FuncionarioAgendarClientePage() {
                 </p>
 
                 <p>
-                  O sistema mostra apenas horários da grade oficial de
-                  40 minutos.
+                  Os horários de início aparecem de 10 em 10 minutos,
+                  mas o tempo ocupado respeita a duração real do
+                  serviço escolhido.
                 </p>
 
                 <p>

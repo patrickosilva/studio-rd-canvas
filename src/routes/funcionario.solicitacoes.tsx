@@ -8,6 +8,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   CalendarCheck,
+  CalendarClock,
   CalendarPlus,
   CheckCircle2,
   ChevronLeft,
@@ -47,6 +48,8 @@ import {
   funcionarioConcluirAgendamento,
   funcionarioListarSolicitacoes,
   funcionarioRecusarAgendamento,
+  listarIndisponibilidadesAgenda,
+  operacionalRemarcarAgendamento,
 } from "@/lib/api/agendamento.functions";
 
 export const Route = createFileRoute("/funcionario/solicitacoes")({
@@ -84,6 +87,14 @@ type Solicitacao = {
   };
 };
 
+type IndisponibilidadeAgenda = {
+  id: string;
+  tipo: "AGENDAMENTO" | "BLOQUEIO";
+  inicio: string | Date;
+  fim: string | Date;
+  motivo: string | null;
+};
+
 const formasPagamento = [
   {
     value: "PIX",
@@ -118,6 +129,38 @@ const formasPagamento = [
 type FormaPagamentoValor =
   (typeof formasPagamento)[number]["value"];
 
+const TIMEZONE_PADRAO = "America/Sao_Paulo";
+const INTERVALO_INICIO_MINUTOS = 10;
+
+const funcionamentoPorDia: Record<
+  number,
+  {
+    abre: string;
+    fecha: string;
+  }
+> = {
+  2: {
+    abre: "09:30",
+    fecha: "19:30",
+  },
+  3: {
+    abre: "09:30",
+    fecha: "19:30",
+  },
+  4: {
+    abre: "09:00",
+    fecha: "19:30",
+  },
+  5: {
+    abre: "08:00",
+    fecha: "21:00",
+  },
+  6: {
+    abre: "08:30",
+    fecha: "19:00",
+  },
+};
+
 function SolicitacoesPage() {
   const carregarSolicitacoes = useServerFn(
     funcionarioListarSolicitacoes,
@@ -131,8 +174,15 @@ function SolicitacoesPage() {
   const concluirAgendamento = useServerFn(
     funcionarioConcluirAgendamento,
   );
+  
   const cancelarAgendamento = useServerFn(
     funcionarioCancelarAgendamento,
+  );
+  const remarcarAgendamento = useServerFn(
+    operacionalRemarcarAgendamento,
+  );
+  const buscarIndisponibilidades = useServerFn(
+    listarIndisponibilidadesAgenda,
   );
 
   const isMobile = useIsMobile();
@@ -158,12 +208,16 @@ function SolicitacoesPage() {
     agendamentoId: string;
     titulo: string;
     descricao: string;
-    clienteNome: string;
-    servicoNome: string;
-    horario: string;
   } | null>(null);
 
   const [motivoModal, setMotivoModal] = useState("");
+
+  const [agendamentoRemarcacao, setAgendamentoRemarcacao] =
+    useState<Solicitacao | null>(null);
+  const [dataRemarcacao, setDataRemarcacao] = useState("");
+  const [horarioRemarcacao, setHorarioRemarcacao] = useState("");
+  const [indisponibilidadesRemarcacao, setIndisponibilidadesRemarcacao] =
+    useState<IndisponibilidadeAgenda[]>([]);
 
   const [
     formasPagamentoPorAgendamento,
@@ -257,6 +311,52 @@ function SolicitacoesPage() {
     [solicitacoes, agendamentoAbertoId],
   );
 
+  const proximosDiasFuncionamento = useMemo(
+    () => obterProximosDiasFuncionamento(),
+    [],
+  );
+
+  const horariosRemarcacaoDisponiveis = useMemo(() => {
+    if (!agendamentoRemarcacao || !dataRemarcacao) {
+      return [];
+    }
+
+    return gerarHorariosDisponiveis(
+      dataRemarcacao,
+      agendamentoRemarcacao.servico.duracaoMinutos,
+    );
+  }, [agendamentoRemarcacao, dataRemarcacao]);
+
+  const horariosRemarcacaoFiltrados = useMemo(() => {
+    if (!agendamentoRemarcacao || !dataRemarcacao) {
+      return [];
+    }
+
+    return horariosRemarcacaoDisponiveis.filter((horario) => {
+      const inicioHorario = criarDataHoraLocal(
+        dataRemarcacao,
+        horario,
+      );
+
+      const fimHorario = new Date(
+        inicioHorario.getTime() +
+          agendamentoRemarcacao.servico.duracaoMinutos * 60 * 1000,
+      );
+
+      return !existeConflitoComIndisponibilidade({
+        inicioHorario,
+        fimHorario,
+        indisponibilidades: indisponibilidadesRemarcacao,
+        ignorarAgendamentoId: agendamentoRemarcacao.id,
+      });
+    });
+  }, [
+    agendamentoRemarcacao,
+    dataRemarcacao,
+    horariosRemarcacaoDisponiveis,
+    indisponibilidadesRemarcacao,
+  ]);
+
   const formaPagamentoSelecionada: FormaPagamentoValor =
     agendamentoSelecionado
       ? formasPagamentoPorAgendamento[agendamentoSelecionado.id] ??
@@ -296,46 +396,129 @@ function SolicitacoesPage() {
     setAgendamentoAbertoId(null);
   }
 
-  function montarHorarioResumo(agendamento: Solicitacao): string {
-    return `${formatarDataCompleta(agendamento.inicio)} · ${formatarHora(
-      agendamento.inicio,
-    )} – ${formatarHora(agendamento.fim)}`;
-  }
+  function abrirModalRecusa(agendamentoId: string) {
+  limparFocoEFecharDetalhes();
 
-  function abrirModalRecusa(agendamento: Solicitacao) {
+  window.setTimeout(() => {
     setMotivoModal("");
-    setAgendamentoAbertoId(null);
     setModalAcao({
       tipo: "RECUSAR",
-      agendamentoId: agendamento.id,
+      agendamentoId,
       titulo: "Recusar solicitação",
       descricao:
-        "Confirme a recusa deste pedido. O motivo é opcional, mas ajuda o cliente a entender a decisão.",
-      clienteNome: agendamento.cliente.nome,
-      servicoNome: agendamento.servico.nome,
-      horario: montarHorarioResumo(agendamento),
+        "Informe o motivo da recusa. O cliente verá essa informação no histórico do agendamento.",
     });
-  }
+  }, 50);
+}
 
-  function abrirModalCancelamentoEquipe(agendamento: Solicitacao) {
+  function abrirModalCancelamentoEquipe(agendamentoId: string) {
+  limparFocoEFecharDetalhes();
+
+  window.setTimeout(() => {
     setMotivoModal("");
-    setAgendamentoAbertoId(null);
     setModalAcao({
       tipo: "CANCELAR_EQUIPE",
-      agendamentoId: agendamento.id,
+      agendamentoId,
       titulo: "Cancelar pela equipe",
       descricao:
-        "Confirme o cancelamento deste horário. O motivo é opcional, mas ficará visível para o cliente.",
-      clienteNome: agendamento.cliente.nome,
-      servicoNome: agendamento.servico.nome,
-      horario: montarHorarioResumo(agendamento),
+        "Informe o motivo do cancelamento. O cliente verá que o horário foi cancelado pela equipe.",
     });
+  }, 50);
+}
+
+  function limparFocoEFecharDetalhes() {
+  const elementoAtivo = document.activeElement;
+
+  if (elementoAtivo instanceof HTMLElement) {
+    elementoAtivo.blur();
   }
+
+  setAgendamentoAbertoId(null);
+}
 
   function fecharModalAcao() {
     setModalAcao(null);
     setMotivoModal("");
   }
+
+  function abrirModalRemarcacao(agendamento: Solicitacao) {
+    limparFocoEFecharDetalhes();
+    setMensagem("");
+    setErro("");
+    setAgendamentoAbertoId(null);
+    setAgendamentoRemarcacao(agendamento);
+    setDataRemarcacao(formatarDataInputSaoPaulo(agendamento.inicio));
+    setHorarioRemarcacao("");
+    setIndisponibilidadesRemarcacao([]);
+  }
+
+  function fecharModalRemarcacao() {
+    setAgendamentoRemarcacao(null);
+    setDataRemarcacao("");
+    setHorarioRemarcacao("");
+    setIndisponibilidadesRemarcacao([]);
+  }
+
+  async function carregarIndisponibilidadesRemarcacao(
+    profissionalId: string,
+    data: string,
+  ) {
+    if (!profissionalId || !data) {
+      setIndisponibilidadesRemarcacao([]);
+      return;
+    }
+
+    try {
+      const resultado = await buscarIndisponibilidades({
+        data: {
+          profissionalId,
+          data,
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setIndisponibilidadesRemarcacao([]);
+        return;
+      }
+
+      setIndisponibilidadesRemarcacao(resultado.intervalos);
+    } catch (error) {
+      console.error(error);
+      setIndisponibilidadesRemarcacao([]);
+    }
+  }
+
+  useEffect(() => {
+    if (!agendamentoRemarcacao || !dataRemarcacao) {
+      return;
+    }
+
+    void carregarIndisponibilidadesRemarcacao(
+      agendamentoRemarcacao.profissional.id,
+      dataRemarcacao,
+    );
+  }, [agendamentoRemarcacao, dataRemarcacao]);
+
+  useEffect(() => {
+    if (!agendamentoRemarcacao) {
+      return;
+    }
+
+    if (
+      horariosRemarcacaoFiltrados.length > 0 &&
+      !horariosRemarcacaoFiltrados.includes(horarioRemarcacao)
+    ) {
+      setHorarioRemarcacao(horariosRemarcacaoFiltrados[0]);
+    }
+
+    if (horariosRemarcacaoFiltrados.length === 0) {
+      setHorarioRemarcacao("");
+    }
+  }, [
+    agendamentoRemarcacao,
+    horariosRemarcacaoFiltrados,
+    horarioRemarcacao,
+  ]);
 
   async function handleConfirmar(agendamentoId: string) {
     setMensagem("");
@@ -417,6 +600,48 @@ function SolicitacoesPage() {
       console.error(error);
 
       setErro("Não foi possível recusar a solicitação.");
+    } finally {
+      setProcessandoId("");
+    }
+  }
+
+  async function handleSalvarRemarcacao() {
+    if (
+      !agendamentoRemarcacao ||
+      !dataRemarcacao ||
+      !horarioRemarcacao
+    ) {
+      setErro("Escolha o novo dia e horário para remarcar.");
+      return;
+    }
+
+    setMensagem("");
+    setErro("");
+    setProcessandoId(agendamentoRemarcacao.id);
+
+    try {
+      const resultado = await remarcarAgendamento({
+        data: {
+          agendamentoId: agendamentoRemarcacao.id,
+          inicio: criarInicioIsoLocal(
+            dataRemarcacao,
+            horarioRemarcacao,
+          ),
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setErro(resultado.mensagem);
+        return;
+      }
+
+      setMensagem(resultado.mensagem);
+      fecharModalRemarcacao();
+
+      await carregarDados();
+    } catch (error) {
+      console.error(error);
+      setErro("Não foi possível remarcar o agendamento.");
     } finally {
       setProcessandoId("");
     }
@@ -681,7 +906,12 @@ function SolicitacoesPage() {
         }}
         onAbrirRecusa={() => {
           if (agendamentoSelecionado) {
-            abrirModalRecusa(agendamentoSelecionado);
+            abrirModalRecusa(agendamentoSelecionado.id);
+          }
+        }}
+        onAbrirRemarcacao={() => {
+          if (agendamentoSelecionado) {
+            abrirModalRemarcacao(agendamentoSelecionado);
           }
         }}
         onConcluir={() => {
@@ -691,13 +921,13 @@ function SolicitacoesPage() {
         }}
         onAbrirCancelamento={() => {
           if (agendamentoSelecionado) {
-            abrirModalCancelamentoEquipe(agendamentoSelecionado);
+            abrirModalCancelamentoEquipe(agendamentoSelecionado.id);
           }
         }}
       />
 
       {modalAcao && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-background/80 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[999] flex items-end justify-center bg-background/80 p-3 backdrop-blur-sm sm:items-center sm:p-4">
           <div className="w-full max-w-lg rounded-3xl border border-border bg-surface p-5 shadow-xl sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -719,16 +949,6 @@ function SolicitacoesPage() {
               </button>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-border bg-background/40 p-4 text-sm">
-              <p className="font-medium">{modalAcao.clienteNome}</p>
-              <p className="mt-1 text-muted-foreground">
-                {modalAcao.servicoNome}
-              </p>
-              <p className="mt-1 text-muted-foreground">
-                {modalAcao.horario}
-              </p>
-            </div>
-
             <form
               className="mt-6"
               onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -738,21 +958,16 @@ function SolicitacoesPage() {
             >
               <div className="space-y-2">
                 <label className="text-xs uppercase tracking-widest text-muted-foreground">
-                  Motivo opcional
+                  Motivo
                 </label>
 
                 <textarea
-                  autoFocus
                   value={motivoModal}
                   onChange={(event) =>
                     setMotivoModal(event.target.value)
                   }
-                  placeholder={
-                    modalAcao.tipo === "RECUSAR"
-                      ? "Ex.: horário indisponível, conflito de agenda..."
-                      : "Ex.: ajuste interno, imprevisto da equipe..."
-                  }
-                  className="min-h-28 w-full rounded-xl border border-input bg-background px-3 py-3 text-sm outline-none transition focus:border-gold"
+                  placeholder="Ex.: horário indisponível, ajuste interno, conflito de agenda..."
+                  className="min-h-32 w-full rounded-xl border border-input bg-background px-3 py-3 text-sm outline-none transition focus:border-gold"
                 />
               </div>
 
@@ -782,13 +997,190 @@ function SolicitacoesPage() {
                       Processando...
                     </>
                   ) : modalAcao.tipo === "RECUSAR" ? (
-                    "Recusar solicitação"
+                    "Confirmar recusa"
                   ) : (
-                    "Cancelar horário"
+                    "Confirmar cancelamento"
                   )}
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {agendamentoRemarcacao && (
+        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-background/80 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-border bg-surface p-5 shadow-xl sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-display">
+                  Remarcar horário
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Escolha um novo dia e horário disponível conforme a
+                  duração real do serviço.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={fecharModalRemarcacao}
+                className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition hover:bg-surface-elevated"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-3 rounded-2xl border border-border bg-background/40 p-4 text-sm sm:grid-cols-2">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Cliente
+                </p>
+                <p className="mt-1 font-medium">
+                  {agendamentoRemarcacao.cliente.nome}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Serviço
+                </p>
+                <p className="mt-1 font-medium">
+                  {agendamentoRemarcacao.servico.nome} ·{" "}
+                  {agendamentoRemarcacao.servico.duracaoMinutos} min
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Profissional
+                </p>
+                <p className="mt-1 font-medium">
+                  {agendamentoRemarcacao.profissional.nome}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Horário atual
+                </p>
+                <p className="mt-1 font-medium">
+                  {formatarDataCompleta(agendamentoRemarcacao.inicio)} ·{" "}
+                  {formatarHora(agendamentoRemarcacao.inicio)} –{" "}
+                  {formatarHora(agendamentoRemarcacao.fim)}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-5">
+              <div>
+                <label className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Novo dia
+                </label>
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {proximosDiasFuncionamento.map((dia) => {
+                    const ativo = dia === dataRemarcacao;
+                    const regra =
+                      funcionamentoPorDia[criarDataLocal(dia).getDay()];
+
+                    return (
+                      <button
+                        key={dia}
+                        type="button"
+                        onClick={() => {
+                          setDataRemarcacao(dia);
+                          setHorarioRemarcacao("");
+                        }}
+                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
+                          ativo
+                            ? "border-gold bg-gold-soft text-gold"
+                            : "border-border bg-background/40 hover:bg-surface-elevated"
+                        }`}
+                      >
+                        <span className="block font-medium capitalize">
+                          {obterNomeDia(dia)}
+                        </span>
+
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {regra.abre} às {regra.fecha}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Novo horário
+                </label>
+
+                {horariosRemarcacaoFiltrados.length === 0 ? (
+                  <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                    Nenhum horário disponível para este dia e
+                    profissional.
+                  </div>
+                ) : (
+                  <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+                    {horariosRemarcacaoFiltrados.map((horario) => {
+                      const ativo = horario === horarioRemarcacao;
+
+                      return (
+                        <button
+                          key={horario}
+                          type="button"
+                          onClick={() => setHorarioRemarcacao(horario)}
+                          className={`rounded-xl border px-3 py-2 text-sm transition ${
+                            ativo
+                              ? "border-gold bg-gold-soft text-gold"
+                              : "border-border bg-background/40 hover:bg-surface-elevated"
+                          }`}
+                        >
+                          {horario}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={fecharModalRemarcacao}
+                disabled={processandoId === agendamentoRemarcacao.id}
+                className="h-11 rounded-xl"
+              >
+                Voltar
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => void handleSalvarRemarcacao()}
+                disabled={
+                  processandoId === agendamentoRemarcacao.id ||
+                  !dataRemarcacao ||
+                  !horarioRemarcacao
+                }
+                className="h-11 rounded-xl"
+              >
+                {processandoId === agendamentoRemarcacao.id ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Salvar novo horário
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -949,6 +1341,7 @@ function PainelDetalhes({
   onValorChange,
   onConfirmar,
   onAbrirRecusa,
+  onAbrirRemarcacao,
   onConcluir,
   onAbrirCancelamento,
 }: {
@@ -962,6 +1355,7 @@ function PainelDetalhes({
   onValorChange: (valor: string) => void;
   onConfirmar: () => void;
   onAbrirRecusa: () => void;
+  onAbrirRemarcacao: () => void;
   onConcluir: () => void;
   onAbrirCancelamento: () => void;
 }) {
@@ -1015,6 +1409,7 @@ function PainelDetalhes({
                   onValorChange={onValorChange}
                   onConfirmar={onConfirmar}
                   onAbrirRecusa={onAbrirRecusa}
+                  onAbrirRemarcacao={onAbrirRemarcacao}
                   onConcluir={onConcluir}
                   onAbrirCancelamento={onAbrirCancelamento}
                 />
@@ -1058,6 +1453,7 @@ function PainelDetalhes({
               onValorChange={onValorChange}
               onConfirmar={onConfirmar}
               onAbrirRecusa={onAbrirRecusa}
+              onAbrirRemarcacao={onAbrirRemarcacao}
               onConcluir={onConcluir}
               onAbrirCancelamento={onAbrirCancelamento}
             />
@@ -1077,6 +1473,7 @@ function ConteudoDetalhes({
   onValorChange,
   onConfirmar,
   onAbrirRecusa,
+  onAbrirRemarcacao,
   onConcluir,
   onAbrirCancelamento,
 }: {
@@ -1088,10 +1485,14 @@ function ConteudoDetalhes({
   onValorChange: (valor: string) => void;
   onConfirmar: () => void;
   onAbrirRecusa: () => void;
+  onAbrirRemarcacao: () => void;
   onConcluir: () => void;
   onAbrirCancelamento: () => void;
 }) {
   const processando = processandoId === agendamento.id;
+  const podeRemarcar =
+    agendamento.status === "SOLICITADO" ||
+    agendamento.status === "CONFIRMADO";
 
   return (
     <div className="space-y-4 pt-2">
@@ -1143,6 +1544,35 @@ function ConteudoDetalhes({
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             {agendamento.observacaoCliente}
           </p>
+        </div>
+      )}
+
+      {podeRemarcar && (
+        <div className="rounded-2xl border border-border bg-background/40 p-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-medium">
+                <CalendarClock className="h-4 w-4 text-gold" />
+                Editar horário
+              </p>
+
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Remarque este atendimento usando os horários
+                disponíveis conforme a duração do serviço.
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={processando}
+              onClick={onAbrirRemarcacao}
+              className="h-11 w-full rounded-xl sm:w-auto"
+            >
+              <CalendarClock className="mr-2 h-4 w-4" />
+              Remarcar horário
+            </Button>
+          </div>
         </div>
       )}
 
@@ -1352,6 +1782,7 @@ function formatarHora(valor: string | Date): string {
   return new Intl.DateTimeFormat("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: TIMEZONE_PADRAO,
   }).format(new Date(valor));
 }
 
@@ -1361,6 +1792,7 @@ function formatarDataCompleta(valor: string | Date): string {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: TIMEZONE_PADRAO,
   }).format(new Date(valor));
 }
 
@@ -1459,7 +1891,167 @@ function traduzirStatus(status: string): string {
     CONFIRMADO: "confirmado",
     CONCLUIDO: "concluído",
     RECUSADO: "recusado",
+    CANCELADO_CLIENTE: "cancelado pelo cliente",
+    CANCELADO_FUNCIONARIO: "cancelado pela equipe",
+    FALTOU: "não compareceu",
   };
 
   return mapa[status] ?? status;
+}
+
+function formatarDataInput(data: Date): string {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+function formatarDataInputSaoPaulo(valor: string | Date): string {
+  const partes = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: TIMEZONE_PADRAO,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(valor));
+
+  const mapa = Object.fromEntries(
+    partes.map((parte) => [parte.type, parte.value]),
+  );
+
+  return `${mapa.year}-${mapa.month}-${mapa.day}`;
+}
+
+function criarDataLocal(dataInput: string): Date {
+  const [ano, mes, dia] = dataInput.split("-").map(Number);
+
+  return new Date(ano, mes - 1, dia);
+}
+
+function criarDataHoraLocal(
+  dataInput: string,
+  horario: string,
+): Date {
+  const [ano, mes, dia] = dataInput.split("-").map(Number);
+  const [hora, minuto] = horario.split(":").map(Number);
+
+  return new Date(ano, mes - 1, dia, hora, minuto, 0, 0);
+}
+
+function obterNomeDia(dataInput: string): string {
+  const data = criarDataLocal(dataInput);
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  }).format(data);
+}
+
+function obterProximosDiasFuncionamento(
+  quantidadeDias = 21,
+): string[] {
+  const dias: string[] = [];
+  const hoje = new Date();
+
+  hoje.setHours(0, 0, 0, 0);
+
+  for (let indice = 0; indice < quantidadeDias; indice += 1) {
+    const data = new Date(hoje);
+
+    data.setDate(hoje.getDate() + indice);
+
+    const diaSemana = data.getDay();
+
+    if (funcionamentoPorDia[diaSemana]) {
+      dias.push(formatarDataInput(data));
+    }
+  }
+
+  return dias;
+}
+
+function converterHoraParaMinutos(hora: string): number {
+  const [horas, minutos] = hora.split(":").map(Number);
+
+  return horas * 60 + minutos;
+}
+
+function formatarMinutosComoHora(totalMinutos: number): string {
+  const horas = Math.floor(totalMinutos / 60);
+  const minutos = totalMinutos % 60;
+
+  return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
+}
+
+function gerarHorariosDisponiveis(
+  dataInput: string,
+  duracaoMinutos: number,
+): string[] {
+  const data = criarDataLocal(dataInput);
+  const regra = funcionamentoPorDia[data.getDay()];
+
+  if (!regra) {
+    return [];
+  }
+
+  const abertura = converterHoraParaMinutos(regra.abre);
+  const fechamento = converterHoraParaMinutos(regra.fecha);
+  const horarios: string[] = [];
+
+  for (
+    let horario = abertura;
+    horario + duracaoMinutos <= fechamento;
+    horario += INTERVALO_INICIO_MINUTOS
+  ) {
+    const horarioFormatado = formatarMinutosComoHora(horario);
+    const inicioHorario = criarDataHoraLocal(
+      dataInput,
+      horarioFormatado,
+    );
+
+    if (inicioHorario.getTime() <= new Date().getTime()) {
+      continue;
+    }
+
+    horarios.push(horarioFormatado);
+  }
+
+  return horarios;
+}
+
+function criarInicioIsoLocal(
+  dataInput: string,
+  horario: string,
+): string {
+  return `${dataInput}T${horario}`;
+}
+
+function existeConflitoComIndisponibilidade({
+  inicioHorario,
+  fimHorario,
+  indisponibilidades,
+  ignorarAgendamentoId,
+}: {
+  inicioHorario: Date;
+  fimHorario: Date;
+  indisponibilidades: IndisponibilidadeAgenda[];
+  ignorarAgendamentoId?: string;
+}): boolean {
+  return indisponibilidades.some((indisponibilidade) => {
+    if (
+      ignorarAgendamentoId &&
+      indisponibilidade.id === ignorarAgendamentoId
+    ) {
+      return false;
+    }
+
+    const inicioIndisponivel = new Date(indisponibilidade.inicio);
+    const fimIndisponivel = new Date(indisponibilidade.fim);
+
+    return (
+      inicioIndisponivel < fimHorario &&
+      fimIndisponivel > inicioHorario
+    );
+  });
 }

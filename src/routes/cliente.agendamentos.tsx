@@ -35,7 +35,6 @@ import {
 export const Route = createFileRoute("/cliente/agendamentos")({
   component: AgendamentosPage,
 
- 
   beforeLoad: ({ context, location }) => {
     const { usuario } = context;
 
@@ -66,9 +65,6 @@ export const Route = createFileRoute("/cliente/agendamentos")({
       });
     }
   },
-
- 
-
 });
 
 type Servico = {
@@ -111,6 +107,8 @@ type IndisponibilidadeAgenda = {
   fim: string | Date;
   motivo: string | null;
 };
+
+const INTERVALO_INICIO_MINUTOS = 10;
 
 const funcionamentoPorDia: Record<
   number,
@@ -211,8 +209,6 @@ function formatarMinutosComoHora(totalMinutos: number): string {
 
   return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
 }
-const INTERVALO_GRADE_MINUTOS = 40;
-  
 
 function gerarHorariosDisponiveis(
   dataInput: string,
@@ -229,14 +225,10 @@ function gerarHorariosDisponiveis(
   const fechamento = converterHoraParaMinutos(regra.fecha);
   const horarios: string[] = [];
 
-  /*
-   * Grade inicial de 40 em 40 minutos.
-   * Depois podemos trocar isso por disponibilidade real por funcionário.
-   */
   for (
     let horario = abertura;
     horario + duracaoMinutos <= fechamento;
-    horario += INTERVALO_GRADE_MINUTOS
+    horario += INTERVALO_INICIO_MINUTOS
   ) {
     horarios.push(formatarMinutosComoHora(horario));
   }
@@ -249,6 +241,24 @@ function criarInicioIsoLocal(
   horario: string,
 ): string {
   return `${dataInput}T${horario}`;
+}
+
+function existeConflitoComIndisponibilidade(
+  inicioHorario: Date,
+  fimHorario: Date,
+  indisponibilidades: IndisponibilidadeAgenda[],
+): boolean {
+  return indisponibilidades.some((indisponibilidade) => {
+    const inicioIndisponivel = new Date(
+      indisponibilidade.inicio,
+    );
+    const fimIndisponivel = new Date(indisponibilidade.fim);
+
+    return (
+      inicioIndisponivel < fimHorario &&
+      fimIndisponivel > inicioHorario
+    );
+  });
 }
 
 function formatarDataHora(valor: string | Date): string {
@@ -286,14 +296,14 @@ function AgendamentosPage() {
   const cancelarAgendamento = useServerFn(
     clienteCancelarAgendamento,
   );
-  const [agendamentoCancelamentoId, setAgendamentoCancelamentoId] =
-    useState("");
-
-  const [motivoCancelamentoModal, setMotivoCancelamentoModal] =
-    useState("");
   const buscarIndisponibilidades = useServerFn(
     listarIndisponibilidadesAgenda,
   );
+
+  const [agendamentoCancelamentoId, setAgendamentoCancelamentoId] =
+    useState("");
+  const [motivoCancelamentoModal, setMotivoCancelamentoModal] =
+    useState("");
 
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [profissionais, setProfissionais] = useState<Profissional[]>(
@@ -305,6 +315,7 @@ function AgendamentosPage() {
   const [indisponibilidades, setIndisponibilidades] = useState<
     IndisponibilidadeAgenda[]
   >([]);
+
   const [servicoId, setServicoId] = useState("");
   const [profissionalId, setProfissionalId] = useState("");
   const [dataSelecionada, setDataSelecionada] = useState("");
@@ -322,11 +333,13 @@ function AgendamentosPage() {
     [],
   );
 
-  const servicoSelecionado = servicos.find(
-    (servico) => servico.id === servicoId,
+  const servicoSelecionado = useMemo(
+    () =>
+      servicos.find((servico) => servico.id === servicoId) ??
+      null,
+    [servicos, servicoId],
   );
 
-  // primeiro precisa existir horariosDisponiveis
   const horariosDisponiveis = useMemo(() => {
     if (!dataSelecionada || !servicoSelecionado) {
       return [];
@@ -338,7 +351,6 @@ function AgendamentosPage() {
     );
   }, [dataSelecionada, servicoSelecionado]);
 
-  // depois você filtra os horários bloqueados/ocupados
   const horariosFiltrados = useMemo(() => {
     return horariosDisponiveis.filter((horario) => {
       if (!servicoSelecionado || !dataSelecionada) {
@@ -349,9 +361,13 @@ function AgendamentosPage() {
         `${dataSelecionada}T${horario}`,
       );
 
+      if (inicioHorario.getTime() <= new Date().getTime()) {
+        return false;
+      }
+
       const fimHorario = new Date(
         inicioHorario.getTime() +
-        servicoSelecionado.duracaoMinutos * 60 * 1000,
+          servicoSelecionado.duracaoMinutos * 60 * 1000,
       );
 
       return !existeConflitoComIndisponibilidade(
@@ -366,6 +382,13 @@ function AgendamentosPage() {
     dataSelecionada,
     indisponibilidades,
   ]);
+
+  const formularioCompleto =
+    servicoId &&
+    profissionalId &&
+    dataSelecionada &&
+    horarioSelecionado;
+
   function abrirModalCancelamento(agendamentoId: string) {
     setMotivoCancelamentoModal("");
     setAgendamentoCancelamentoId(agendamentoId);
@@ -374,24 +397,6 @@ function AgendamentosPage() {
   function fecharModalCancelamento() {
     setAgendamentoCancelamentoId("");
     setMotivoCancelamentoModal("");
-  }
-
-  function existeConflitoComIndisponibilidade(
-    inicioHorario: Date,
-    fimHorario: Date,
-    indisponibilidades: IndisponibilidadeAgenda[],
-  ): boolean {
-    return indisponibilidades.some((indisponibilidade) => {
-      const inicioIndisponivel = new Date(
-        indisponibilidade.inicio,
-      );
-      const fimIndisponivel = new Date(indisponibilidade.fim);
-
-      return (
-        inicioIndisponivel < fimHorario &&
-        fimIndisponivel > inicioHorario
-      );
-    });
   }
 
   async function carregarDados() {
@@ -433,25 +438,6 @@ function AgendamentosPage() {
     }
   }
 
-  useEffect(() => {
-    void carregarDados();
-  }, []);
-
-  useEffect(() => {
-    void carregarIndisponibilidades(
-      profissionalId,
-      dataSelecionada,
-    );
-  }, [profissionalId, dataSelecionada]);
-
-  useEffect(() => {
-    if (
-      horariosDisponiveis.length > 0 &&
-      !horariosDisponiveis.includes(horarioSelecionado)
-    ) {
-      setHorarioSelecionado(horariosDisponiveis[0]);
-    }
-  }, [horariosDisponiveis, horarioSelecionado]);
   async function carregarIndisponibilidades(
     profissionalIdSelecionado: string,
     dataSelecionadaValor: string,
@@ -482,13 +468,43 @@ function AgendamentosPage() {
     }
   }
 
+  useEffect(() => {
+    void carregarDados();
+  }, []);
+
+  useEffect(() => {
+    void carregarIndisponibilidades(
+      profissionalId,
+      dataSelecionada,
+    );
+  }, [profissionalId, dataSelecionada]);
+
+  useEffect(() => {
+    if (
+      horariosFiltrados.length > 0 &&
+      !horariosFiltrados.includes(horarioSelecionado)
+    ) {
+      setHorarioSelecionado(horariosFiltrados[0]);
+      return;
+    }
+
+    if (horariosFiltrados.length === 0) {
+      setHorarioSelecionado("");
+    }
+  }, [horariosFiltrados, horarioSelecionado]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setMensagem("");
     setErro("");
 
-    if (!servicoId || !profissionalId || !dataSelecionada || !horarioSelecionado) {
+    if (
+      !servicoId ||
+      !profissionalId ||
+      !dataSelecionada ||
+      !horarioSelecionado
+    ) {
       setErro("Escolha serviço, profissional, dia e horário.");
       return;
     }
@@ -517,6 +533,10 @@ function AgendamentosPage() {
       setObservacao("");
 
       await carregarDados();
+      await carregarIndisponibilidades(
+        profissionalId,
+        dataSelecionada,
+      );
     } catch (error) {
       console.error(error);
 
@@ -525,6 +545,7 @@ function AgendamentosPage() {
       setEnviando(false);
     }
   }
+
   async function handleCancelarAgendamento(
     agendamentoId: string,
     motivoCancelamento: string,
@@ -550,6 +571,10 @@ function AgendamentosPage() {
       fecharModalCancelamento();
 
       await carregarDados();
+      await carregarIndisponibilidades(
+        profissionalId,
+        dataSelecionada,
+      );
     } catch (error) {
       console.error(error);
 
@@ -558,6 +583,7 @@ function AgendamentosPage() {
       setCancelandoId("");
     }
   }
+
   async function handleConfirmarCancelamentoModal() {
     if (!agendamentoCancelamentoId) {
       return;
@@ -658,9 +684,10 @@ function AgendamentosPage() {
                   <select
                     id="profissional"
                     value={profissionalId}
-                    onChange={(event) =>
-                      setProfissionalId(event.target.value)
-                    }
+                    onChange={(event) => {
+                      setProfissionalId(event.target.value);
+                      setHorarioSelecionado("");
+                    }}
                     className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                   >
                     {profissionais.map((profissional) => (
@@ -683,6 +710,8 @@ function AgendamentosPage() {
                 <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {proximosDias.map((dia) => {
                     const ativo = dia === dataSelecionada;
+                    const regra =
+                      funcionamentoPorDia[criarDataLocal(dia).getDay()];
 
                     return (
                       <button
@@ -692,19 +721,18 @@ function AgendamentosPage() {
                           setDataSelecionada(dia);
                           setHorarioSelecionado("");
                         }}
-                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${ativo
-                          ? "border-gold bg-gold-soft text-gold"
-                          : "border-border bg-background/40 hover:bg-surface-elevated"
-                          }`}
+                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
+                          ativo
+                            ? "border-gold bg-gold-soft text-gold"
+                            : "border-border bg-background/40 hover:bg-surface-elevated"
+                        }`}
                       >
                         <span className="block font-medium capitalize">
                           {obterNomeDia(dia)}
                         </span>
 
                         <span className="mt-1 block text-xs text-muted-foreground">
-                          {funcionamentoPorDia[criarDataLocal(dia).getDay()].abre}
-                          {" às "}
-                          {funcionamentoPorDia[criarDataLocal(dia).getDay()].fecha}
+                          {regra.abre} às {regra.fecha}
                         </span>
                       </button>
                     );
@@ -717,25 +745,46 @@ function AgendamentosPage() {
                   Horário
                 </Label>
 
-                <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
-                  {horariosFiltrados.map((horario) => {
-                    const ativo = horario === horarioSelecionado;
+                {!servicoSelecionado || !dataSelecionada ? (
+                  <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                    Escolha um serviço e um dia para ver os horários
+                    disponíveis.
+                  </div>
+                ) : horariosFiltrados.length === 0 ? (
+                  <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                    Nenhum horário disponível para este serviço,
+                    profissional e dia.
+                  </div>
+                ) : (
+                  <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+                    {horariosFiltrados.map((horario) => {
+                      const ativo = horario === horarioSelecionado;
 
-                    return (
-                      <button
-                        key={horario}
-                        type="button"
-                        onClick={() => setHorarioSelecionado(horario)}
-                        className={`rounded-xl border px-3 py-2 text-sm transition ${ativo
-                          ? "border-gold bg-gold-soft text-gold"
-                          : "border-border bg-background/40 hover:bg-surface-elevated"
+                      return (
+                        <button
+                          key={horario}
+                          type="button"
+                          onClick={() => setHorarioSelecionado(horario)}
+                          className={`rounded-xl border px-3 py-2 text-sm transition ${
+                            ativo
+                              ? "border-gold bg-gold-soft text-gold"
+                              : "border-border bg-background/40 hover:bg-surface-elevated"
                           }`}
-                      >
-                        {horario}
-                      </button>
-                    );
-                  })}
-                </div>
+                        >
+                          {horario}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {servicoSelecionado && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Este serviço ocupa {servicoSelecionado.duracaoMinutos} minutos
+                    na agenda. Os horários aparecem de 10 em 10 minutos, mas só
+                    ficam disponíveis quando o serviço inteiro cabe.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -755,7 +804,7 @@ function AgendamentosPage() {
 
               <Button
                 type="submit"
-                disabled={enviando}
+                disabled={enviando || !formularioCompleto}
                 className="w-full"
               >
                 <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -839,6 +888,7 @@ function AgendamentosPage() {
                       Motivo da recusa: {agendamento.motivoRecusa}
                     </p>
                   )}
+
                   {agendamento.motivoCancelamento && (
                     <p className="mt-3 text-sm text-destructive">
                       Motivo do cancelamento:{" "}
@@ -849,86 +899,87 @@ function AgendamentosPage() {
                   {["SOLICITADO", "CONFIRMADO"].includes(
                     agendamento.status,
                   ) && (
-                      <button
-                        type="button"
-                        disabled={cancelandoId === agendamento.id}
-                        onClick={() => abrirModalCancelamento(agendamento.id)}
-                        className="mt-4 inline-flex h-9 items-center rounded-full border border-destructive/40 px-4 text-sm text-destructive transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {cancelandoId === agendamento.id
-                          ? "Cancelando..."
-                          : "Cancelar agendamento"}
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      disabled={cancelandoId === agendamento.id}
+                      onClick={() => abrirModalCancelamento(agendamento.id)}
+                      className="mt-4 inline-flex h-9 items-center rounded-full border border-destructive/40 px-4 text-sm text-destructive transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {cancelandoId === agendamento.id
+                        ? "Cancelando..."
+                        : "Cancelar agendamento"}
+                    </button>
+                  )}
                 </article>
               ))}
             </div>
           )}
         </section>
+      </div>
 
-        {agendamentoCancelamentoId && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-display">
-                    Cancelar agendamento
-                  </h2>
+      {agendamentoCancelamentoId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="font-display text-xl">
+                  Cancelar agendamento
+                </h2>
 
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Informe o motivo do cancelamento, se quiser. Esse registro ficará
-                    salvo no histórico do seu agendamento.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={fecharModalCancelamento}
-                  className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition hover:bg-surface-elevated"
-                >
-                  Fechar
-                </button>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Informe o motivo do cancelamento, se quiser. Esse registro
+                  ficará salvo no histórico do seu agendamento.
+                </p>
               </div>
 
-              <div className="mt-6 space-y-2">
-                <label className="text-xs uppercase tracking-widest text-muted-foreground">
-                  Motivo do cancelamento
-                </label>
+              <button
+                type="button"
+                onClick={fecharModalCancelamento}
+                className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition hover:bg-surface-elevated"
+              >
+                Fechar
+              </button>
+            </div>
 
-                <textarea
-                  value={motivoCancelamentoModal}
-                  onChange={(event) =>
-                    setMotivoCancelamentoModal(event.target.value)
-                  }
-                  placeholder="Ex.: não poderei comparecer, surgiu um imprevisto..."
-                  className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
-              </div>
+            <div className="mt-6 space-y-2">
+              <label className="text-xs uppercase tracking-widest text-muted-foreground">
+                Motivo do cancelamento
+              </label>
 
-              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={fecharModalCancelamento}
-                  disabled={cancelandoId === agendamentoCancelamentoId}
-                  className="inline-flex h-10 items-center justify-center rounded-full border border-border px-5 text-sm transition hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Voltar
-                </button>
+              <textarea
+                value={motivoCancelamentoModal}
+                onChange={(event) =>
+                  setMotivoCancelamentoModal(event.target.value)
+                }
+                placeholder="Ex.: não poderei comparecer, surgiu um imprevisto..."
+                className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </div>
 
-                <button
-                  type="button"
-                  onClick={() => void handleConfirmarCancelamentoModal()}
-                  disabled={cancelandoId === agendamentoCancelamentoId}
-                  className="inline-flex h-10 items-center justify-center rounded-full bg-destructive px-5 text-sm text-destructive-foreground transition hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {cancelandoId === agendamentoCancelamentoId
-                    ? "Cancelando..."
-                    : "Confirmar cancelamento"}
-                </button>
-              </div>
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={fecharModalCancelamento}
+                disabled={cancelandoId === agendamentoCancelamentoId}
+                className="inline-flex h-10 items-center justify-center rounded-full border border-border px-5 text-sm transition hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Voltar
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void handleConfirmarCancelamentoModal()}
+                disabled={cancelandoId === agendamentoCancelamentoId}
+                className="inline-flex h-10 items-center justify-center rounded-full bg-destructive px-5 text-sm text-destructive-foreground transition hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {cancelandoId === agendamentoCancelamentoId
+                  ? "Cancelando..."
+                  : "Confirmar cancelamento"}
+              </button>
             </div>
           </div>
-        )}</div>
+        </div>
+      )}
     </div>
   );
-} 
+}

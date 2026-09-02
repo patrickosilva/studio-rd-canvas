@@ -204,8 +204,10 @@ const concluirAgendamentoSchema = z.object({
 });
 
 const TIMEZONE_PADRAO = "America/Sao_Paulo";
-const INTERVALO_GRADE_MINUTOS = 40;
+const INTERVALO_INICIO_MINUTOS = 10;
 
+// Esse intervalo define apenas os possíveis horários de início.
+// A duração real do atendimento sempre vem de servico.duracaoMinutos.
 const funcionamentoPorDia: Record<
   number,
   {
@@ -358,11 +360,11 @@ function validarHorarioNaGrade({
 
   const distanciaDaAbertura = minutosInicio - minutosAbertura;
 
-  if (distanciaDaAbertura % INTERVALO_GRADE_MINUTOS !== 0) {
+  if (distanciaDaAbertura % INTERVALO_INICIO_MINUTOS !== 0) {
     return {
       valido: false,
       mensagem:
-        "Escolha um horário dentro da grade oficial de 40 minutos.",
+        "Escolha um horário em um início válido de 10 em 10 minutos.",
     };
   }
 
@@ -723,7 +725,7 @@ export const solicitarAgendamento = createServerFn({
         sucesso: false,
         mensagem:
           horarioNaGrade.mensagem ||
-          "Escolha um horário válido na grade da barbearia.",
+          "Escolha um horário válido da agenda da barbearia.",
       };
     }
 
@@ -1006,7 +1008,7 @@ export const funcionarioCriarAgendamentoParaCliente =
           sucesso: false,
           mensagem:
             horarioNaGrade.mensagem ||
-            "Escolha um horário válido na grade da barbearia.",
+            "Escolha um horário válido da agenda da barbearia.",
         };
       }
 
@@ -1602,7 +1604,7 @@ export const funcionarioConcluirAgendamento =
       };
     });
 export const operacionalRemarcarAgendamento =
-  createServerFn({
+   createServerFn({
     method: "POST",
   })
     .validator(remarcarAgendamentoSchema)
@@ -1633,15 +1635,29 @@ export const operacionalRemarcarAgendamento =
           id: true,
           status: true,
           profissionalId: true,
+
           cliente: {
             select: {
+              id: true,
+              nome: true,
+              email: true,
+              telefone: true,
+            },
+          },
+
+          profissional: {
+            select: {
+              id: true,
               nome: true,
             },
           },
+
           servico: {
             select: {
+              id: true,
               nome: true,
               duracaoMinutos: true,
+              precoCentavos: true,
             },
           },
         },
@@ -1680,7 +1696,7 @@ export const operacionalRemarcarAgendamento =
           sucesso: false,
           mensagem:
             horarioNaGrade.mensagem ||
-            "Escolha um horário válido na grade da barbearia.",
+            "Escolha um horário válido na agenda da barbearia.",
         };
       }
 
@@ -1727,6 +1743,31 @@ export const operacionalRemarcarAgendamento =
             inicio: true,
             fim: true,
             status: true,
+
+            cliente: {
+              select: {
+                id: true,
+                nome: true,
+                email: true,
+                telefone: true,
+              },
+            },
+
+            profissional: {
+              select: {
+                id: true,
+                nome: true,
+              },
+            },
+
+            servico: {
+              select: {
+                id: true,
+                nome: true,
+                duracaoMinutos: true,
+                precoCentavos: true,
+              },
+            },
           },
         });
 
@@ -1739,11 +1780,10 @@ export const operacionalRemarcarAgendamento =
 
       return {
         sucesso: true,
-        mensagem: "Agendamento remarcado com sucesso.",
+        mensagem: "Horário do agendamento atualizado com sucesso.",
         agendamento: agendamentoAtualizado,
       };
     });
-
 export const adminListarAgenda = createServerFn({
   method: "GET",
 }).handler(async () => {

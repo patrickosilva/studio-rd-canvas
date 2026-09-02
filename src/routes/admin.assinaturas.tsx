@@ -34,7 +34,7 @@ type FormaPagamento =
   | "DINHEIRO"
   | "CARTAO_DEBITO"
   | "CARTAO_CREDITO"
-  | "ASSINATURA" 
+  | "ASSINATURA"
   | "CORTESIA"
   | "OUTRO";
 
@@ -161,6 +161,134 @@ function formaPagamentoLabel(forma: FormaPagamento): string {
   return labels[forma];
 }
 
+function normalizarTexto(valor: string | null | undefined): string {
+  return (valor ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function apenasNumeros(valor: string | null | undefined): string {
+  return (valor ?? "").replace(/\D/g, "");
+}
+
+function formatarContatoCliente(cliente: Cliente): string {
+  if (cliente.telefone) {
+    return cliente.telefone;
+  }
+
+  return cliente.email;
+}
+
+function ClienteAutocomplete({
+  clientes,
+  clienteBusca,
+  clienteSelecionadoId,
+  onAlterarBusca,
+  onSelecionarCliente,
+}: {
+  clientes: Cliente[];
+  clienteBusca: string;
+  clienteSelecionadoId: string;
+  onAlterarBusca: (valor: string) => void;
+  onSelecionarCliente: (cliente: Cliente) => void;
+}) {
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+
+  const clienteSelecionado = clientes.find(
+    (cliente) => cliente.id === clienteSelecionadoId,
+  );
+
+  const clientesFiltrados = useMemo(() => {
+    const termoTexto = normalizarTexto(clienteBusca.trim());
+    const termoNumeros = apenasNumeros(clienteBusca);
+
+    if (!termoTexto && !termoNumeros) {
+      return clientes.slice(0, 8);
+    }
+
+    return clientes
+      .filter((cliente) => {
+        const nome = normalizarTexto(cliente.nome);
+        const email = normalizarTexto(cliente.email);
+        const telefone = apenasNumeros(cliente.telefone);
+
+        return (
+          nome.includes(termoTexto) ||
+          email.includes(termoTexto) ||
+          Boolean(termoNumeros && telefone.includes(termoNumeros))
+        );
+      })
+      .slice(0, 8);
+  }, [clientes, clienteBusca]);
+
+  return (
+    <div className="relative space-y-2">
+      <label className="text-xs uppercase tracking-widest text-muted-foreground">
+        Cliente
+      </label>
+
+      <input
+        type="text"
+        value={clienteBusca}
+        onChange={(event) => {
+          onAlterarBusca(event.target.value);
+          setMostrarSugestoes(true);
+        }}
+        onFocus={() => setMostrarSugestoes(true)}
+        onBlur={() => {
+          window.setTimeout(() => setMostrarSugestoes(false), 150);
+        }}
+        placeholder="Digite nome, telefone ou e-mail do cliente"
+        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+      />
+
+      {mostrarSugestoes && (
+        <div className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-xl border border-border bg-surface p-2 shadow-xl">
+          {clientesFiltrados.length === 0 ? (
+            <div className="px-3 py-4 text-sm text-muted-foreground">
+              Nenhum cliente encontrado.
+            </div>
+          ) : (
+            clientesFiltrados.map((cliente) => (
+              <button
+                key={cliente.id}
+                type="button"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  onSelecionarCliente(cliente);
+                  setMostrarSugestoes(false);
+                }}
+                className="w-full rounded-lg px-3 py-3 text-left transition hover:bg-surface-elevated"
+              >
+                <p className="text-sm font-medium">{cliente.nome}</p>
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formatarContatoCliente(cliente)}
+                  {cliente.email ? ` · ${cliente.email}` : ""}
+                </p>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+
+      {clienteSelecionado && (
+        <div className="rounded-xl border border-gold/30 bg-gold-soft px-3 py-2 text-sm text-gold">
+          Cliente selecionado:{" "}
+          <strong>{clienteSelecionado.nome}</strong>
+        </div>
+      )}
+
+      {!clienteSelecionadoId && clienteBusca && (
+        <p className="text-xs text-muted-foreground">
+          Selecione um cliente da lista para continuar.
+        </p>
+      )}
+    </div>
+  );
+}
+
 function AdminAssinaturasPage() {
   const listarPlanos = useServerFn(adminListarPlanosAssinatura);
   const criarPlano = useServerFn(adminCriarPlanoAssinatura);
@@ -190,6 +318,7 @@ function AdminAssinaturasPage() {
   const [cortesPorCiclo, setCortesPorCiclo] = useState("2");
   const [duracaoDias, setDuracaoDias] = useState("30");
 
+  const [clienteBusca, setClienteBusca] = useState("");
   const [clienteId, setClienteId] = useState("");
   const [planoId, setPlanoId] = useState("");
   const [vigenciaInicio, setVigenciaInicio] = useState("");
@@ -326,42 +455,44 @@ function AdminAssinaturasPage() {
       setSalvandoPlano(false);
     }
   }
+
   async function handleDesativarPlano(plano: PlanoAssinatura) {
-  const confirmar = window.confirm(
-    `Tem certeza que deseja excluir o plano "${plano.nome}"? Ele ficará indisponível para novas assinaturas.`,
-  );
+    const confirmar = window.confirm(
+      `Tem certeza que deseja excluir o plano "${plano.nome}"? Ele ficará indisponível para novas assinaturas.`,
+    );
 
-  if (!confirmar) {
-    return;
-  }
-
-  setMensagem("");
-  setErro("");
-  setRemovendoPlanoId(plano.id);
-
-  try {
-    const resultado = await desativarPlano({
-      data: {
-        planoId: plano.id,
-      },
-    });
-
-    if (!resultado.sucesso) {
-      setErro(resultado.mensagem);
+    if (!confirmar) {
       return;
     }
 
-    setMensagem(resultado.mensagem);
+    setMensagem("");
+    setErro("");
+    setRemovendoPlanoId(plano.id);
 
-    await carregarDados();
-  } catch (error) {
-    console.error(error);
+    try {
+      const resultado = await desativarPlano({
+        data: {
+          planoId: plano.id,
+        },
+      });
 
-    setErro("Não foi possível excluir o plano.");
-  } finally {
-    setRemovendoPlanoId("");
+      if (!resultado.sucesso) {
+        setErro(resultado.mensagem);
+        return;
+      }
+
+      setMensagem(resultado.mensagem);
+
+      await carregarDados();
+    } catch (error) {
+      console.error(error);
+
+      setErro("Não foi possível excluir o plano.");
+    } finally {
+      setRemovendoPlanoId("");
+    }
   }
-}
+
   async function handleAtivarAssinatura(
     event: FormEvent<HTMLFormElement>,
   ) {
@@ -369,6 +500,12 @@ function AdminAssinaturasPage() {
 
     setMensagem("");
     setErro("");
+
+    if (!clienteId || !planoId) {
+      setErro("Selecione um cliente e um plano para ativar a assinatura.");
+      return;
+    }
+
     setAtivando(true);
 
     try {
@@ -392,6 +529,7 @@ function AdminAssinaturasPage() {
 
       setMensagem(resultado.mensagem);
 
+      setClienteBusca("");
       setClienteId("");
       setPlanoId("");
       setVigenciaInicio("");
@@ -662,36 +800,40 @@ function AdminAssinaturasPage() {
               </p>
             ) : (
               planos.map((plano) => (
-                <div className="flex items-start justify-between gap-4">
-  <div>
-    <h4 className="font-medium">{plano.nome}</h4>
+                <div
+                  key={plano.id}
+                  className="rounded-xl border border-border bg-background/40 p-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="font-medium">{plano.nome}</h4>
 
-    <p className="mt-1 text-xs text-muted-foreground">
-      {plano.cortesPorCiclo} cortes a cada{" "}
-      {plano.duracaoDias} dias
-    </p>
-  </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {plano.cortesPorCiclo} cortes a cada{" "}
+                        {plano.duracaoDias} dias
+                      </p>
+                    </div>
 
-  <div className="flex flex-col items-end gap-2">
-    <span className="text-sm font-medium text-gold">
-      {formatarDinheiro(plano.precoCentavos)}
-    </span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-sm font-medium text-gold">
+                        {formatarDinheiro(plano.precoCentavos)}
+                      </span>
 
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      disabled={removendoPlanoId === plano.id}
-      onClick={() => void handleDesativarPlano(plano)}
-      className="border-destructive/40 text-destructive hover:bg-destructive/10"
-    >
-      <Trash2 className="mr-2 h-4 w-4" />
-      {removendoPlanoId === plano.id
-        ? "Excluindo..."
-        : "Excluir"}
-    </Button>
-  </div>
-
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={removendoPlanoId === plano.id}
+                        onClick={() => void handleDesativarPlano(plano)}
+                        className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {removendoPlanoId === plano.id
+                          ? "Excluindo..."
+                          : "Excluir"}
+                      </Button>
+                    </div>
+                  </div>
 
                   {plano.descricao && (
                     <p className="mt-3 text-sm text-muted-foreground">
@@ -712,7 +854,7 @@ function AdminAssinaturasPage() {
                 Ativar assinatura
               </h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                Escolha o cliente, o plano e registre o pagamento.
+                Busque o cliente pelo nome, telefone ou e-mail.
               </p>
             </div>
           </div>
@@ -721,28 +863,21 @@ function AdminAssinaturasPage() {
             onSubmit={handleAtivarAssinatura}
             className="space-y-4"
           >
-            <div className="space-y-2">
-              <label className="text-xs uppercase tracking-widest text-muted-foreground">
-                Cliente
-              </label>
-
-              <select
-                value={clienteId}
-                onChange={(event) =>
-                  setClienteId(event.target.value)
-                }
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                required
-              >
-                <option value="">Selecione um cliente</option>
-
-                {clientes.map((cliente) => (
-                  <option key={cliente.id} value={cliente.id}>
-                    {cliente.nome} — {cliente.email}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <ClienteAutocomplete
+              clientes={clientes}
+              clienteBusca={clienteBusca}
+              clienteSelecionadoId={clienteId}
+              onAlterarBusca={(valor) => {
+                setClienteBusca(valor);
+                setClienteId("");
+              }}
+              onSelecionarCliente={(cliente) => {
+                setClienteId(cliente.id);
+                setClienteBusca(
+                  `${cliente.nome} — ${formatarContatoCliente(cliente)}`,
+                );
+              }}
+            />
 
             <div className="space-y-2">
               <label className="text-xs uppercase tracking-widest text-muted-foreground">
@@ -846,7 +981,7 @@ function AdminAssinaturasPage() {
 
             <Button
               type="submit"
-              disabled={ativando}
+              disabled={ativando || !clienteId || !planoId}
               className="w-full"
             >
               <CreditCard className="mr-2 h-4 w-4" />

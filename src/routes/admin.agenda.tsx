@@ -1,4 +1,5 @@
 import {
+  type FormEvent,
   useEffect,
   useMemo,
   useState,
@@ -11,12 +12,18 @@ import {
   CheckCircle2,
   Clock,
   DollarSign,
+  Edit3,
+  Loader2,
   Scissors,
   UserRound,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/dashboard/Sidebar";
-import { adminListarAgenda } from "@/lib/api/agendamento.functions";
+import {
+  adminListarAgenda,
+  listarIndisponibilidadesAgenda,
+  operacionalRemarcarAgendamento,
+} from "@/lib/api/agendamento.functions";
 
 export const Route = createFileRoute("/admin/agenda")({
   component: AdminAgendaPage,
@@ -52,6 +59,45 @@ type AgendamentoAdmin = {
   };
 };
 
+type IndisponibilidadeAgenda = {
+  id: string;
+  tipo: "AGENDAMENTO" | "BLOQUEIO";
+  inicio: string | Date;
+  fim: string | Date;
+  motivo: string | null;
+};
+
+const INTERVALO_INICIO_MINUTOS = 10;
+
+const funcionamentoPorDia: Record<
+  number,
+  {
+    abre: string;
+    fecha: string;
+  }
+> = {
+  2: {
+    abre: "09:30",
+    fecha: "19:30",
+  },
+  3: {
+    abre: "09:30",
+    fecha: "19:30",
+  },
+  4: {
+    abre: "09:00",
+    fecha: "19:30",
+  },
+  5: {
+    abre: "08:00",
+    fecha: "21:00",
+  },
+  6: {
+    abre: "08:30",
+    fecha: "19:00",
+  },
+};
+
 function formatarMoeda(precoCentavos: number): string {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -69,7 +115,154 @@ function formatarDataHora(valor: string | Date): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "America/Sao_Paulo",
   }).format(data);
+}
+
+function formatarDataInput(data: Date): string {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+function formatarDataInputSaoPaulo(valor: string | Date): string {
+  const data = new Date(valor);
+
+  const partes = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(data);
+
+  const mapa = Object.fromEntries(
+    partes.map((parte) => [parte.type, parte.value]),
+  );
+
+  return `${mapa.year}-${mapa.month}-${mapa.day}`;
+}
+
+function criarDataLocal(dataInput: string): Date {
+  const [ano, mes, dia] = dataInput.split("-").map(Number);
+
+  return new Date(ano, mes - 1, dia);
+}
+
+function obterNomeDia(dataInput: string): string {
+  const data = criarDataLocal(dataInput);
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  }).format(data);
+}
+
+function obterProximosDiasFuncionamento(
+  quantidadeDias = 30,
+): string[] {
+  const dias: string[] = [];
+  const hoje = new Date();
+
+  hoje.setHours(0, 0, 0, 0);
+
+  for (let indice = 0; indice < quantidadeDias; indice += 1) {
+    const data = new Date(hoje);
+
+    data.setDate(hoje.getDate() + indice);
+
+    const diaSemana = data.getDay();
+
+    if (funcionamentoPorDia[diaSemana]) {
+      dias.push(formatarDataInput(data));
+    }
+  }
+
+  return dias;
+}
+
+function converterHoraParaMinutos(hora: string): number {
+  const [horas, minutos] = hora.split(":").map(Number);
+
+  return horas * 60 + minutos;
+}
+
+function formatarMinutosComoHora(totalMinutos: number): string {
+  const horas = Math.floor(totalMinutos / 60);
+  const minutos = totalMinutos % 60;
+
+  return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
+}
+
+function gerarHorariosDisponiveis(
+  dataInput: string,
+  duracaoMinutos: number,
+): string[] {
+  const data = criarDataLocal(dataInput);
+  const regra = funcionamentoPorDia[data.getDay()];
+
+  if (!regra) {
+    return [];
+  }
+
+  const abertura = converterHoraParaMinutos(regra.abre);
+  const fechamento = converterHoraParaMinutos(regra.fecha);
+  const horarios: string[] = [];
+
+  for (
+    let horario = abertura;
+    horario + duracaoMinutos <= fechamento;
+    horario += INTERVALO_INICIO_MINUTOS
+  ) {
+    horarios.push(formatarMinutosComoHora(horario));
+  }
+
+  return horarios;
+}
+
+function criarInicioIsoLocal(
+  dataInput: string,
+  horario: string,
+): string {
+  return `${dataInput}T${horario}`;
+}
+
+function horarioJaPassou(dataInput: string, horario: string): boolean {
+  const inicio = new Date(criarInicioIsoLocal(dataInput, horario));
+
+  return inicio.getTime() <= new Date().getTime();
+}
+
+function existeConflitoComIndisponibilidade({
+  inicioHorario,
+  fimHorario,
+  indisponibilidades,
+  ignorarAgendamentoId,
+}: {
+  inicioHorario: Date;
+  fimHorario: Date;
+  indisponibilidades: IndisponibilidadeAgenda[];
+  ignorarAgendamentoId?: string;
+}): boolean {
+  return indisponibilidades.some((indisponibilidade) => {
+    if (
+      ignorarAgendamentoId &&
+      indisponibilidade.tipo === "AGENDAMENTO" &&
+      indisponibilidade.id === ignorarAgendamentoId
+    ) {
+      return false;
+    }
+
+    const inicioIndisponivel = new Date(indisponibilidade.inicio);
+    const fimIndisponivel = new Date(indisponibilidade.fim);
+
+    return (
+      inicioIndisponivel < fimHorario &&
+      fimIndisponivel > inicioHorario
+    );
+  });
 }
 
 function traduzirStatus(status: string): string {
@@ -111,14 +304,39 @@ function obterClasseStatus(status: string): string {
   return "bg-surface-elevated text-muted-foreground";
 }
 
+function podeRemarcarAgendamento(agendamento: AgendamentoAdmin): boolean {
+  return ["SOLICITADO", "CONFIRMADO"].includes(agendamento.status);
+}
+
 function AdminAgendaPage() {
   const carregarAgenda = useServerFn(adminListarAgenda);
+  const buscarIndisponibilidades = useServerFn(
+    listarIndisponibilidadesAgenda,
+  );
+  const remarcarAgendamento = useServerFn(
+    operacionalRemarcarAgendamento,
+  );
 
   const [agendamentos, setAgendamentos] = useState<AgendamentoAdmin[]>(
     [],
   );
   const [carregando, setCarregando] = useState(true);
+  const [processandoRemarcacao, setProcessandoRemarcacao] =
+    useState(false);
   const [erro, setErro] = useState("");
+  const [mensagem, setMensagem] = useState("");
+
+  const [agendamentoParaRemarcar, setAgendamentoParaRemarcar] =
+    useState<AgendamentoAdmin | null>(null);
+  const [dataRemarcacao, setDataRemarcacao] = useState("");
+  const [horarioRemarcacao, setHorarioRemarcacao] = useState("");
+  const [indisponibilidadesRemarcacao, setIndisponibilidadesRemarcacao] =
+    useState<IndisponibilidadeAgenda[]>([]);
+
+  const proximosDiasRemarcacao = useMemo(
+    () => obterProximosDiasFuncionamento(),
+    [],
+  );
 
   async function carregarDados() {
     setCarregando(true);
@@ -180,6 +398,174 @@ function AdminAgendaPage() {
     };
   }, [agendamentos]);
 
+  const horariosDisponiveisRemarcacao = useMemo(() => {
+    if (!agendamentoParaRemarcar || !dataRemarcacao) {
+      return [];
+    }
+
+    return gerarHorariosDisponiveis(
+      dataRemarcacao,
+      agendamentoParaRemarcar.servico.duracaoMinutos,
+    );
+  }, [agendamentoParaRemarcar, dataRemarcacao]);
+
+  const horariosFiltradosRemarcacao = useMemo(() => {
+    if (!agendamentoParaRemarcar || !dataRemarcacao) {
+      return [];
+    }
+
+    return horariosDisponiveisRemarcacao.filter((horario) => {
+      if (horarioJaPassou(dataRemarcacao, horario)) {
+        return false;
+      }
+
+      const inicioHorario = new Date(
+        criarInicioIsoLocal(dataRemarcacao, horario),
+      );
+
+      const fimHorario = new Date(
+        inicioHorario.getTime() +
+          agendamentoParaRemarcar.servico.duracaoMinutos * 60 * 1000,
+      );
+
+      return !existeConflitoComIndisponibilidade({
+        inicioHorario,
+        fimHorario,
+        indisponibilidades: indisponibilidadesRemarcacao,
+        ignorarAgendamentoId: agendamentoParaRemarcar.id,
+      });
+    });
+  }, [
+    agendamentoParaRemarcar,
+    dataRemarcacao,
+    horariosDisponiveisRemarcacao,
+    indisponibilidadesRemarcacao,
+  ]);
+
+  async function carregarIndisponibilidadesRemarcacao(
+    agendamento: AgendamentoAdmin,
+    dataSelecionada: string,
+  ) {
+    if (!dataSelecionada) {
+      setIndisponibilidadesRemarcacao([]);
+      return;
+    }
+
+    try {
+      const resultado = await buscarIndisponibilidades({
+        data: {
+          profissionalId: agendamento.profissional.id,
+          data: dataSelecionada,
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setIndisponibilidadesRemarcacao([]);
+        return;
+      }
+
+      setIndisponibilidadesRemarcacao(resultado.intervalos);
+    } catch (error) {
+      console.error(error);
+      setIndisponibilidadesRemarcacao([]);
+    }
+  }
+
+  function abrirModalRemarcacao(agendamento: AgendamentoAdmin) {
+    const dataAtualAgendamento = formatarDataInputSaoPaulo(
+      agendamento.inicio,
+    );
+
+    const dataInicial = proximosDiasRemarcacao.includes(
+      dataAtualAgendamento,
+    )
+      ? dataAtualAgendamento
+      : proximosDiasRemarcacao[0] ?? "";
+
+    setMensagem("");
+    setErro("");
+    setAgendamentoParaRemarcar(agendamento);
+    setDataRemarcacao(dataInicial);
+    setHorarioRemarcacao("");
+    setIndisponibilidadesRemarcacao([]);
+  }
+
+  function fecharModalRemarcacao() {
+    setAgendamentoParaRemarcar(null);
+    setDataRemarcacao("");
+    setHorarioRemarcacao("");
+    setIndisponibilidadesRemarcacao([]);
+    setProcessandoRemarcacao(false);
+  }
+
+  useEffect(() => {
+    if (!agendamentoParaRemarcar || !dataRemarcacao) {
+      setIndisponibilidadesRemarcacao([]);
+      return;
+    }
+
+    void carregarIndisponibilidadesRemarcacao(
+      agendamentoParaRemarcar,
+      dataRemarcacao,
+    );
+  }, [agendamentoParaRemarcar, dataRemarcacao]);
+
+  useEffect(() => {
+    if (
+      horariosFiltradosRemarcacao.length > 0 &&
+      !horariosFiltradosRemarcacao.includes(horarioRemarcacao)
+    ) {
+      setHorarioRemarcacao(horariosFiltradosRemarcacao[0]);
+      return;
+    }
+
+    if (horariosFiltradosRemarcacao.length === 0) {
+      setHorarioRemarcacao("");
+    }
+  }, [horariosFiltradosRemarcacao, horarioRemarcacao]);
+
+  async function handleRemarcar(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!agendamentoParaRemarcar) {
+      return;
+    }
+
+    setMensagem("");
+    setErro("");
+
+    if (!dataRemarcacao || !horarioRemarcacao) {
+      setErro("Escolha um novo dia e horário para remarcar.");
+      return;
+    }
+
+    setProcessandoRemarcacao(true);
+
+    try {
+      const resultado = await remarcarAgendamento({
+        data: {
+          agendamentoId: agendamentoParaRemarcar.id,
+          inicio: criarInicioIsoLocal(dataRemarcacao, horarioRemarcacao),
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setErro(resultado.mensagem);
+        return;
+      }
+
+      setMensagem(resultado.mensagem);
+      fecharModalRemarcacao();
+
+      await carregarDados();
+    } catch (error) {
+      console.error(error);
+      setErro("Não foi possível remarcar o agendamento.");
+    } finally {
+      setProcessandoRemarcacao(false);
+    }
+  }
+
   return (
     <div className="max-w-7xl p-8 lg:p-12">
       <PageHeader
@@ -201,6 +587,12 @@ function AdminAgendaPage() {
           className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
         >
           {erro}
+        </div>
+      )}
+
+      {mensagem && (
+        <div className="mb-6 rounded-xl border border-gold/30 bg-gold-soft px-4 py-3 text-sm text-gold">
+          {mensagem}
         </div>
       )}
 
@@ -345,8 +737,8 @@ function AdminAgendaPage() {
             </h2>
 
             <p className="mt-1 text-xs text-muted-foreground">
-              Esta tela é apenas de monitoramento. A confirmação, recusa e
-              conclusão ficam na área do funcionário.
+              Esta tela também permite que o administrador remarque horários
+              sem digitar horário livre manualmente.
             </p>
           </div>
 
@@ -410,11 +802,193 @@ function AdminAgendaPage() {
                       </p>
                     )}
                   </div>
+
+                  {podeRemarcarAgendamento(agendamento) && (
+                    <button
+                      type="button"
+                      onClick={() => abrirModalRemarcacao(agendamento)}
+                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-gold/40 px-5 text-sm text-gold transition hover:bg-gold-soft"
+                    >
+                      <Edit3 className="mr-2 h-4 w-4" />
+                      Remarcar
+                    </button>
+                  )}
                 </div>
               </article>
             ))}
           </div>
         </section>
+      )}
+
+      {agendamentoParaRemarcar && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4 backdrop-blur-sm sm:items-center">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-border bg-surface p-5 shadow-xl sm:p-6">
+            <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Remarcar agendamento
+                </p>
+
+                <h2 className="mt-2 text-2xl font-display">
+                  {agendamentoParaRemarcar.cliente.nome}
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Horário atual:{" "}
+                  {formatarDataHora(agendamentoParaRemarcar.inicio)}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={fecharModalRemarcacao}
+                disabled={processandoRemarcacao}
+                className="inline-flex h-10 items-center justify-center rounded-full border border-border px-5 text-sm transition hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <form
+              className="mt-5 space-y-6"
+              onSubmit={(event) => void handleRemarcar(event)}
+            >
+              <div className="grid gap-3 rounded-2xl border border-border bg-background/40 p-4 text-sm text-muted-foreground md:grid-cols-3">
+                <p>
+                  <span className="block text-xs uppercase tracking-widest">
+                    Serviço
+                  </span>
+                  <strong className="mt-1 block text-foreground">
+                    {agendamentoParaRemarcar.servico.nome}
+                  </strong>
+                </p>
+
+                <p>
+                  <span className="block text-xs uppercase tracking-widest">
+                    Duração
+                  </span>
+                  <strong className="mt-1 block text-foreground">
+                    {agendamentoParaRemarcar.servico.duracaoMinutos} min
+                  </strong>
+                </p>
+
+                <p>
+                  <span className="block text-xs uppercase tracking-widest">
+                    Profissional
+                  </span>
+                  <strong className="mt-1 block text-foreground">
+                    {agendamentoParaRemarcar.profissional.nome}
+                  </strong>
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Novo dia
+                </label>
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {proximosDiasRemarcacao.map((dia) => {
+                    const ativo = dia === dataRemarcacao;
+                    const regra =
+                      funcionamentoPorDia[criarDataLocal(dia).getDay()];
+
+                    return (
+                      <button
+                        key={dia}
+                        type="button"
+                        onClick={() => {
+                          setDataRemarcacao(dia);
+                          setHorarioRemarcacao("");
+                        }}
+                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
+                          ativo
+                            ? "border-gold bg-gold-soft text-gold"
+                            : "border-border bg-background/40 hover:bg-surface-elevated"
+                        }`}
+                      >
+                        <span className="block font-medium capitalize">
+                          {obterNomeDia(dia)}
+                        </span>
+
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {regra.abre} às {regra.fecha}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Novo horário
+                </label>
+
+                {horariosFiltradosRemarcacao.length === 0 ? (
+                  <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                    Nenhum horário disponível para este dia, serviço e
+                    profissional.
+                  </div>
+                ) : (
+                  <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+                    {horariosFiltradosRemarcacao.map((horario) => {
+                      const ativo = horario === horarioRemarcacao;
+
+                      return (
+                        <button
+                          key={horario}
+                          type="button"
+                          onClick={() => setHorarioRemarcacao(horario)}
+                          className={`rounded-xl border px-3 py-2 text-sm transition ${
+                            ativo
+                              ? "border-gold bg-gold-soft text-gold"
+                              : "border-border bg-background/40 hover:bg-surface-elevated"
+                          }`}
+                        >
+                          {horario}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={fecharModalRemarcacao}
+                  disabled={processandoRemarcacao}
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-border px-5 text-sm transition hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={
+                    processandoRemarcacao ||
+                    !dataRemarcacao ||
+                    !horarioRemarcacao
+                  }
+                  className="inline-flex h-11 items-center justify-center rounded-full bg-gold px-5 text-sm font-medium text-gold-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {processandoRemarcacao ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Remarcando...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Confirmar remarcação
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
