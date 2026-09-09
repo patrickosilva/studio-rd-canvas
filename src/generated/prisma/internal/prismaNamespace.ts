@@ -1425,6 +1425,7 @@ export const AgendamentoScalarFieldEnum = {
   valorPagoCentavos: 'valorPagoCentavos',
   pagoEm: 'pagoEm',
   observacaoPagamento: 'observacaoPagamento',
+  reminderSentAt: 'reminderSentAt',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
 } as const

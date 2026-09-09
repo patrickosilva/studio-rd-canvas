@@ -1,33 +1,22 @@
 import "dotenv/config";
 import nodemailer, { type Transporter } from "nodemailer";
 
-// Notifica a barbearia por e-mail sempre que um CLIENTE cria ou cancela um
-// agendamento. Falha no envio nunca deve derrubar o fluxo de agendamento —
-// por isso essa função nunca lança exceção, apenas registra o erro no log.
+// Serviço central de e-mail transacional da barbearia. Cobre duas direções:
+//
+// 1) Notificações administrativas -> sempre para o e-mail da barbearia
+//    (novo agendamento, cancelamento pelo cliente, reagendamento).
+// 2) Notificações para o cliente -> para o e-mail que ele cadastrou
+//    (confirmação, recusa, reagendamento e lembrete de agendamento).
+//
+// Falha no envio nunca deve derrubar o fluxo de agendamento: a operação no
+// banco já aconteceu antes de qualquer chamada deste módulo. Por isso nenhuma
+// função aqui lança exceção — elas apenas registram o erro no log e retornam
+// `false` para quem precisar saber se o envio realmente aconteceu (ex.: a
+// rotina de lembretes, que só marca `reminderSentAt` em caso de sucesso).
 
 const EMAIL_NOTIFICACAO_PADRAO = "studiordbarber00@gmail.com";
 const FUSO_HORARIO_BARBEARIA = "America/Sao_Paulo";
-const LOG_PREFIX = "[AppointmentNotification]";
-
-type TipoNotificacaoAgendamento = "NOVO_AGENDAMENTO" | "AGENDAMENTO_CANCELADO";
-
-interface DadosNotificacaoAgendamento {
-  tipo: TipoNotificacaoAgendamento;
-  agendamentoId: string;
-  cliente: {
-    nome: string;
-    telefone: string | null;
-    email: string;
-  };
-  servico: {
-    nome: string;
-  };
-  profissional: {
-    nome: string;
-  };
-  inicio: Date;
-  motivoCancelamento?: string | null;
-}
+const LOG_PREFIX = "[EmailNotificacao]";
 
 let transportadorCache: Transporter | null | undefined;
 
@@ -51,7 +40,7 @@ function obterTransportador(): Transporter | null {
 
   if (ausentes.length > 0) {
     console.warn(
-      `${LOG_PREFIX} SMTP não configurado — notificações desativadas. Variáveis ausentes: ${ausentes.join(", ")}.`,
+      `${LOG_PREFIX} SMTP não configurado — envio de e-mails desativado. Variáveis ausentes: ${ausentes.join(", ")}.`,
     );
 
     transportadorCache = null;
@@ -93,6 +82,50 @@ function obterTransportador(): Transporter | null {
   return transportadorCache;
 }
 
+function remetentePadrao(): string | undefined {
+  return process.env.EMAIL_FROM?.trim() || process.env.SMTP_USER;
+}
+
+async function enviarEmail({
+  to,
+  subject,
+  text,
+  contexto,
+}: {
+  to: string;
+  subject: string;
+  text: string;
+  contexto: string;
+}): Promise<boolean> {
+  const transportador = obterTransportador();
+
+  if (!transportador) {
+    console.warn(`${LOG_PREFIX} Envio ignorado (SMTP não configurado). contexto: ${contexto}`);
+    return false;
+  }
+
+  console.log(`${LOG_PREFIX} Enviando e-mail. contexto: ${contexto}, to: ${to}`);
+
+  try {
+    await transportador.sendMail({
+      from: remetentePadrao(),
+      to,
+      subject,
+      text,
+    });
+
+    console.log(`${LOG_PREFIX} E-mail enviado com sucesso. contexto: ${contexto}`);
+    return true;
+  } catch (error) {
+    console.error(
+      `${LOG_PREFIX} Falha ao enviar e-mail. contexto: ${contexto}, erro: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return false;
+  }
+}
+
 function formatarDataHora(data: Date): {
   data: string;
   horario: string;
@@ -110,7 +143,42 @@ function formatarDataHora(data: Date): {
   };
 }
 
-function montarConteudo(dados: DadosNotificacaoAgendamento): { assunto: string; texto: string } {
+function destinatarioBarbearia(): string {
+  return process.env.NOTIFICATION_EMAIL?.trim() || process.env.BARBERSHOP_NOTIFICATION_EMAIL?.trim() || EMAIL_NOTIFICACAO_PADRAO;
+}
+
+// ---------------------------------------------------------------------------
+// Notificações administrativas (destinatário: barbearia)
+// ---------------------------------------------------------------------------
+
+type TipoNotificacaoAgendamento =
+  | "NOVO_AGENDAMENTO"
+  | "AGENDAMENTO_CANCELADO"
+  | "AGENDAMENTO_REAGENDADO";
+
+interface DadosNotificacaoAgendamento {
+  tipo: TipoNotificacaoAgendamento;
+  agendamentoId: string;
+  cliente: {
+    nome: string;
+    telefone: string | null;
+    email: string;
+  };
+  servico: {
+    nome: string;
+  };
+  profissional: {
+    nome: string;
+  };
+  inicio: Date;
+  inicioAnterior?: Date;
+  motivoCancelamento?: string | null;
+}
+
+function montarConteudoAdministrativo(dados: DadosNotificacaoAgendamento): {
+  assunto: string;
+  texto: string;
+} {
   const agora = formatarDataHora(new Date());
   const horarioAgendamento = formatarDataHora(dados.inicio);
 
@@ -127,7 +195,7 @@ function montarConteudo(dados: DadosNotificacaoAgendamento): { assunto: string; 
 
   if (dados.tipo === "NOVO_AGENDAMENTO") {
     return {
-      assunto: "[Studio RD] Novo agendamento",
+      assunto: `Novo agendamento — ${dados.cliente.nome} — ${horarioAgendamento.data} às ${horarioAgendamento.horario}`,
       texto: [
         "Novo agendamento realizado.",
         "",
@@ -144,8 +212,34 @@ function montarConteudo(dados: DadosNotificacaoAgendamento): { assunto: string; 
     };
   }
 
+  if (dados.tipo === "AGENDAMENTO_REAGENDADO") {
+    const horarioAnterior = dados.inicioAnterior ? formatarDataHora(dados.inicioAnterior) : null;
+
+    return {
+      assunto: `Agendamento reagendado — ${dados.cliente.nome}`,
+      texto: [
+        "Um agendamento teve a data/horário alterados.",
+        "",
+        ...linhasCliente,
+        "",
+        ...linhasServico,
+        "",
+        "HORÁRIO ANTERIOR:",
+        horarioAnterior ? `Data: ${horarioAnterior.data}` : "Data: não disponível",
+        horarioAnterior ? `Horário: ${horarioAnterior.horario}` : "Horário: não disponível",
+        "",
+        "NOVO HORÁRIO:",
+        `Data: ${horarioAgendamento.data}`,
+        `Horário: ${horarioAgendamento.horario}`,
+        "",
+        `Alteração realizada em: ${agora.data} às ${agora.horario}.`,
+        `Referência: ${dados.agendamentoId}`,
+      ].join("\n"),
+    };
+  }
+
   return {
-    assunto: "[Studio RD] Agendamento cancelado",
+    assunto: `Agendamento cancelado — ${dados.cliente.nome} — ${horarioAgendamento.data}`,
     texto: [
       "Um cliente cancelou um agendamento.",
       "",
@@ -167,39 +261,143 @@ function montarConteudo(dados: DadosNotificacaoAgendamento): { assunto: string; 
 
 export async function enviarNotificacaoAgendamento(
   dados: DadosNotificacaoAgendamento,
-): Promise<void> {
-  const transportador = obterTransportador();
+): Promise<boolean> {
+  const { assunto, texto } = montarConteudoAdministrativo(dados);
 
-  if (!transportador) {
-    console.warn(
-      `${LOG_PREFIX} Envio ignorado (SMTP não configurado). event: ${dados.tipo}, appointmentId: ${dados.agendamentoId}`,
-    );
+  return enviarEmail({
+    to: destinatarioBarbearia(),
+    subject: assunto,
+    text: texto,
+    contexto: `${dados.tipo} (appointmentId: ${dados.agendamentoId})`,
+  });
+}
 
-    return;
-  }
+// ---------------------------------------------------------------------------
+// Notificações para o cliente (destinatário: e-mail cadastrado pelo cliente)
+// ---------------------------------------------------------------------------
 
-  const destinatario = process.env.NOTIFICATION_EMAIL?.trim() || EMAIL_NOTIFICACAO_PADRAO;
+interface DadosEmailCliente {
+  agendamentoId: string;
+  cliente: {
+    nome: string;
+    email: string;
+  };
+  servico: {
+    nome: string;
+  };
+  profissional: {
+    nome: string;
+  };
+  inicio: Date;
+}
 
-  const { assunto, texto } = montarConteudo(dados);
+export async function enviarEmailConfirmacaoAgendamento(
+  dados: DadosEmailCliente,
+): Promise<boolean> {
+  const horario = formatarDataHora(dados.inicio);
 
-  console.log(
-    `${LOG_PREFIX} Attempting ${dados.tipo} (appointmentId: ${dados.agendamentoId}, to: ${destinatario})`,
-  );
+  const texto = [
+    `Olá, ${dados.cliente.nome}.`,
+    "",
+    "Seu horário foi confirmado!",
+    "",
+    `Serviço: ${dados.servico.nome}`,
+    `Profissional: ${dados.profissional.nome}`,
+    `Data: ${horario.data}`,
+    `Horário: ${horario.horario}`,
+    "Situação: CONFIRMADO",
+    "",
+    "Te esperamos no Studio RD Barber. Até lá!",
+  ].join("\n");
 
-  try {
-    await transportador.sendMail({
-      from: process.env.SMTP_USER,
-      to: destinatario,
-      subject: assunto,
-      text: texto,
-    });
+  return enviarEmail({
+    to: dados.cliente.email,
+    subject: "Seu horário foi confirmado — Studio RD Barber",
+    text: texto,
+    contexto: `AGENDAMENTO_CONFIRMADO (appointmentId: ${dados.agendamentoId})`,
+  });
+}
 
-    console.log(`${LOG_PREFIX} Sent successfully (appointmentId: ${dados.agendamentoId})`);
-  } catch (error) {
-    console.error(
-      `${LOG_PREFIX} Failed: ${
-        error instanceof Error ? error.message : String(error)
-      } (event: ${dados.tipo}, appointmentId: ${dados.agendamentoId})`,
-    );
-  }
+export async function enviarEmailRecusaAgendamento(
+  dados: DadosEmailCliente,
+): Promise<boolean> {
+  const horario = formatarDataHora(dados.inicio);
+
+  const texto = [
+    `Olá, ${dados.cliente.nome}.`,
+    "",
+    `Infelizmente não foi possível confirmar seu horário para ${horario.data} às ${horario.horario}.`,
+    "Acesse novamente nosso sistema para escolher outro horário disponível.",
+    "",
+    `Serviço: ${dados.servico.nome}`,
+    `Data: ${horario.data}`,
+    `Horário: ${horario.horario}`,
+    "Situação: NÃO CONFIRMADO",
+    "",
+    "Agradecemos a compreensão. Esperamos te atender em breve no Studio RD Barber.",
+  ].join("\n");
+
+  return enviarEmail({
+    to: dados.cliente.email,
+    subject: "Atualização sobre seu agendamento — Studio RD Barber",
+    text: texto,
+    contexto: `AGENDAMENTO_RECUSADO (appointmentId: ${dados.agendamentoId})`,
+  });
+}
+
+export async function enviarEmailReagendamentoCliente(
+  dados: DadosEmailCliente & { inicioAnterior: Date },
+): Promise<boolean> {
+  const horarioAnterior = formatarDataHora(dados.inicioAnterior);
+  const horarioNovo = formatarDataHora(dados.inicio);
+
+  const texto = [
+    `Olá, ${dados.cliente.nome}.`,
+    "",
+    "Seu agendamento foi reagendado pela nossa equipe.",
+    "",
+    `Serviço: ${dados.servico.nome}`,
+    `Profissional: ${dados.profissional.nome}`,
+    "",
+    "HORÁRIO ANTERIOR:",
+    `Data: ${horarioAnterior.data}`,
+    `Horário: ${horarioAnterior.horario}`,
+    "",
+    "NOVO HORÁRIO:",
+    `Data: ${horarioNovo.data}`,
+    `Horário: ${horarioNovo.horario}`,
+    "",
+    "Se o novo horário não for bom para você, entre em contato com a gente ou acesse o sistema para cancelar.",
+  ].join("\n");
+
+  return enviarEmail({
+    to: dados.cliente.email,
+    subject: "Seu agendamento foi reagendado — Studio RD Barber",
+    text: texto,
+    contexto: `AGENDAMENTO_REAGENDADO_CLIENTE (appointmentId: ${dados.agendamentoId})`,
+  });
+}
+
+export async function enviarEmailLembreteAgendamento(
+  dados: DadosEmailCliente,
+): Promise<boolean> {
+  const horario = formatarDataHora(dados.inicio);
+
+  const texto = [
+    `Olá, ${dados.cliente.nome}.`,
+    "",
+    `Este é um lembrete do seu horário amanhã, ${horario.data} às ${horario.horario}.`,
+    "",
+    `Serviço: ${dados.servico.nome}`,
+    `Profissional: ${dados.profissional.nome}`,
+    "",
+    "Contamos com a sua presença. Até breve no Studio RD Barber!",
+  ].join("\n");
+
+  return enviarEmail({
+    to: dados.cliente.email,
+    subject: "Lembrete do seu agendamento — Studio RD Barber",
+    text: texto,
+    contexto: `AGENDAMENTO_LEMBRETE (appointmentId: ${dados.agendamentoId})`,
+  });
 }

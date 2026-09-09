@@ -51,6 +51,7 @@ export type AgendamentoMinAggregateOutputType = {
   valorPagoCentavos: number | null
   pagoEm: Date | null
   observacaoPagamento: string | null
+  reminderSentAt: Date | null
   criadoEm: Date | null
   atualizadoEm: Date | null
 }
@@ -72,6 +73,7 @@ export type AgendamentoMaxAggregateOutputType = {
   valorPagoCentavos: number | null
   pagoEm: Date | null
   observacaoPagamento: string | null
+  reminderSentAt: Date | null
   criadoEm: Date | null
   atualizadoEm: Date | null
 }
@@ -93,6 +95,7 @@ export type AgendamentoCountAggregateOutputType = {
   valorPagoCentavos: number
   pagoEm: number
   observacaoPagamento: number
+  reminderSentAt: number
   criadoEm: number
   atualizadoEm: number
   _all: number
@@ -124,6 +127,7 @@ export type AgendamentoMinAggregateInputType = {
   valorPagoCentavos?: true
   pagoEm?: true
   observacaoPagamento?: true
+  reminderSentAt?: true
   criadoEm?: true
   atualizadoEm?: true
 }
@@ -145,6 +149,7 @@ export type AgendamentoMaxAggregateInputType = {
   valorPagoCentavos?: true
   pagoEm?: true
   observacaoPagamento?: true
+  reminderSentAt?: true
   criadoEm?: true
   atualizadoEm?: true
 }
@@ -166,6 +171,7 @@ export type AgendamentoCountAggregateInputType = {
   valorPagoCentavos?: true
   pagoEm?: true
   observacaoPagamento?: true
+  reminderSentAt?: true
   criadoEm?: true
   atualizadoEm?: true
   _all?: true
@@ -274,6 +280,7 @@ export type AgendamentoGroupByOutputType = {
   valorPagoCentavos: number | null
   pagoEm: Date | null
   observacaoPagamento: string | null
+  reminderSentAt: Date | null
   criadoEm: Date
   atualizadoEm: Date
   _count: AgendamentoCountAggregateOutputType | null
@@ -318,6 +325,7 @@ export type AgendamentoWhereInput = {
   valorPagoCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
   pagoEm?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   observacaoPagamento?: Prisma.StringNullableFilter<"Agendamento"> | string | null
+  reminderSentAt?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   criadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   usoAssinatura?: Prisma.XOR<Prisma.UsoAssinaturaNullableScalarRelationFilter, Prisma.UsoAssinaturaWhereInput> | null
@@ -343,6 +351,7 @@ export type AgendamentoOrderByWithRelationInput = {
   valorPagoCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
   pagoEm?: Prisma.SortOrderInput | Prisma.SortOrder
   observacaoPagamento?: Prisma.SortOrderInput | Prisma.SortOrder
+  reminderSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   usoAssinatura?: Prisma.UsoAssinaturaOrderByWithRelationInput
@@ -371,6 +380,7 @@ export type AgendamentoWhereUniqueInput = Prisma.AtLeast<{
   valorPagoCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
   pagoEm?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   observacaoPagamento?: Prisma.StringNullableFilter<"Agendamento"> | string | null
+  reminderSentAt?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   criadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   usoAssinatura?: Prisma.XOR<Prisma.UsoAssinaturaNullableScalarRelationFilter, Prisma.UsoAssinaturaWhereInput> | null
@@ -396,6 +406,7 @@ export type AgendamentoOrderByWithAggregationInput = {
   valorPagoCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
   pagoEm?: Prisma.SortOrderInput | Prisma.SortOrder
   observacaoPagamento?: Prisma.SortOrderInput | Prisma.SortOrder
+  reminderSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   _count?: Prisma.AgendamentoCountOrderByAggregateInput
@@ -425,6 +436,7 @@ export type AgendamentoScalarWhereWithAggregatesInput = {
   valorPagoCentavos?: Prisma.IntNullableWithAggregatesFilter<"Agendamento"> | number | null
   pagoEm?: Prisma.DateTimeNullableWithAggregatesFilter<"Agendamento"> | Date | string | null
   observacaoPagamento?: Prisma.StringNullableWithAggregatesFilter<"Agendamento"> | string | null
+  reminderSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Agendamento"> | Date | string | null
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"Agendamento"> | Date | string
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"Agendamento"> | Date | string
 }
@@ -443,6 +455,7 @@ export type AgendamentoCreateInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
@@ -468,6 +481,7 @@ export type AgendamentoUncheckedCreateInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
@@ -487,6 +501,7 @@ export type AgendamentoUpdateInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
@@ -512,6 +527,7 @@ export type AgendamentoUncheckedUpdateInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
@@ -534,6 +550,7 @@ export type AgendamentoCreateManyInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
 }
@@ -552,6 +569,7 @@ export type AgendamentoUpdateManyMutationInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -573,6 +591,7 @@ export type AgendamentoUncheckedUpdateManyInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -604,6 +623,7 @@ export type AgendamentoCountOrderByAggregateInput = {
   valorPagoCentavos?: Prisma.SortOrder
   pagoEm?: Prisma.SortOrder
   observacaoPagamento?: Prisma.SortOrder
+  reminderSentAt?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
@@ -629,6 +649,7 @@ export type AgendamentoMaxOrderByAggregateInput = {
   valorPagoCentavos?: Prisma.SortOrder
   pagoEm?: Prisma.SortOrder
   observacaoPagamento?: Prisma.SortOrder
+  reminderSentAt?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
@@ -650,6 +671,7 @@ export type AgendamentoMinOrderByAggregateInput = {
   valorPagoCentavos?: Prisma.SortOrder
   pagoEm?: Prisma.SortOrder
   observacaoPagamento?: Prisma.SortOrder
+  reminderSentAt?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
@@ -837,6 +859,7 @@ export type AgendamentoCreateWithoutClienteInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
@@ -860,6 +883,7 @@ export type AgendamentoUncheckedCreateWithoutClienteInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
@@ -911,6 +935,7 @@ export type AgendamentoScalarWhereInput = {
   valorPagoCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
   pagoEm?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   observacaoPagamento?: Prisma.StringNullableFilter<"Agendamento"> | string | null
+  reminderSentAt?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   criadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
 }
@@ -929,6 +954,7 @@ export type AgendamentoCreateWithoutServicoInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
@@ -952,6 +978,7 @@ export type AgendamentoUncheckedCreateWithoutServicoInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
@@ -997,6 +1024,7 @@ export type AgendamentoCreateWithoutProfissionalInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
@@ -1020,6 +1048,7 @@ export type AgendamentoUncheckedCreateWithoutProfissionalInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
@@ -1065,6 +1094,7 @@ export type AgendamentoCreateWithoutUsoAssinaturaInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   cliente: Prisma.UsuarioCreateNestedOneWithoutAgendamentosInput
@@ -1089,6 +1119,7 @@ export type AgendamentoUncheckedCreateWithoutUsoAssinaturaInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
 }
@@ -1123,6 +1154,7 @@ export type AgendamentoUpdateWithoutUsoAssinaturaInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAgendamentosNestedInput
@@ -1147,6 +1179,7 @@ export type AgendamentoUncheckedUpdateWithoutUsoAssinaturaInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1167,6 +1200,7 @@ export type AgendamentoCreateManyClienteInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
 }
@@ -1185,6 +1219,7 @@ export type AgendamentoUpdateWithoutClienteInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
@@ -1208,6 +1243,7 @@ export type AgendamentoUncheckedUpdateWithoutClienteInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
@@ -1229,6 +1265,7 @@ export type AgendamentoUncheckedUpdateManyWithoutClienteInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1249,6 +1286,7 @@ export type AgendamentoCreateManyServicoInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
 }
@@ -1267,6 +1305,7 @@ export type AgendamentoUpdateWithoutServicoInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
@@ -1290,6 +1329,7 @@ export type AgendamentoUncheckedUpdateWithoutServicoInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
@@ -1311,6 +1351,7 @@ export type AgendamentoUncheckedUpdateManyWithoutServicoInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1331,6 +1372,7 @@ export type AgendamentoCreateManyProfissionalInput = {
   valorPagoCentavos?: number | null
   pagoEm?: Date | string | null
   observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
 }
@@ -1349,6 +1391,7 @@ export type AgendamentoUpdateWithoutProfissionalInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
@@ -1372,6 +1415,7 @@ export type AgendamentoUncheckedUpdateWithoutProfissionalInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
@@ -1393,6 +1437,7 @@ export type AgendamentoUncheckedUpdateManyWithoutProfissionalInput = {
   valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1416,6 +1461,7 @@ export type AgendamentoSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   valorPagoCentavos?: boolean
   pagoEm?: boolean
   observacaoPagamento?: boolean
+  reminderSentAt?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
   usoAssinatura?: boolean | Prisma.Agendamento$usoAssinaturaArgs<ExtArgs>
@@ -1441,6 +1487,7 @@ export type AgendamentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   valorPagoCentavos?: boolean
   pagoEm?: boolean
   observacaoPagamento?: boolean
+  reminderSentAt?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
@@ -1465,6 +1512,7 @@ export type AgendamentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   valorPagoCentavos?: boolean
   pagoEm?: boolean
   observacaoPagamento?: boolean
+  reminderSentAt?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
@@ -1489,11 +1537,12 @@ export type AgendamentoSelectScalar = {
   valorPagoCentavos?: boolean
   pagoEm?: boolean
   observacaoPagamento?: boolean
+  reminderSentAt?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
 }
 
-export type AgendamentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "profissionalId" | "servicoId" | "inicio" | "fim" | "status" | "observacaoCliente" | "observacaoInterna" | "motivoRecusa" | "motivoCancelamento" | "canceladoEm" | "formaPagamento" | "valorPagoCentavos" | "pagoEm" | "observacaoPagamento" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["agendamento"]>
+export type AgendamentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "profissionalId" | "servicoId" | "inicio" | "fim" | "status" | "observacaoCliente" | "observacaoInterna" | "motivoRecusa" | "motivoCancelamento" | "canceladoEm" | "formaPagamento" | "valorPagoCentavos" | "pagoEm" | "observacaoPagamento" | "reminderSentAt" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["agendamento"]>
 export type AgendamentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   usoAssinatura?: boolean | Prisma.Agendamento$usoAssinaturaArgs<ExtArgs>
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
@@ -1536,6 +1585,7 @@ export type $AgendamentoPayload<ExtArgs extends runtime.Types.Extensions.Interna
     valorPagoCentavos: number | null
     pagoEm: Date | null
     observacaoPagamento: string | null
+    reminderSentAt: Date | null
     criadoEm: Date
     atualizadoEm: Date
   }, ExtArgs["result"]["agendamento"]>
@@ -1981,6 +2031,7 @@ export interface AgendamentoFieldRefs {
   readonly valorPagoCentavos: Prisma.FieldRef<"Agendamento", 'Int'>
   readonly pagoEm: Prisma.FieldRef<"Agendamento", 'DateTime'>
   readonly observacaoPagamento: Prisma.FieldRef<"Agendamento", 'String'>
+  readonly reminderSentAt: Prisma.FieldRef<"Agendamento", 'DateTime'>
   readonly criadoEm: Prisma.FieldRef<"Agendamento", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"Agendamento", 'DateTime'>
 }

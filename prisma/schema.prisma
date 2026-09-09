@@ -140,6 +140,8 @@ model Agendamento {
   pagoEm              DateTime?
   observacaoPagamento String?
 
+  reminderSentAt DateTime?
+
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
@@ -154,6 +156,7 @@ model Agendamento {
   @@index([formaPagamento])
   @@index([inicio])
   @@index([profissionalId, inicio])
+  @@index([status, reminderSentAt, inicio])
 }
 
 model BloqueioAgenda {

@@ -1,7 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { FormaPagamento } from "../../generated/prisma/client";
-import { enviarNotificacaoAgendamento } from "../notificacao-agendamento.server";
+import {
+  enviarEmailConfirmacaoAgendamento,
+  enviarEmailReagendamentoCliente,
+  enviarEmailRecusaAgendamento,
+  enviarNotificacaoAgendamento,
+} from "../notificacao-agendamento.server";
 import { prisma } from "../prisma.server";
 import { obterUsuarioAtual } from "../session.server";
 
@@ -1120,6 +1125,14 @@ export const funcionarioCriarAgendamentoParaCliente =
         acao: "agendou",
       });
 
+      await enviarEmailConfirmacaoAgendamento({
+        agendamentoId: agendamento.id,
+        cliente: agendamento.cliente,
+        servico: agendamento.servico,
+        profissional: agendamento.profissional,
+        inicio: agendamento.inicio,
+      });
+
       return {
         sucesso: true,
         mensagem: "Agendamento criado e confirmado com sucesso.",
@@ -1304,6 +1317,25 @@ export const funcionarioConfirmarAgendamento =
             inicio: true,
             fim: true,
             status: true,
+
+            cliente: {
+              select: {
+                nome: true,
+                email: true,
+              },
+            },
+
+            profissional: {
+              select: {
+                nome: true,
+              },
+            },
+
+            servico: {
+              select: {
+                nome: true,
+              },
+            },
           },
         });
 
@@ -1354,6 +1386,14 @@ export const funcionarioConfirmarAgendamento =
           },
         });
 
+      await enviarEmailConfirmacaoAgendamento({
+        agendamentoId: agendamento.id,
+        cliente: agendamento.cliente,
+        servico: agendamento.servico,
+        profissional: agendamento.profissional,
+        inicio: agendamentoAtualizado.inicio,
+      });
+
       return {
         sucesso: true,
         mensagem: "Agendamento confirmado com sucesso.",
@@ -1377,6 +1417,26 @@ export const funcionarioRecusarAgendamento =
           select: {
             id: true,
             status: true,
+            inicio: true,
+
+            cliente: {
+              select: {
+                nome: true,
+                email: true,
+              },
+            },
+
+            profissional: {
+              select: {
+                nome: true,
+              },
+            },
+
+            servico: {
+              select: {
+                nome: true,
+              },
+            },
           },
         });
 
@@ -1411,6 +1471,14 @@ export const funcionarioRecusarAgendamento =
             motivoRecusa: true,
           },
         });
+
+      await enviarEmailRecusaAgendamento({
+        agendamentoId: agendamento.id,
+        cliente: agendamento.cliente,
+        servico: agendamento.servico,
+        profissional: agendamento.profissional,
+        inicio: agendamento.inicio,
+      });
 
       return {
         sucesso: true,
@@ -1635,6 +1703,7 @@ export const operacionalRemarcarAgendamento =
           id: true,
           status: true,
           profissionalId: true,
+          inicio: true,
 
           cliente: {
             select: {
@@ -1729,6 +1798,8 @@ export const operacionalRemarcarAgendamento =
         };
       }
 
+      const inicioAnterior = agendamento.inicio;
+
       const agendamentoAtualizado =
         await prisma.agendamento.update({
           where: {
@@ -1737,6 +1808,7 @@ export const operacionalRemarcarAgendamento =
           data: {
             inicio: novoInicio,
             fim: novoFim,
+            reminderSentAt: null,
           },
           select: {
             id: true,
@@ -1776,6 +1848,40 @@ export const operacionalRemarcarAgendamento =
         servicoNome: agendamento.servico.nome,
         inicio: agendamentoAtualizado.inicio,
         acao: "agendou",
+      });
+
+      await enviarNotificacaoAgendamento({
+        tipo: "AGENDAMENTO_REAGENDADO",
+        agendamentoId: agendamento.id,
+        cliente: {
+          nome: agendamento.cliente.nome,
+          telefone: agendamento.cliente.telefone,
+          email: agendamento.cliente.email,
+        },
+        servico: {
+          nome: agendamentoAtualizado.servico.nome,
+        },
+        profissional: {
+          nome: agendamentoAtualizado.profissional.nome,
+        },
+        inicio: agendamentoAtualizado.inicio,
+        inicioAnterior,
+      });
+
+      await enviarEmailReagendamentoCliente({
+        agendamentoId: agendamento.id,
+        cliente: {
+          nome: agendamento.cliente.nome,
+          email: agendamento.cliente.email,
+        },
+        servico: {
+          nome: agendamentoAtualizado.servico.nome,
+        },
+        profissional: {
+          nome: agendamentoAtualizado.profissional.nome,
+        },
+        inicio: agendamentoAtualizado.inicio,
+        inicioAnterior,
       });
 
       return {
