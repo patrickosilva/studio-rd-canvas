@@ -395,7 +395,8 @@ export const ModelName = {
   AssinaturaCliente: 'AssinaturaCliente',
   UsoAssinatura: 'UsoAssinatura',
   PagamentoAssinatura: 'PagamentoAssinatura',
-  Notificacao: 'Notificacao'
+  Notificacao: 'Notificacao',
+  TokenRedefinicaoSenha: 'TokenRedefinicaoSenha'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "cliente" | "usuario" | "servico" | "profissional" | "sessao" | "agendamento" | "bloqueioAgenda" | "planoAssinatura" | "assinaturaCliente" | "usoAssinatura" | "pagamentoAssinatura" | "notificacao"
+    modelProps: "cliente" | "usuario" | "servico" | "profissional" | "sessao" | "agendamento" | "bloqueioAgenda" | "planoAssinatura" | "assinaturaCliente" | "usoAssinatura" | "pagamentoAssinatura" | "notificacao" | "tokenRedefinicaoSenha"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1303,6 +1304,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TokenRedefinicaoSenha: {
+      payload: Prisma.$TokenRedefinicaoSenhaPayload<ExtArgs>
+      fields: Prisma.TokenRedefinicaoSenhaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TokenRedefinicaoSenhaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TokenRedefinicaoSenhaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>
+        }
+        findFirst: {
+          args: Prisma.TokenRedefinicaoSenhaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TokenRedefinicaoSenhaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>
+        }
+        findMany: {
+          args: Prisma.TokenRedefinicaoSenhaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>[]
+        }
+        create: {
+          args: Prisma.TokenRedefinicaoSenhaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>
+        }
+        createMany: {
+          args: Prisma.TokenRedefinicaoSenhaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TokenRedefinicaoSenhaCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>[]
+        }
+        delete: {
+          args: Prisma.TokenRedefinicaoSenhaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>
+        }
+        update: {
+          args: Prisma.TokenRedefinicaoSenhaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>
+        }
+        deleteMany: {
+          args: Prisma.TokenRedefinicaoSenhaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TokenRedefinicaoSenhaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TokenRedefinicaoSenhaUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>[]
+        }
+        upsert: {
+          args: Prisma.TokenRedefinicaoSenhaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenRedefinicaoSenhaPayload>
+        }
+        aggregate: {
+          args: Prisma.TokenRedefinicaoSenhaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTokenRedefinicaoSenha>
+        }
+        groupBy: {
+          args: Prisma.TokenRedefinicaoSenhaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TokenRedefinicaoSenhaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TokenRedefinicaoSenhaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TokenRedefinicaoSenhaCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1517,6 +1592,19 @@ export const NotificacaoScalarFieldEnum = {
 } as const
 
 export type NotificacaoScalarFieldEnum = (typeof NotificacaoScalarFieldEnum)[keyof typeof NotificacaoScalarFieldEnum]
+
+
+export const TokenRedefinicaoSenhaScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  tokenHash: 'tokenHash',
+  usado: 'usado',
+  expiraEm: 'expiraEm',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type TokenRedefinicaoSenhaScalarFieldEnum = (typeof TokenRedefinicaoSenhaScalarFieldEnum)[keyof typeof TokenRedefinicaoSenhaScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1789,6 +1877,7 @@ export type GlobalOmitConfig = {
   usoAssinatura?: Prisma.UsoAssinaturaOmit
   pagamentoAssinatura?: Prisma.PagamentoAssinaturaOmit
   notificacao?: Prisma.NotificacaoOmit
+  tokenRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaOmit
 }
 
 /* Types for Logging */

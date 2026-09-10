@@ -219,6 +219,7 @@ export type UsuarioWhereInput = {
   assinaturas?: Prisma.AssinaturaClienteListRelationFilter
   agendamentos?: Prisma.AgendamentoListRelationFilter
   notificacoes?: Prisma.NotificacaoListRelationFilter
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaListRelationFilter
 }
 
 export type UsuarioOrderByWithRelationInput = {
@@ -236,6 +237,7 @@ export type UsuarioOrderByWithRelationInput = {
   assinaturas?: Prisma.AssinaturaClienteOrderByRelationAggregateInput
   agendamentos?: Prisma.AgendamentoOrderByRelationAggregateInput
   notificacoes?: Prisma.NotificacaoOrderByRelationAggregateInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaOrderByRelationAggregateInput
 }
 
 export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
@@ -256,6 +258,7 @@ export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
   assinaturas?: Prisma.AssinaturaClienteListRelationFilter
   agendamentos?: Prisma.AgendamentoListRelationFilter
   notificacoes?: Prisma.NotificacaoListRelationFilter
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaListRelationFilter
 }, "id" | "email" | "telefone">
 
 export type UsuarioOrderByWithAggregationInput = {
@@ -303,6 +306,7 @@ export type UsuarioCreateInput = {
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateInput = {
@@ -320,6 +324,7 @@ export type UsuarioUncheckedCreateInput = {
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUpdateInput = {
@@ -337,6 +342,7 @@ export type UsuarioUpdateInput = {
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateInput = {
@@ -354,6 +360,7 @@ export type UsuarioUncheckedUpdateInput = {
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateManyInput = {
@@ -518,6 +525,20 @@ export type UsuarioUpdateOneRequiredWithoutNotificacoesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutNotificacoesInput, Prisma.UsuarioUpdateWithoutNotificacoesInput>, Prisma.UsuarioUncheckedUpdateWithoutNotificacoesInput>
 }
 
+export type UsuarioCreateNestedOneWithoutTokensRedefinicaoSenhaInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutTokensRedefinicaoSenhaInput, Prisma.UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutTokensRedefinicaoSenhaInput
+  connect?: Prisma.UsuarioWhereUniqueInput
+}
+
+export type UsuarioUpdateOneRequiredWithoutTokensRedefinicaoSenhaNestedInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutTokensRedefinicaoSenhaInput, Prisma.UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutTokensRedefinicaoSenhaInput
+  upsert?: Prisma.UsuarioUpsertWithoutTokensRedefinicaoSenhaInput
+  connect?: Prisma.UsuarioWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutTokensRedefinicaoSenhaInput, Prisma.UsuarioUpdateWithoutTokensRedefinicaoSenhaInput>, Prisma.UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput>
+}
+
 export type UsuarioCreateWithoutProfissionalInput = {
   id?: string
   nome: string
@@ -532,6 +553,7 @@ export type UsuarioCreateWithoutProfissionalInput = {
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutProfissionalInput = {
@@ -548,6 +570,7 @@ export type UsuarioUncheckedCreateWithoutProfissionalInput = {
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutProfissionalInput = {
@@ -580,6 +603,7 @@ export type UsuarioUpdateWithoutProfissionalInput = {
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutProfissionalInput = {
@@ -596,6 +620,7 @@ export type UsuarioUncheckedUpdateWithoutProfissionalInput = {
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateWithoutSessoesInput = {
@@ -612,6 +637,7 @@ export type UsuarioCreateWithoutSessoesInput = {
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutSessoesInput = {
@@ -628,6 +654,7 @@ export type UsuarioUncheckedCreateWithoutSessoesInput = {
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutSessoesInput = {
@@ -660,6 +687,7 @@ export type UsuarioUpdateWithoutSessoesInput = {
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutSessoesInput = {
@@ -676,6 +704,7 @@ export type UsuarioUncheckedUpdateWithoutSessoesInput = {
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateWithoutAgendamentosInput = {
@@ -692,6 +721,7 @@ export type UsuarioCreateWithoutAgendamentosInput = {
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutAgendamentosInput = {
@@ -708,6 +738,7 @@ export type UsuarioUncheckedCreateWithoutAgendamentosInput = {
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutAgendamentosInput = {
@@ -740,6 +771,7 @@ export type UsuarioUpdateWithoutAgendamentosInput = {
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutAgendamentosInput = {
@@ -756,6 +788,7 @@ export type UsuarioUncheckedUpdateWithoutAgendamentosInput = {
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateWithoutAssinaturasInput = {
@@ -772,6 +805,7 @@ export type UsuarioCreateWithoutAssinaturasInput = {
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutAssinaturasInput = {
@@ -788,6 +822,7 @@ export type UsuarioUncheckedCreateWithoutAssinaturasInput = {
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutAssinaturasInput = {
@@ -820,6 +855,7 @@ export type UsuarioUpdateWithoutAssinaturasInput = {
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutAssinaturasInput = {
@@ -836,6 +872,7 @@ export type UsuarioUncheckedUpdateWithoutAssinaturasInput = {
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateWithoutNotificacoesInput = {
@@ -852,6 +889,7 @@ export type UsuarioCreateWithoutNotificacoesInput = {
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutNotificacoesInput = {
@@ -868,6 +906,7 @@ export type UsuarioUncheckedCreateWithoutNotificacoesInput = {
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutNotificacoesInput = {
@@ -900,6 +939,7 @@ export type UsuarioUpdateWithoutNotificacoesInput = {
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutNotificacoesInput = {
@@ -916,6 +956,91 @@ export type UsuarioUncheckedUpdateWithoutNotificacoesInput = {
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+}
+
+export type UsuarioCreateWithoutTokensRedefinicaoSenhaInput = {
+  id?: string
+  nome: string
+  email: string
+  telefone?: string | null
+  senhaHash: string
+  papel?: $Enums.PapelUsuario
+  ativo?: boolean
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
+  profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
+  assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
+  agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
+  notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+}
+
+export type UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput = {
+  id?: string
+  nome: string
+  email: string
+  telefone?: string | null
+  senhaHash: string
+  papel?: $Enums.PapelUsuario
+  ativo?: boolean
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
+  profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
+  assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
+  agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
+  notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+}
+
+export type UsuarioCreateOrConnectWithoutTokensRedefinicaoSenhaInput = {
+  where: Prisma.UsuarioWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutTokensRedefinicaoSenhaInput, Prisma.UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput>
+}
+
+export type UsuarioUpsertWithoutTokensRedefinicaoSenhaInput = {
+  update: Prisma.XOR<Prisma.UsuarioUpdateWithoutTokensRedefinicaoSenhaInput, Prisma.UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput>
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutTokensRedefinicaoSenhaInput, Prisma.UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput>
+  where?: Prisma.UsuarioWhereInput
+}
+
+export type UsuarioUpdateToOneWithWhereWithoutTokensRedefinicaoSenhaInput = {
+  where?: Prisma.UsuarioWhereInput
+  data: Prisma.XOR<Prisma.UsuarioUpdateWithoutTokensRedefinicaoSenhaInput, Prisma.UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput>
+}
+
+export type UsuarioUpdateWithoutTokensRedefinicaoSenhaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
+  profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
+  assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
+  agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
+  notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+}
+
+export type UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
+  assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
+  agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
+  notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 
@@ -928,6 +1053,7 @@ export type UsuarioCountOutputType = {
   assinaturas: number
   agendamentos: number
   notificacoes: number
+  tokensRedefinicaoSenha: number
 }
 
 export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -935,6 +1061,7 @@ export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   assinaturas?: boolean | UsuarioCountOutputTypeCountAssinaturasArgs
   agendamentos?: boolean | UsuarioCountOutputTypeCountAgendamentosArgs
   notificacoes?: boolean | UsuarioCountOutputTypeCountNotificacoesArgs
+  tokensRedefinicaoSenha?: boolean | UsuarioCountOutputTypeCountTokensRedefinicaoSenhaArgs
 }
 
 /**
@@ -975,6 +1102,13 @@ export type UsuarioCountOutputTypeCountNotificacoesArgs<ExtArgs extends runtime.
   where?: Prisma.NotificacaoWhereInput
 }
 
+/**
+ * UsuarioCountOutputType without action
+ */
+export type UsuarioCountOutputTypeCountTokensRedefinicaoSenhaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TokenRedefinicaoSenhaWhereInput
+}
+
 
 export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -991,6 +1125,7 @@ export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   assinaturas?: boolean | Prisma.Usuario$assinaturasArgs<ExtArgs>
   agendamentos?: boolean | Prisma.Usuario$agendamentosArgs<ExtArgs>
   notificacoes?: boolean | Prisma.Usuario$notificacoesArgs<ExtArgs>
+  tokensRedefinicaoSenha?: boolean | Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>
   _count?: boolean | Prisma.UsuarioCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["usuario"]>
 
@@ -1037,6 +1172,7 @@ export type UsuarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   assinaturas?: boolean | Prisma.Usuario$assinaturasArgs<ExtArgs>
   agendamentos?: boolean | Prisma.Usuario$agendamentosArgs<ExtArgs>
   notificacoes?: boolean | Prisma.Usuario$notificacoesArgs<ExtArgs>
+  tokensRedefinicaoSenha?: boolean | Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>
   _count?: boolean | Prisma.UsuarioCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UsuarioIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1050,6 +1186,7 @@ export type $UsuarioPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     assinaturas: Prisma.$AssinaturaClientePayload<ExtArgs>[]
     agendamentos: Prisma.$AgendamentoPayload<ExtArgs>[]
     notificacoes: Prisma.$NotificacaoPayload<ExtArgs>[]
+    tokensRedefinicaoSenha: Prisma.$TokenRedefinicaoSenhaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1460,6 +1597,7 @@ export interface Prisma__UsuarioClient<T, Null = never, ExtArgs extends runtime.
   assinaturas<T extends Prisma.Usuario$assinaturasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$assinaturasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssinaturaClientePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   agendamentos<T extends Prisma.Usuario$agendamentosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$agendamentosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgendamentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notificacoes<T extends Prisma.Usuario$notificacoesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$notificacoesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificacaoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tokensRedefinicaoSenha<T extends Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TokenRedefinicaoSenhaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2003,6 +2141,30 @@ export type Usuario$notificacoesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.NotificacaoScalarFieldEnum | Prisma.NotificacaoScalarFieldEnum[]
+}
+
+/**
+ * Usuario.tokensRedefinicaoSenha
+ */
+export type Usuario$tokensRedefinicaoSenhaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TokenRedefinicaoSenha
+   */
+  select?: Prisma.TokenRedefinicaoSenhaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TokenRedefinicaoSenha
+   */
+  omit?: Prisma.TokenRedefinicaoSenhaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TokenRedefinicaoSenhaInclude<ExtArgs> | null
+  where?: Prisma.TokenRedefinicaoSenhaWhereInput
+  orderBy?: Prisma.TokenRedefinicaoSenhaOrderByWithRelationInput | Prisma.TokenRedefinicaoSenhaOrderByWithRelationInput[]
+  cursor?: Prisma.TokenRedefinicaoSenhaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TokenRedefinicaoSenhaScalarFieldEnum | Prisma.TokenRedefinicaoSenhaScalarFieldEnum[]
 }
 
 /**

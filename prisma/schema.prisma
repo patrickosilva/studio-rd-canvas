@@ -49,11 +49,12 @@ model Usuario {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  sessoes      Sessao[]
-  profissional Profissional?
-  assinaturas  AssinaturaCliente[] @relation("AssinaturasCliente")
-  agendamentos Agendamento[]       @relation("AgendamentosCliente")
-  notificacoes Notificacao[]
+  sessoes                Sessao[]
+  profissional           Profissional?
+  assinaturas            AssinaturaCliente[]     @relation("AssinaturasCliente")
+  agendamentos           Agendamento[]           @relation("AgendamentosCliente")
+  notificacoes           Notificacao[]
+  tokensRedefinicaoSenha TokenRedefinicaoSenha[]
 }
 
 model Servico {
@@ -284,4 +285,22 @@ model Notificacao {
   @@index([lida])
   @@index([criadoEm])
   @@index([usuarioId, lida])
+}
+
+model TokenRedefinicaoSenha {
+  id        String @id @default(cuid())
+  usuarioId String
+
+  tokenHash String   @unique
+  usado     Boolean  @default(false)
+  expiraEm  DateTime
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([expiraEm])
+  @@index([usado])
 }

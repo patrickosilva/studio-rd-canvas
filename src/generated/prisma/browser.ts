@@ -77,3 +77,8 @@ export type PagamentoAssinatura = Prisma.PagamentoAssinaturaModel
  * 
  */
 export type Notificacao = Prisma.NotificacaoModel
+/**
+ * Model TokenRedefinicaoSenha
+ * 
+ */
+export type TokenRedefinicaoSenha = Prisma.TokenRedefinicaoSenhaModel

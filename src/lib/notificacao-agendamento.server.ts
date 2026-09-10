@@ -92,7 +92,7 @@ async function enviarEmail({
   text,
   contexto,
 }: {
-  to: string;
+  to: string | string[];
   subject: string;
   text: string;
   contexto: string;
@@ -104,7 +104,7 @@ async function enviarEmail({
     return false;
   }
 
-  console.log(`${LOG_PREFIX} Enviando e-mail. contexto: ${contexto}, to: ${to}`);
+  console.log(`${LOG_PREFIX} Enviando e-mail. contexto: ${contexto}, to: ${Array.isArray(to) ? to.join(", ") : to}`);
 
   try {
     await transportador.sendMail({
@@ -143,8 +143,22 @@ function formatarDataHora(data: Date): {
   };
 }
 
-function destinatarioBarbearia(): string {
-  return process.env.NOTIFICATION_EMAIL?.trim() || process.env.BARBERSHOP_NOTIFICATION_EMAIL?.trim() || EMAIL_NOTIFICACAO_PADRAO;
+function destinatariosBarbearia(): string[] {
+  const emails = [
+    process.env.NOTIFICATION_EMAIL,
+    process.env.NOTIFICATION_EMAIL2,
+    process.env.BARBERSHOP_NOTIFICATION_EMAIL,
+  ]
+    .map((email) => email?.trim())
+    .filter((email): email is string => Boolean(email));
+
+  const emailsUnicos = Array.from(new Set(emails));
+
+  if (emailsUnicos.length > 0) {
+    return emailsUnicos;
+  }
+
+  return [EMAIL_NOTIFICACAO_PADRAO];
 }
 
 // ---------------------------------------------------------------------------
@@ -264,12 +278,12 @@ export async function enviarNotificacaoAgendamento(
 ): Promise<boolean> {
   const { assunto, texto } = montarConteudoAdministrativo(dados);
 
-  return enviarEmail({
-    to: destinatarioBarbearia(),
-    subject: assunto,
-    text: texto,
-    contexto: `${dados.tipo} (appointmentId: ${dados.agendamentoId})`,
-  });
+ return enviarEmail({
+  to: destinatariosBarbearia(),
+  subject: assunto,
+  text: texto,
+  contexto: `${dados.tipo} (appointmentId: ${dados.agendamentoId})`,
+});
 }
 
 // ---------------------------------------------------------------------------
@@ -377,6 +391,40 @@ export async function enviarEmailReagendamentoCliente(
     contexto: `AGENDAMENTO_REAGENDADO_CLIENTE (appointmentId: ${dados.agendamentoId})`,
   });
 }
+
+export async function enviarEmailCancelamentoEquipeCliente(
+  dados: DadosEmailCliente & { motivoCancelamento?: string | null },
+): Promise<boolean> {
+  const horario = formatarDataHora(dados.inicio);
+
+  const texto = [
+    `Olá, ${dados.cliente.nome}.`,
+    "",
+    "Seu agendamento foi cancelado pela nossa equipe.",
+    "",
+    `Serviço: ${dados.servico.nome}`,
+    `Profissional: ${dados.profissional.nome}`,
+    `Data: ${horario.data}`,
+    `Horário: ${horario.horario}`,
+    "Situação: CANCELADO",
+    "",
+    ...(dados.motivoCancelamento
+      ? [`Motivo informado: ${dados.motivoCancelamento}`, ""]
+      : []),
+    "Se desejar, acesse o sistema para escolher um novo horário disponível.",
+    "",
+    "Agradecemos a compreensão.",
+    "Studio RD Barber",
+  ].join("\n");
+
+  return enviarEmail({
+    to: dados.cliente.email,
+    subject: "Seu agendamento foi cancelado — Studio RD Barber",
+    text: texto,
+    contexto: `AGENDAMENTO_CANCELADO_EQUIPE_CLIENTE (appointmentId: ${dados.agendamentoId})`,
+  });
+}
+
 
 export async function enviarEmailLembreteAgendamento(
   dados: DadosEmailCliente,

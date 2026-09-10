@@ -2,11 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { FormaPagamento } from "../../generated/prisma/client";
 import {
+  enviarEmailCancelamentoEquipeCliente,
   enviarEmailConfirmacaoAgendamento,
   enviarEmailReagendamentoCliente,
   enviarEmailRecusaAgendamento,
   enviarNotificacaoAgendamento,
 } from "../notificacao-agendamento.server";
+
 import { prisma } from "../prisma.server";
 import { obterUsuarioAtual } from "../session.server";
 
@@ -1140,7 +1142,8 @@ export const funcionarioCriarAgendamentoParaCliente =
       };
     });
 
-export const funcionarioCancelarAgendamento =
+
+ export const funcionarioCancelarAgendamento =
   createServerFn({
     method: "POST",
   })
@@ -1157,6 +1160,28 @@ export const funcionarioCancelarAgendamento =
             id: true,
             status: true,
             inicio: true,
+
+            cliente: {
+              select: {
+                id: true,
+                nome: true,
+                email: true,
+              },
+            },
+
+            servico: {
+              select: {
+                id: true,
+                nome: true,
+              },
+            },
+
+            profissional: {
+              select: {
+                id: true,
+                nome: true,
+              },
+            },
           },
         });
 
@@ -1183,6 +1208,9 @@ export const funcionarioCancelarAgendamento =
         };
       }
 
+      const motivoCancelamento =
+        data.motivoCancelamento?.trim() || null;
+
       const agendamentoAtualizado =
         await prisma.agendamento.update({
           where: {
@@ -1190,8 +1218,7 @@ export const funcionarioCancelarAgendamento =
           },
           data: {
             status: "CANCELADO_FUNCIONARIO",
-            motivoCancelamento:
-              data.motivoCancelamento?.trim() || null,
+            motivoCancelamento,
             canceladoEm: new Date(),
           },
           select: {
@@ -1201,6 +1228,22 @@ export const funcionarioCancelarAgendamento =
             canceladoEm: true,
           },
         });
+
+      await enviarEmailCancelamentoEquipeCliente({
+        agendamentoId: agendamento.id,
+        cliente: {
+          nome: agendamento.cliente.nome,
+          email: agendamento.cliente.email,
+        },
+        servico: {
+          nome: agendamento.servico.nome,
+        },
+        profissional: {
+          nome: agendamento.profissional.nome,
+        },
+        inicio: agendamento.inicio,
+        motivoCancelamento,
+      });
 
       return {
         sucesso: true,
