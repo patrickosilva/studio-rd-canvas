@@ -544,6 +544,17 @@ async function criarNotificacaoCancelamentoCliente({
     console.error("Erro ao criar notificação de cancelamento:", error);
   }
 }
+function dispararEmailSemBloquear(
+  contexto: string,
+  acao: () => Promise<boolean>,
+) {
+  void acao().catch((error) => {
+    console.error(
+      `[EmailNotificacao] Erro assíncrono no envio. contexto: ${contexto}`,
+      error,
+    );
+  });
+}
 
 export const clienteCancelarAgendamento =
   createServerFn({
@@ -627,23 +638,25 @@ export const clienteCancelarAgendamento =
         inicio: agendamento.inicio,
       });
 
-      await enviarNotificacaoAgendamento({
-        tipo: "AGENDAMENTO_CANCELADO",
-        agendamentoId: agendamento.id,
-        cliente: {
-          nome: usuario.nome,
-          telefone: usuario.telefone,
-          email: usuario.email,
-        },
-        servico: {
-          nome: agendamento.servico.nome,
-        },
-        profissional: {
-          nome: agendamento.profissional.nome,
-        },
-        inicio: agendamento.inicio,
-        motivoCancelamento: agendamentoAtualizado.motivoCancelamento,
-      });
+      dispararEmailSemBloquear("AGENDAMENTO_CANCELADO", () =>
+        enviarNotificacaoAgendamento({
+          tipo: "AGENDAMENTO_CANCELADO",
+          agendamentoId: agendamento.id,
+          cliente: {
+            nome: usuario.nome,
+            telefone: usuario.telefone,
+            email: usuario.email,
+          },
+          servico: {
+            nome: agendamento.servico.nome,
+          },
+          profissional: {
+            nome: agendamento.profissional.nome,
+          },
+          inicio: agendamento.inicio,
+          motivoCancelamento: agendamentoAtualizado.motivoCancelamento,
+        }),
+      );
 
       return {
         sucesso: true,
@@ -829,22 +842,24 @@ export const solicitarAgendamento = createServerFn({
       acao: "solicitou",
     });
 
-    await enviarNotificacaoAgendamento({
-      tipo: "NOVO_AGENDAMENTO",
-      agendamentoId: agendamento.id,
-      cliente: {
-        nome: usuario.nome,
-        telefone: usuario.telefone,
-        email: usuario.email,
-      },
-      servico: {
-        nome: agendamento.servico.nome,
-      },
-      profissional: {
-        nome: agendamento.profissional.nome,
-      },
-      inicio: agendamento.inicio,
-    });
+    dispararEmailSemBloquear("NOVO_AGENDAMENTO", () =>
+      enviarNotificacaoAgendamento({
+        tipo: "NOVO_AGENDAMENTO",
+        agendamentoId: agendamento.id,
+        cliente: {
+          nome: usuario.nome,
+          telefone: usuario.telefone,
+          email: usuario.email,
+        },
+        servico: {
+          nome: agendamento.servico.nome,
+        },
+        profissional: {
+          nome: agendamento.profissional.nome,
+        },
+        inicio: agendamento.inicio,
+      }),
+    );
 
     return {
       sucesso: true,
@@ -1127,13 +1142,15 @@ export const funcionarioCriarAgendamentoParaCliente =
         acao: "agendou",
       });
 
-      await enviarEmailConfirmacaoAgendamento({
-        agendamentoId: agendamento.id,
-        cliente: agendamento.cliente,
-        servico: agendamento.servico,
-        profissional: agendamento.profissional,
-        inicio: agendamento.inicio,
-      });
+      dispararEmailSemBloquear("AGENDAMENTO_CONFIRMADO_CRIADO_EQUIPE", () =>
+        enviarEmailConfirmacaoAgendamento({
+          agendamentoId: agendamento.id,
+          cliente: agendamento.cliente,
+          servico: agendamento.servico,
+          profissional: agendamento.profissional,
+          inicio: agendamento.inicio,
+        }),
+      );
 
       return {
         sucesso: true,
@@ -1229,21 +1246,23 @@ export const funcionarioCriarAgendamentoParaCliente =
           },
         });
 
-      await enviarEmailCancelamentoEquipeCliente({
-        agendamentoId: agendamento.id,
-        cliente: {
-          nome: agendamento.cliente.nome,
-          email: agendamento.cliente.email,
-        },
-        servico: {
-          nome: agendamento.servico.nome,
-        },
-        profissional: {
-          nome: agendamento.profissional.nome,
-        },
-        inicio: agendamento.inicio,
-        motivoCancelamento,
-      });
+      dispararEmailSemBloquear("AGENDAMENTO_CANCELADO_EQUIPE_CLIENTE", () =>
+        enviarEmailCancelamentoEquipeCliente({
+          agendamentoId: agendamento.id,
+          cliente: {
+            nome: agendamento.cliente.nome,
+            email: agendamento.cliente.email,
+          },
+          servico: {
+            nome: agendamento.servico.nome,
+          },
+          profissional: {
+            nome: agendamento.profissional.nome,
+          },
+          inicio: agendamento.inicio,
+          motivoCancelamento,
+        }),
+      );
 
       return {
         sucesso: true,
@@ -1429,13 +1448,15 @@ export const funcionarioConfirmarAgendamento =
           },
         });
 
-      await enviarEmailConfirmacaoAgendamento({
-        agendamentoId: agendamento.id,
-        cliente: agendamento.cliente,
-        servico: agendamento.servico,
-        profissional: agendamento.profissional,
-        inicio: agendamentoAtualizado.inicio,
-      });
+      dispararEmailSemBloquear("AGENDAMENTO_CONFIRMADO", () =>
+        enviarEmailConfirmacaoAgendamento({
+          agendamentoId: agendamento.id,
+          cliente: agendamento.cliente,
+          servico: agendamento.servico,
+          profissional: agendamento.profissional,
+          inicio: agendamentoAtualizado.inicio,
+        }),
+      );
 
       return {
         sucesso: true,
@@ -1515,13 +1536,15 @@ export const funcionarioRecusarAgendamento =
           },
         });
 
-      await enviarEmailRecusaAgendamento({
-        agendamentoId: agendamento.id,
-        cliente: agendamento.cliente,
-        servico: agendamento.servico,
-        profissional: agendamento.profissional,
-        inicio: agendamento.inicio,
-      });
+      dispararEmailSemBloquear("AGENDAMENTO_RECUSADO", () =>
+        enviarEmailRecusaAgendamento({
+          agendamentoId: agendamento.id,
+          cliente: agendamento.cliente,
+          servico: agendamento.servico,
+          profissional: agendamento.profissional,
+          inicio: agendamento.inicio,
+        }),
+      );
 
       return {
         sucesso: true,
@@ -1893,39 +1916,43 @@ export const operacionalRemarcarAgendamento =
         acao: "agendou",
       });
 
-      await enviarNotificacaoAgendamento({
-        tipo: "AGENDAMENTO_REAGENDADO",
-        agendamentoId: agendamento.id,
-        cliente: {
-          nome: agendamento.cliente.nome,
-          telefone: agendamento.cliente.telefone,
-          email: agendamento.cliente.email,
-        },
-        servico: {
-          nome: agendamentoAtualizado.servico.nome,
-        },
-        profissional: {
-          nome: agendamentoAtualizado.profissional.nome,
-        },
-        inicio: agendamentoAtualizado.inicio,
-        inicioAnterior,
-      });
+      dispararEmailSemBloquear("AGENDAMENTO_REAGENDADO_BARBEARIA", () =>
+        enviarNotificacaoAgendamento({
+          tipo: "AGENDAMENTO_REAGENDADO",
+          agendamentoId: agendamento.id,
+          cliente: {
+            nome: agendamento.cliente.nome,
+            telefone: agendamento.cliente.telefone,
+            email: agendamento.cliente.email,
+          },
+          servico: {
+            nome: agendamentoAtualizado.servico.nome,
+          },
+          profissional: {
+            nome: agendamentoAtualizado.profissional.nome,
+          },
+          inicio: agendamentoAtualizado.inicio,
+          inicioAnterior,
+        }),
+      );
 
-      await enviarEmailReagendamentoCliente({
-        agendamentoId: agendamento.id,
-        cliente: {
-          nome: agendamento.cliente.nome,
-          email: agendamento.cliente.email,
-        },
-        servico: {
-          nome: agendamentoAtualizado.servico.nome,
-        },
-        profissional: {
-          nome: agendamentoAtualizado.profissional.nome,
-        },
-        inicio: agendamentoAtualizado.inicio,
-        inicioAnterior,
-      });
+      dispararEmailSemBloquear("AGENDAMENTO_REAGENDADO_CLIENTE", () =>
+        enviarEmailReagendamentoCliente({
+          agendamentoId: agendamento.id,
+          cliente: {
+            nome: agendamento.cliente.nome,
+            email: agendamento.cliente.email,
+          },
+          servico: {
+            nome: agendamentoAtualizado.servico.nome,
+          },
+          profissional: {
+            nome: agendamentoAtualizado.profissional.nome,
+          },
+          inicio: agendamentoAtualizado.inicio,
+          inicioAnterior,
+        }),
+      );
 
       return {
         sucesso: true,

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import nodemailer, { type Transporter } from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 // Serviço central de e-mail transacional da barbearia. Cobre duas direções:
 //
@@ -74,15 +75,27 @@ console.log(`${LOG_PREFIX} Configuração SMTP carregada.`, {
   ),
 });
 
-transportadorCache = nodemailer.createTransport({
+type OpcoesSmtpComFamily = SMTPTransport.Options & {
+  family?: 4 | 6;
+};
+
+const opcoesTransporte: OpcoesSmtpComFamily = {
   host,
   port,
   secure: port === 465,
+  family: 4,
   auth: {
     user: usuario,
     pass: senha,
   },
-});
+  connectionTimeout: 5000,
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
+};
+
+transportadorCache = nodemailer.createTransport(
+  opcoesTransporte as SMTPTransport.Options,
+);
 
   // Diagnóstico único de conexão/autenticação SMTP, feito só na primeira
   // vez que o transportador é criado — não a cada envio.
