@@ -18,15 +18,21 @@ const EMAIL_NOTIFICACAO_PADRAO = "studiordbarber00@gmail.com";
 const FUSO_HORARIO_BARBEARIA = "America/Sao_Paulo";
 const LOG_PREFIX = "[EmailNotificacao]";
 
+const SMTP_HOST_PADRAO = "smtp.gmail.com";
+const SMTP_PORT_PADRAO = "465";
+
 let transportadorCache: Transporter | null | undefined;
 
 function variaveisSmtpAusentes(): string[] {
   const ausentes: string[] = [];
 
-  if (!process.env.SMTP_HOST) ausentes.push("SMTP_HOST");
-  if (!process.env.SMTP_PORT) ausentes.push("SMTP_PORT");
-  if (!process.env.SMTP_USER) ausentes.push("SMTP_USER");
-  if (!process.env.SMTP_PASSWORD) ausentes.push("SMTP_PASSWORD");
+  if (!process.env.SMTP_USER?.trim()) {
+    ausentes.push("SMTP_USER");
+  }
+
+  if (!process.env.SMTP_PASSWORD?.trim()) {
+    ausentes.push("SMTP_PASSWORD");
+  }
 
   return ausentes;
 }
@@ -47,20 +53,36 @@ function obterTransportador(): Transporter | null {
     return transportadorCache;
   }
 
-  const host = process.env.SMTP_HOST as string;
-  const port = process.env.SMTP_PORT as string;
-  const usuario = process.env.SMTP_USER as string;
-  const senha = process.env.SMTP_PASSWORD as string;
+ const host = process.env.SMTP_HOST?.trim() || SMTP_HOST_PADRAO;
+const port = Number(
+  process.env.SMTP_PORT?.trim() || SMTP_PORT_PADRAO,
+);
+const usuario = process.env.SMTP_USER?.trim() as string;
+const senha = process.env.SMTP_PASSWORD as string;
 
-  transportadorCache = nodemailer.createTransport({
-    host,
-    port: Number(port),
-    secure: Number(port) === 465,
-    auth: {
-      user: usuario,
-      pass: senha,
-    },
-  });
+console.log(`${LOG_PREFIX} Configuração SMTP carregada.`, {
+  host,
+  port,
+  userConfigurado: Boolean(usuario),
+  passwordConfigurado: Boolean(senha),
+  emailFromConfigurado: Boolean(process.env.EMAIL_FROM?.trim()),
+  notificationEmailConfigurado: Boolean(
+    process.env.NOTIFICATION_EMAIL?.trim(),
+  ),
+  notificationEmail2Configurado: Boolean(
+    process.env.NOTIFICATION_EMAIL2?.trim(),
+  ),
+});
+
+transportadorCache = nodemailer.createTransport({
+  host,
+  port,
+  secure: port === 465,
+  auth: {
+    user: usuario,
+    pass: senha,
+  },
+});
 
   // Diagnóstico único de conexão/autenticação SMTP, feito só na primeira
   // vez que o transportador é criado — não a cada envio.
