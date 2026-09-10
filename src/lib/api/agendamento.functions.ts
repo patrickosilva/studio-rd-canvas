@@ -1890,6 +1890,7 @@ export const operacionalRemarcarAgendamento =
         agendamento: agendamentoAtualizado,
       };
     });
+    
 export const adminListarAgenda = createServerFn({
   method: "GET",
 }).handler(async () => {
