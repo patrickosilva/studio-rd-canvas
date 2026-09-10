@@ -1,6 +1,4 @@
 import "dotenv/config";
-import nodemailer, { type Transporter } from "nodemailer";
-import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 // Serviço central de e-mail transacional da barbearia. Cobre duas direções:
 //
@@ -12,113 +10,35 @@ import type SMTPTransport from "nodemailer/lib/smtp-transport";
 // Falha no envio nunca deve derrubar o fluxo de agendamento: a operação no
 // banco já aconteceu antes de qualquer chamada deste módulo. Por isso nenhuma
 // função aqui lança exceção — elas apenas registram o erro no log e retornam
-// `false` para quem precisar saber se o envio realmente aconteceu (ex.: a
-// rotina de lembretes, que só marca `reminderSentAt` em caso de sucesso).
+// `false` para quem precisar saber se o envio realmente aconteceu.
 
 const EMAIL_NOTIFICACAO_PADRAO = "studiordbarber00@gmail.com";
 const FUSO_HORARIO_BARBEARIA = "America/Sao_Paulo";
 const LOG_PREFIX = "[EmailNotificacao]";
+const RESEND_API_URL = "https://api.resend.com/emails";
 
-const SMTP_HOST_PADRAO = "smtp.gmail.com";
-const SMTP_PORT_PADRAO = "465";
+type DestinatarioEmail = string | string[];
 
-let transportadorCache: Transporter | null | undefined;
-
-function variaveisSmtpAusentes(): string[] {
+function variaveisEmailApiAusentes(): string[] {
   const ausentes: string[] = [];
 
-  if (!process.env.SMTP_USER?.trim()) {
-    ausentes.push("SMTP_USER");
+  if (!process.env.RESEND_API_KEY?.trim()) {
+    ausentes.push("RESEND_API_KEY");
   }
 
-  if (!process.env.SMTP_PASSWORD?.trim()) {
-    ausentes.push("SMTP_PASSWORD");
+  if (!remetentePadrao()) {
+    ausentes.push("RESEND_FROM_EMAIL ou EMAIL_FROM");
   }
 
   return ausentes;
 }
 
-function obterTransportador(): Transporter | null {
-  if (transportadorCache !== undefined) {
-    return transportadorCache;
-  }
-
-  const ausentes = variaveisSmtpAusentes();
-
-  if (ausentes.length > 0) {
-    console.warn(
-      `${LOG_PREFIX} SMTP não configurado — envio de e-mails desativado. Variáveis ausentes: ${ausentes.join(", ")}.`,
-    );
-
-    transportadorCache = null;
-    return transportadorCache;
-  }
-
- const host = process.env.SMTP_HOST?.trim() || SMTP_HOST_PADRAO;
-const port = Number(
-  process.env.SMTP_PORT?.trim() || SMTP_PORT_PADRAO,
-);
-const usuario = process.env.SMTP_USER?.trim() as string;
-const senha = process.env.SMTP_PASSWORD as string;
-
-console.log(`${LOG_PREFIX} Configuração SMTP carregada.`, {
-  host,
-  port,
-  userConfigurado: Boolean(usuario),
-  passwordConfigurado: Boolean(senha),
-  emailFromConfigurado: Boolean(process.env.EMAIL_FROM?.trim()),
-  notificationEmailConfigurado: Boolean(
-    process.env.NOTIFICATION_EMAIL?.trim(),
-  ),
-  notificationEmail2Configurado: Boolean(
-    process.env.NOTIFICATION_EMAIL2?.trim(),
-  ),
-});
-
-type OpcoesSmtpComFamily = SMTPTransport.Options & {
-  family?: 4 | 6;
-};
-
-const opcoesTransporte: OpcoesSmtpComFamily = {
-  host,
-  port,
-  secure: port === 465,
-  family: 4,
-  auth: {
-    user: usuario,
-    pass: senha,
-  },
-  connectionTimeout: 5000,
-  greetingTimeout: 5000,
-  socketTimeout: 10000,
-};
-
-transportadorCache = nodemailer.createTransport(
-  opcoesTransporte as SMTPTransport.Options,
-);
-
-  // Diagnóstico único de conexão/autenticação SMTP, feito só na primeira
-  // vez que o transportador é criado — não a cada envio.
-  transportadorCache
-    .verify()
-    .then(() => {
-      console.log(
-        `${LOG_PREFIX} Conexão SMTP verificada com sucesso (host, porta e autenticação OK).`,
-      );
-    })
-    .catch((error) => {
-      console.error(
-        `${LOG_PREFIX} Falha ao verificar conexão SMTP: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    });
-
-  return transportadorCache;
-}
-
-function remetentePadrao(): string | undefined {
-  return process.env.EMAIL_FROM?.trim() || process.env.SMTP_USER;
+function remetentePadrao(): string {
+  return (
+    process.env.RESEND_FROM_EMAIL?.trim() ||
+    process.env.EMAIL_FROM?.trim() ||
+    `Studio RD Black <${EMAIL_NOTIFICACAO_PADRAO}>`
+  );
 }
 
 async function enviarEmail({
@@ -127,36 +47,64 @@ async function enviarEmail({
   text,
   contexto,
 }: {
-  to: string | string[];
+  to: DestinatarioEmail;
   subject: string;
   text: string;
   contexto: string;
 }): Promise<boolean> {
-  const transportador = obterTransportador();
+  const ausentes = variaveisEmailApiAusentes();
 
-  if (!transportador) {
-    console.warn(`${LOG_PREFIX} Envio ignorado (SMTP não configurado). contexto: ${contexto}`);
+  if (ausentes.length > 0) {
+    console.warn(
+      `${LOG_PREFIX} API de e-mail não configurada — envio ignorado. Variáveis ausentes: ${ausentes.join(", ")}. contexto: ${contexto}`,
+    );
+
     return false;
   }
 
-  console.log(`${LOG_PREFIX} Enviando e-mail. contexto: ${contexto}, to: ${Array.isArray(to) ? to.join(", ") : to}`);
+  const destinatarios = Array.isArray(to) ? to : [to];
+
+  console.log(`${LOG_PREFIX} Enviando e-mail via Resend API.`, {
+    contexto,
+    to: destinatarios.join(", "),
+    fromConfigurado: Boolean(remetentePadrao()),
+    apiKeyConfigurada: Boolean(process.env.RESEND_API_KEY?.trim()),
+  });
 
   try {
-    await transportador.sendMail({
-      from: remetentePadrao(),
-      to,
-      subject,
-      text,
+    const resposta = await fetch(RESEND_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY?.trim()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: remetentePadrao(),
+        to: destinatarios,
+        subject,
+        text,
+      }),
     });
 
-    console.log(`${LOG_PREFIX} E-mail enviado com sucesso. contexto: ${contexto}`);
+    if (!resposta.ok) {
+      const detalhe = await resposta.text().catch(() => "");
+
+      console.error(
+        `${LOG_PREFIX} Falha ao enviar e-mail via Resend API. contexto: ${contexto}, status: ${resposta.status}, detalhe: ${detalhe}`,
+      );
+
+      return false;
+    }
+
+    console.log(`${LOG_PREFIX} E-mail enviado com sucesso via Resend API. contexto: ${contexto}`);
     return true;
   } catch (error) {
     console.error(
-      `${LOG_PREFIX} Falha ao enviar e-mail. contexto: ${contexto}, erro: ${
+      `${LOG_PREFIX} Erro ao chamar Resend API. contexto: ${contexto}, erro: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );
+
     return false;
   }
 }
