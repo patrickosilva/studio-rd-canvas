@@ -55,3 +55,47 @@ Appointment is reviewed
      ↓             ↓
 Customer        Customer
 notified        notified
+
+Customers can also cancel or reschedule appointments, generating the corresponding notifications automatically.
+
+🛠️ Tech Stack
+Backend & Data
+PostgreSQL
+Prisma ORM
+SMTP integration
+Development
+Git
+GitHub
+Environment variables
+Database migrations
+🗄️ Database
+
+The application uses PostgreSQL for persistent data storage.
+
+Database structure and migrations are managed through Prisma, ensuring consistent schema evolution throughout development.
+
+🔐 Environment Variables
+
+The project uses environment variables for sensitive configuration such as database credentials and SMTP authentication.
+
+Example:
+DATABASE_URL=your_database_url
+
+SMTP_HOST=your_smtp_host
+SMTP_PORT=your_smtp_port
+SMTP_USER=your_email
+SMTP_PASSWORD=your_app_password
+
+Sensitive credentials must never be committed to the repository.
+
+🚀 Project Purpose
+
+Studio RD Barber was developed to solve a real business need: centralizing appointment management while reducing manual communication between customers and the barbershop.
+
+The project demonstrates the implementation of business rules, database persistence, automated communication and Full Stack application development in a real-world scenario.
+
+👨‍💻 Developer
+
+Developed by Patrick Oliveira.
+
+Full Stack Developer focused on software development and Cybersecurity.
