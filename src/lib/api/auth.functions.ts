@@ -165,14 +165,17 @@ export const cadastrarCliente = createServerFn({
       where: {
         OR: [
           {
-            email,
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
           },
           ...(telefoneNormalizado
             ? [
-                {
-                  telefone: telefoneNormalizado,
-                },
-              ]
+              {
+                telefone: telefoneNormalizado,
+              },
+            ]
             : []),
         ],
       },
@@ -228,9 +231,12 @@ export const entrar = createServerFn({
   .handler(async ({ data }) => {
     const email = data.email.trim().toLowerCase();
 
-    const usuario = await prisma.usuario.findUnique({
+    const usuario = await prisma.usuario.findFirst({
       where: {
-        email,
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
       },
       select: {
         id: true,
