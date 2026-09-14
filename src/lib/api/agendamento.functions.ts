@@ -1217,14 +1217,6 @@ export const funcionarioCriarAgendamentoParaCliente =
         };
       }
 
-      if (agendamento.inicio <= new Date()) {
-        return {
-          sucesso: false,
-          mensagem:
-            "Não é possível cancelar um agendamento que já passou.",
-        };
-      }
-
       const motivoCancelamento =
         data.motivoCancelamento?.trim() || null;
 
