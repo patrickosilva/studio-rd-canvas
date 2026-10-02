@@ -73,7 +73,7 @@ type IndisponibilidadeAgenda = {
   motivo: string | null;
 };
 
-const INTERVALO_INICIO_MINUTOS = 10;
+const INTERVALO_INICIO_MINUTOS = 5;
 
 const funcionamentoPorDia: Record<
   number,
@@ -229,6 +229,40 @@ function gerarHorariosDisponiveis(
   }
 
   return horarios;
+}
+function ehEncaixePerfeito(
+  horario: string,
+  dataInput: string,
+  duracaoMinutos: number,
+  indisponibilidades: IndisponibilidadeAgenda[],
+): boolean {
+  const inicio = new Date(
+    criarInicioIsoLocal(dataInput, horario),
+  );
+
+  const fim = new Date(
+    inicio.getTime() +
+      duracaoMinutos * 60 * 1000,
+  );
+
+  return indisponibilidades.some(
+    (indisponibilidade) => {
+      const inicioOcupado = new Date(
+        indisponibilidade.inicio,
+      );
+
+      const fimOcupado = new Date(
+        indisponibilidade.fim,
+      );
+
+      return (
+        inicio.getTime() ===
+          fimOcupado.getTime() ||
+        fim.getTime() ===
+          inicioOcupado.getTime()
+      );
+    },
+  );
 }
 
 function existeConflitoComIndisponibilidade(
@@ -448,40 +482,110 @@ function FuncionarioAgendarClientePage() {
   }, [dataSelecionada, servicoSelecionado]);
 
   const horariosFiltrados = useMemo(() => {
-    return horariosDisponiveis.filter((horario) => {
-      if (!servicoSelecionado || !dataSelecionada) {
-        return false;
+  return horariosDisponiveis.filter((horario) => {
+    if (!servicoSelecionado || !dataSelecionada) {
+      return false;
+    }
+
+    const inicioHorario = new Date(
+      criarInicioIsoLocal(dataSelecionada, horario),
+    );
+
+    const fimHorario = new Date(
+      inicioHorario.getTime() +
+        servicoSelecionado.duracaoMinutos * 60 * 1000,
+    );
+
+    return !existeConflitoComIndisponibilidade(
+      inicioHorario,
+      fimHorario,
+      indisponibilidades,
+    );
+  });
+}, [
+  horariosDisponiveis,
+  servicoSelecionado,
+  dataSelecionada,
+  indisponibilidades,
+]);
+
+const horariosOrdenadosPorEncaixe = useMemo(() => {
+  if (
+    !servicoSelecionado ||
+    !dataSelecionada ||
+    horariosFiltrados.length === 0
+  ) {
+    return [];
+  }
+
+  const duracaoMs =
+    servicoSelecionado.duracaoMinutos * 60 * 1000;
+
+  function pontuacaoEncaixe(horario: string): number {
+    const inicio = new Date(
+      criarInicioIsoLocal(dataSelecionada, horario),
+    );
+
+    const fim = new Date(
+      inicio.getTime() + duracaoMs,
+    );
+
+    let menorDistancia = Number.POSITIVE_INFINITY;
+
+    for (const indisponibilidade of indisponibilidades) {
+      const inicioOcupado = new Date(
+        indisponibilidade.inicio,
+      );
+
+      const fimOcupado = new Date(
+        indisponibilidade.fim,
+      );
+
+      const distanciaDepois = Math.abs(
+        inicio.getTime() - fimOcupado.getTime(),
+      );
+
+      const distanciaAntes = Math.abs(
+        fim.getTime() - inicioOcupado.getTime(),
+      );
+
+      menorDistancia = Math.min(
+        menorDistancia,
+        distanciaDepois,
+        distanciaAntes,
+      );
+    }
+
+    return menorDistancia;
+  }
+
+  return [...horariosFiltrados].sort(
+    (horarioA, horarioB) => {
+      const pontuacaoA = pontuacaoEncaixe(horarioA);
+      const pontuacaoB = pontuacaoEncaixe(horarioB);
+
+      if (pontuacaoA !== pontuacaoB) {
+        return pontuacaoA - pontuacaoB;
       }
 
-      const inicioHorario = new Date(
-        criarInicioIsoLocal(dataSelecionada, horario),
-      );
-
-      const fimHorario = new Date(
-        inicioHorario.getTime() +
-          servicoSelecionado.duracaoMinutos * 60 * 1000,
-      );
-
-      return !existeConflitoComIndisponibilidade(
-        inicioHorario,
-        fimHorario,
-        indisponibilidades,
-      );
-    });
-  }, [
-    horariosDisponiveis,
-    servicoSelecionado,
-    dataSelecionada,
-    indisponibilidades,
-  ]);
-
-  const formularioCompleto = Boolean(
-    clienteSelecionadoId &&
-      servicoId &&
-      profissionalId &&
-      dataSelecionada &&
-      horarioSelecionado,
+      return horarioA.localeCompare(horarioB);
+    },
   );
+}, [
+  horariosFiltrados,
+  indisponibilidades,
+  servicoSelecionado,
+  dataSelecionada,
+]);
+
+const formularioCompleto = Boolean(
+  clienteSelecionadoId &&
+    servicoId &&
+    profissionalId &&
+    dataSelecionada &&
+    horarioSelecionado,
+);
+ 
 
   async function carregarIndisponibilidades(
     profissionalIdSelecionado: string,
@@ -530,17 +634,22 @@ function FuncionarioAgendarClientePage() {
   }, [profissionalId, dataSelecionada]);
 
   useEffect(() => {
-    if (
-      horariosFiltrados.length > 0 &&
-      !horariosFiltrados.includes(horarioSelecionado)
-    ) {
-      setHorarioSelecionado(horariosFiltrados[0]);
-    }
+  if (
+    horariosOrdenadosPorEncaixe.length > 0 &&
+    !horariosOrdenadosPorEncaixe.includes(horarioSelecionado)
+  ) {
+    setHorarioSelecionado(
+      horariosOrdenadosPorEncaixe[0],
+    );
+  }
 
-    if (horariosFiltrados.length === 0) {
-      setHorarioSelecionado("");
-    }
-  }, [horariosFiltrados, horarioSelecionado]);
+  if (horariosOrdenadosPorEncaixe.length === 0) {
+    setHorarioSelecionado("");
+  }
+}, [
+  horariosOrdenadosPorEncaixe,
+  horarioSelecionado,
+]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -820,7 +929,7 @@ function FuncionarioAgendarClientePage() {
                           </div>
                         ) : (
                           <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
-                            {horariosFiltrados.map((horario) => {
+                            {horariosOrdenadosPorEncaixe.map((horario) => {
                               const ativo =
                                 horario === horarioSelecionado;
 
@@ -1052,6 +1161,7 @@ function ResumoLinha({
     </div>
   );
 }
+
 
 function formatarDinheiro(valorCentavos: number) {
   return new Intl.NumberFormat("pt-BR", {

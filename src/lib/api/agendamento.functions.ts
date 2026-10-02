@@ -216,7 +216,7 @@ const concluirAgendamentoSchema = z.object({
 });
 
 const TIMEZONE_PADRAO = "America/Sao_Paulo";
-const INTERVALO_INICIO_MINUTOS = 10;
+const INTERVALO_INICIO_MINUTOS = 5;
 
 // Esse intervalo define apenas os possíveis horários de início.
 // A duração real do atendimento sempre vem de servico.duracaoMinutos.
@@ -376,7 +376,7 @@ function validarHorarioNaGrade({
     return {
       valido: false,
       mensagem:
-        "Escolha um horário em um início válido de 10 em 10 minutos.",
+        "Escolha um horário em um início válido de 5 em 5 minutos.",
     };
   }
 
@@ -1342,7 +1342,7 @@ export const funcionarioListarSolicitacoes =
         },
         servico: {
           select: {
-            id : true,
+            id: true,
             nome: true,
             duracaoMinutos: true,
             precoCentavos: true,
@@ -1993,6 +1993,7 @@ export const operacionalRemarcarAgendamento =
         agendamento: agendamentoAtualizado,
       };
     });
+    
 export const adminListarAgenda = createServerFn({
   method: "GET",
 }).handler(async () => {
