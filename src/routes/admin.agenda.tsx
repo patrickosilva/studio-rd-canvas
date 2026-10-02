@@ -425,7 +425,7 @@ function AdminAgendaPage() {
 
       const fimHorario = new Date(
         inicioHorario.getTime() +
-          agendamentoParaRemarcar.servico.duracaoMinutos * 60 * 1000,
+        agendamentoParaRemarcar.servico.duracaoMinutos * 60 * 1000,
       );
 
       return !existeConflitoComIndisponibilidade({
@@ -545,7 +545,11 @@ function AdminAgendaPage() {
       const resultado = await remarcarAgendamento({
         data: {
           agendamentoId: agendamentoParaRemarcar.id,
-          inicio: criarInicioIsoLocal(dataRemarcacao, horarioRemarcacao),
+          servicoId: agendamentoParaRemarcar.servico.id,
+          inicio: criarInicioIsoLocal(
+            dataRemarcacao,
+            horarioRemarcacao,
+          ),
         },
       });
 
@@ -901,11 +905,10 @@ function AdminAgendaPage() {
                           setDataRemarcacao(dia);
                           setHorarioRemarcacao("");
                         }}
-                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
-                          ativo
-                            ? "border-gold bg-gold-soft text-gold"
-                            : "border-border bg-background/40 hover:bg-surface-elevated"
-                        }`}
+                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${ativo
+                          ? "border-gold bg-gold-soft text-gold"
+                          : "border-border bg-background/40 hover:bg-surface-elevated"
+                          }`}
                       >
                         <span className="block font-medium capitalize">
                           {obterNomeDia(dia)}
@@ -940,11 +943,10 @@ function AdminAgendaPage() {
                           key={horario}
                           type="button"
                           onClick={() => setHorarioRemarcacao(horario)}
-                          className={`rounded-xl border px-3 py-2 text-sm transition ${
-                            ativo
-                              ? "border-gold bg-gold-soft text-gold"
-                              : "border-border bg-background/40 hover:bg-surface-elevated"
-                          }`}
+                          className={`rounded-xl border px-3 py-2 text-sm transition ${ativo
+                            ? "border-gold bg-gold-soft text-gold"
+                            : "border-border bg-background/40 hover:bg-surface-elevated"
+                            }`}
                         >
                           {horario}
                         </button>

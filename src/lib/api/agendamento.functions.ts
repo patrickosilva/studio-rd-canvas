@@ -135,6 +135,11 @@ const remarcarAgendamentoSchema = z.object({
     .trim()
     .min(1, "Agendamento inválido."),
 
+  servicoId: z
+    .string()
+    .trim()
+    .min(1, "Escolha um serviço."),
+
   inicio: z
     .string()
     .trim()
@@ -1160,7 +1165,7 @@ export const funcionarioCriarAgendamentoParaCliente =
     });
 
 
- export const funcionarioCancelarAgendamento =
+export const funcionarioCancelarAgendamento =
   createServerFn({
     method: "POST",
   })
@@ -1337,6 +1342,7 @@ export const funcionarioListarSolicitacoes =
         },
         servico: {
           select: {
+            id : true,
             nome: true,
             duracaoMinutos: true,
             precoCentavos: true,
@@ -1730,7 +1736,7 @@ export const funcionarioConcluirAgendamento =
       };
     });
 export const operacionalRemarcarAgendamento =
-   createServerFn({
+  createServerFn({
     method: "POST",
   })
     .validator(remarcarAgendamentoSchema)
@@ -1808,14 +1814,34 @@ export const operacionalRemarcarAgendamento =
         };
       }
 
+      const novoServico = await prisma.servico.findFirst({
+        where: {
+          id: data.servicoId,
+          ativo: true,
+        },
+        select: {
+          id: true,
+          nome: true,
+          duracaoMinutos: true,
+          precoCentavos: true,
+        },
+      });
+
+      if (!novoServico) {
+        return {
+          sucesso: false,
+          mensagem: "Serviço não encontrado ou inativo.",
+        };
+      }
+
       const novoFim = calcularFim(
         novoInicio,
-        agendamento.servico.duracaoMinutos,
+        novoServico.duracaoMinutos,
       );
 
       const horarioNaGrade = validarHorarioNaGrade({
         inicio: novoInicio,
-        duracaoMinutos: agendamento.servico.duracaoMinutos,
+        duracaoMinutos: novoServico.duracaoMinutos,
       });
 
       if (!horarioNaGrade.valido) {
@@ -1863,11 +1889,14 @@ export const operacionalRemarcarAgendamento =
           where: {
             id: agendamento.id,
           },
+
           data: {
+            servicoId: novoServico.id,
             inicio: novoInicio,
             fim: novoFim,
             reminderSentAt: null,
           },
+
           select: {
             id: true,
             inicio: true,
@@ -1903,56 +1932,67 @@ export const operacionalRemarcarAgendamento =
 
       await criarNotificacaoNovoAgendamento({
         clienteNome: agendamento.cliente.nome,
-        servicoNome: agendamento.servico.nome,
+        servicoNome: agendamentoAtualizado.servico.nome,
         inicio: agendamentoAtualizado.inicio,
         acao: "agendou",
       });
 
-      dispararEmailSemBloquear("AGENDAMENTO_REAGENDADO_BARBEARIA", () =>
-        enviarNotificacaoAgendamento({
-          tipo: "AGENDAMENTO_REAGENDADO",
-          agendamentoId: agendamento.id,
-          cliente: {
-            nome: agendamento.cliente.nome,
-            telefone: agendamento.cliente.telefone,
-            email: agendamento.cliente.email,
-          },
-          servico: {
-            nome: agendamentoAtualizado.servico.nome,
-          },
-          profissional: {
-            nome: agendamentoAtualizado.profissional.nome,
-          },
-          inicio: agendamentoAtualizado.inicio,
-          inicioAnterior,
-        }),
+      dispararEmailSemBloquear(
+        "AGENDAMENTO_REAGENDADO_BARBEARIA",
+        () =>
+          enviarNotificacaoAgendamento({
+            tipo: "AGENDAMENTO_REAGENDADO",
+            agendamentoId: agendamento.id,
+
+            cliente: {
+              nome: agendamento.cliente.nome,
+              telefone: agendamento.cliente.telefone,
+              email: agendamento.cliente.email,
+            },
+
+            servico: {
+              nome: agendamentoAtualizado.servico.nome,
+            },
+
+            profissional: {
+              nome: agendamentoAtualizado.profissional.nome,
+            },
+
+            inicio: agendamentoAtualizado.inicio,
+            inicioAnterior,
+          }),
       );
 
-      dispararEmailSemBloquear("AGENDAMENTO_REAGENDADO_CLIENTE", () =>
-        enviarEmailReagendamentoCliente({
-          agendamentoId: agendamento.id,
-          cliente: {
-            nome: agendamento.cliente.nome,
-            email: agendamento.cliente.email,
-          },
-          servico: {
-            nome: agendamentoAtualizado.servico.nome,
-          },
-          profissional: {
-            nome: agendamentoAtualizado.profissional.nome,
-          },
-          inicio: agendamentoAtualizado.inicio,
-          inicioAnterior,
-        }),
+      dispararEmailSemBloquear(
+        "AGENDAMENTO_REAGENDADO_CLIENTE",
+        () =>
+          enviarEmailReagendamentoCliente({
+            agendamentoId: agendamento.id,
+
+            cliente: {
+              nome: agendamento.cliente.nome,
+              email: agendamento.cliente.email,
+            },
+
+            servico: {
+              nome: agendamentoAtualizado.servico.nome,
+            },
+
+            profissional: {
+              nome: agendamentoAtualizado.profissional.nome,
+            },
+
+            inicio: agendamentoAtualizado.inicio,
+            inicioAnterior,
+          }),
       );
 
       return {
         sucesso: true,
-        mensagem: "Horário do agendamento atualizado com sucesso.",
+        mensagem: "Agendamento atualizado com sucesso.",
         agendamento: agendamentoAtualizado,
       };
     });
-    
 export const adminListarAgenda = createServerFn({
   method: "GET",
 }).handler(async () => {
