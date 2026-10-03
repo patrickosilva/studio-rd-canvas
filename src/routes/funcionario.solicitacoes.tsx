@@ -141,6 +141,9 @@ type FormaPagamentoValor =
 const TIMEZONE_PADRAO = "America/Sao_Paulo";
 const INTERVALO_INICIO_MINUTOS = 10;
 
+// Dias anteriores exibidos na remarcação para corrigir lançamentos retroativos.
+const DIAS_RETROATIVOS = 7;
+
 const funcionamentoPorDia: Record<
   number,
   {
@@ -563,7 +566,15 @@ function SolicitacoesPage() {
       horariosRemarcacaoFiltrados.length > 0 &&
       !horariosRemarcacaoFiltrados.includes(horarioRemarcacao)
     ) {
-      setHorarioRemarcacao(horariosRemarcacaoFiltrados[0]);
+      // Sugere um horário futuro quando existir; horário passado
+      // só é selecionado automaticamente em dias anteriores.
+      setHorarioRemarcacao(
+        horariosRemarcacaoFiltrados.find(
+          (horario) =>
+            criarDataHoraLocal(dataRemarcacao, horario).getTime() >
+            Date.now(),
+        ) ?? horariosRemarcacaoFiltrados[0],
+      );
     }
 
     if (horariosRemarcacaoFiltrados.length === 0) {
@@ -573,6 +584,7 @@ function SolicitacoesPage() {
     agendamentoRemarcacao,
     horariosRemarcacaoFiltrados,
     horarioRemarcacao,
+    dataRemarcacao,
   ]);
 
   async function handleConfirmar(agendamentoId: string) {
@@ -1368,7 +1380,12 @@ type ItemLinhaDoTempo = {
 };
 
 const PIXELS_POR_MINUTO = 2;
-const ALTURA_MINIMA_CARTAO_PADRAO = 80;
+// Altura em que o layout completo cabe sem corte (conteúdo + padding + borda).
+const ALTURA_MINIMA_CARTAO_PADRAO = 84;
+// Abaixo disso o cartão mostra uma única linha (ex.: serviços de 10–25 min).
+const ALTURA_MINIMA_CARTAO_COMPACTO = 56;
+
+type DensidadeCartao = "linha" | "compacto" | "padrao";
 
 function LinhaDoTempoDia({
   agendamentos,
@@ -1423,7 +1440,7 @@ function LinhaDoTempoDia({
             return (
               <div
                 key={item.agendamento.id}
-                className="absolute py-0.5 pl-1"
+                className="@container absolute py-0.5 pl-1"
                 style={{
                   top:
                     (item.inicioMinutos - inicioEscala) *
@@ -1435,7 +1452,13 @@ function LinhaDoTempoDia({
               >
                 <CartaoAgendamento
                   agendamento={item.agendamento}
-                  compacto={altura < ALTURA_MINIMA_CARTAO_PADRAO}
+                  densidade={
+                    altura < ALTURA_MINIMA_CARTAO_COMPACTO
+                      ? "linha"
+                      : altura < ALTURA_MINIMA_CARTAO_PADRAO
+                        ? "compacto"
+                        : "padrao"
+                  }
                   onClick={() => onAbrir(item.agendamento.id)}
                 />
               </div>
@@ -1546,44 +1569,120 @@ function calcularLinhaDoTempo(
   };
 }
 
+// O conteúdo se adapta ao espaço do cartão: a altura (duração) define a
+// densidade e a largura do container (@sm = 24rem) troca o layout em linha
+// pelo empilhado, usado no mobile e em colunas simultâneas estreitas.
+// Os detalhes completos continuam no painel aberto pelo clique.
 function CartaoAgendamento({
   agendamento,
   onClick,
-  compacto = false,
+  densidade = "padrao",
 }: {
   agendamento: Solicitacao;
   onClick: () => void;
-  compacto?: boolean;
+  densidade?: DensidadeCartao;
 }) {
+  const inicio = formatarHora(agendamento.inicio);
+  const fim = formatarHora(agendamento.fim);
+  const resumo = `${inicio} – ${fim} · ${agendamento.cliente.nome} · ${agendamento.servico.nome} · ${traduzirStatus(agendamento.status)}`;
+
+  if (densidade === "linha") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        title={resumo}
+        aria-label={resumo}
+        className="flex h-full w-full items-center gap-2 overflow-hidden rounded-2xl border border-border bg-background/40 px-2 text-left text-xs leading-3 transition hover:border-gold/40 hover:bg-surface-elevated @sm:px-4"
+      >
+        <PontoStatus status={agendamento.status} />
+        <span className="shrink-0 font-semibold text-gold">{inicio}</span>
+        <span className="min-w-0 truncate font-medium">
+          {agendamento.cliente.nome}
+        </span>
+        <span className="hidden min-w-0 flex-1 truncate text-muted-foreground @sm:inline">
+          · {agendamento.servico.nome}
+        </span>
+      </button>
+    );
+  }
+
+  const compacto = densidade === "compacto";
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-full w-full items-center gap-4 overflow-hidden rounded-2xl border border-border bg-background/40 px-4 text-left transition hover:border-gold/40 hover:bg-surface-elevated ${compacto ? "py-2" : "py-4"
+      title={resumo}
+      aria-label={resumo}
+      className={`flex h-full w-full items-center gap-2.5 overflow-hidden rounded-2xl border border-border bg-background/40 px-3 text-left transition hover:border-gold/40 hover:bg-surface-elevated @sm:gap-4 @sm:px-4 ${compacto ? "py-1.5 @sm:py-1.5" : "py-2 @sm:py-4"
         }`}
     >
-      <div className="flex w-14 shrink-0 flex-col items-center">
-        <span className="text-sm font-semibold text-gold">
-          {formatarHora(agendamento.inicio)}
+      <div className="flex min-w-0 flex-1 flex-col @sm:hidden">
+        <span className="flex items-center gap-1.5 text-xs font-semibold leading-4 text-gold">
+          <PontoStatus status={agendamento.status} />
+          <span className="truncate">
+            {inicio} – {fim}
+          </span>
         </span>
-        <span className="text-[10px] text-muted-foreground">
-          {formatarHora(agendamento.fim)}
+        <span className="truncate text-sm font-medium leading-5">
+          {agendamento.cliente.nome}
+        </span>
+        {!compacto && (
+          <span className="truncate text-xs leading-4 text-muted-foreground">
+            {agendamento.servico.nome}
+          </span>
+        )}
+      </div>
+
+      <div className="hidden w-14 shrink-0 flex-col items-center @sm:flex">
+        <span
+          className={`text-sm font-semibold text-gold ${compacto ? "leading-tight" : ""}`}
+        >
+          {inicio}
+        </span>
+        <span
+          className={`text-[10px] text-muted-foreground ${compacto ? "leading-tight" : ""}`}
+        >
+          {fim}
         </span>
       </div>
 
-      <div className="h-10 w-px shrink-0 bg-border" />
+      <div
+        className={`hidden w-px shrink-0 bg-border @sm:block ${compacto ? "h-8" : "h-10"}`}
+      />
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">
+      <div className="hidden min-w-0 flex-1 @sm:block">
+        <p className={`truncate font-medium ${compacto ? "leading-tight" : ""}`}>
           {agendamento.cliente.nome}
         </p>
-        <p className="truncate text-sm text-muted-foreground">
+        <p
+          className={`truncate text-sm text-muted-foreground ${compacto ? "leading-tight" : ""}`}
+        >
           {agendamento.servico.nome}
         </p>
       </div>
 
-      <StatusBadge status={agendamento.status} />
+      <div className="hidden shrink-0 @sm:block">
+        <StatusBadge status={agendamento.status} />
+      </div>
     </button>
+  );
+}
+
+function PontoStatus({ status }: { status: string }) {
+  const cores: Record<string, string> = {
+    SOLICITADO: "bg-amber-500",
+    CONFIRMADO: "bg-emerald-500",
+    CONCLUIDO: "bg-gold",
+    RECUSADO: "bg-destructive",
+  };
+
+  return (
+    <span
+      aria-hidden="true"
+      className={`h-2 w-2 shrink-0 rounded-full ${cores[status] ?? "bg-muted-foreground"}`}
+    />
   );
 }
 
@@ -2221,13 +2320,14 @@ function obterNomeDia(dataInput: string): string {
 
 function obterProximosDiasFuncionamento(
   quantidadeDias = 21,
+  diasAnteriores = DIAS_RETROATIVOS,
 ): string[] {
   const dias: string[] = [];
   const hoje = new Date();
 
   hoje.setHours(0, 0, 0, 0);
 
-  for (let indice = 0; indice < quantidadeDias; indice += 1) {
+  for (let indice = -diasAnteriores; indice < quantidadeDias; indice += 1) {
     const data = new Date(hoje);
 
     data.setDate(hoje.getDate() + indice);
@@ -2270,22 +2370,13 @@ function gerarHorariosDisponiveis(
   const fechamento = converterHoraParaMinutos(regra.fecha);
   const horarios: string[] = [];
 
+  // Horários passados são mantidos para corrigir lançamentos retroativos.
   for (
     let horario = abertura;
     horario + duracaoMinutos <= fechamento;
     horario += INTERVALO_INICIO_MINUTOS
   ) {
-    const horarioFormatado = formatarMinutosComoHora(horario);
-    const inicioHorario = criarDataHoraLocal(
-      dataInput,
-      horarioFormatado,
-    );
-
-    if (inicioHorario.getTime() <= new Date().getTime()) {
-      continue;
-    }
-
-    horarios.push(horarioFormatado);
+    horarios.push(formatarMinutosComoHora(horario));
   }
 
   return horarios;

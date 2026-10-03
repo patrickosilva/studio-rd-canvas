@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import type { FormaPagamento } from "../../generated/prisma/client";
+import type {
+  FormaPagamento,
+  StatusAgendamento,
+} from "../../generated/prisma/client";
 import {
   enviarEmailCancelamentoEquipeCliente,
   enviarEmailConfirmacaoAgendamento,
@@ -218,6 +221,14 @@ const concluirAgendamentoSchema = z.object({
 const TIMEZONE_PADRAO = "America/Sao_Paulo";
 const INTERVALO_INICIO_MINUTOS = 5;
 
+// Status que ocupam o horário do profissional. CONCLUIDO entra porque o
+// horário já foi usado (relevante para lançamentos retroativos).
+const STATUS_QUE_OCUPAM_HORARIO: StatusAgendamento[] = [
+  "SOLICITADO",
+  "CONFIRMADO",
+  "CONCLUIDO",
+];
+
 // Esse intervalo define apenas os possíveis horários de início.
 // A duração real do atendimento sempre vem de servico.duracaoMinutos.
 const funcionamentoPorDia: Record<
@@ -405,7 +416,7 @@ async function existeConflitoDeHorario({
         }
         : undefined,
       status: {
-        in: ["SOLICITADO", "CONFIRMADO"],
+        in: STATUS_QUE_OCUPAM_HORARIO,
       },
       inicio: {
         lt: fim,
@@ -1747,12 +1758,9 @@ export const operacionalRemarcarAgendamento =
         };
       }
 
-      if (novoInicio.getTime() <= new Date().getTime()) {
-        return {
-          sucesso: false,
-          mensagem: "Escolha um horário futuro.",
-        };
-      }
+      // Assim como na criação pela equipe, a remarcação operacional aceita
+      // horários passados para corrigir atendimentos lançados retroativamente.
+      // A permissão vem de exigirOperacional (papel da sessão).
 
       const agendamento = await prisma.agendamento.findUnique({
         where: {
@@ -2066,7 +2074,7 @@ export const listarIndisponibilidadesAgenda =
           where: {
             profissionalId: data.profissionalId,
             status: {
-              in: ["SOLICITADO", "CONFIRMADO"],
+              in: STATUS_QUE_OCUPAM_HORARIO,
             },
             inicio: {
               lt: fimDia,
