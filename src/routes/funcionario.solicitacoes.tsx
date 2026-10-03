@@ -907,15 +907,11 @@ function SolicitacoesPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3 p-4 sm:p-5">
-              {agendamentosDoDia.map((solicitacao) => (
-                <CartaoAgendamento
-                  key={solicitacao.id}
-                  agendamento={solicitacao}
-                  onClick={() => abrirDetalhes(solicitacao.id)}
-                />
-              ))}
-            </div>
+            <LinhaDoTempoDia
+              agendamentos={agendamentosDoDia}
+              dataSelecionada={dataSelecionada}
+              onAbrir={abrirDetalhes}
+            />
           )}
         </section>
       </div>
@@ -1363,18 +1359,208 @@ function SeletorDeDias({
   );
 }
 
+type ItemLinhaDoTempo = {
+  agendamento: Solicitacao;
+  inicioMinutos: number;
+  fimMinutos: number;
+  coluna: number;
+  totalColunas: number;
+};
+
+const PIXELS_POR_MINUTO = 2;
+const ALTURA_MINIMA_CARTAO_PADRAO = 80;
+
+function LinhaDoTempoDia({
+  agendamentos,
+  dataSelecionada,
+  onAbrir,
+}: {
+  agendamentos: Solicitacao[];
+  dataSelecionada: Date;
+  onAbrir: (agendamentoId: string) => void;
+}) {
+  const { itens, inicioEscala, fimEscala } = useMemo(
+    () => calcularLinhaDoTempo(agendamentos, dataSelecionada),
+    [agendamentos, dataSelecionada],
+  );
+
+  const horas: number[] = [];
+
+  for (let minuto = inicioEscala; minuto <= fimEscala; minuto += 60) {
+    horas.push(minuto);
+  }
+
+  return (
+    <div className="p-4 sm:p-5">
+      <div
+        className="relative"
+        style={{
+          height: (fimEscala - inicioEscala) * PIXELS_POR_MINUTO,
+        }}
+      >
+        {horas.map((minuto) => (
+          <div
+            key={minuto}
+            className="absolute inset-x-0 flex -translate-y-1/2 items-center"
+            style={{
+              top: (minuto - inicioEscala) * PIXELS_POR_MINUTO,
+            }}
+          >
+            <span className="w-12 shrink-0 pr-2 text-right text-[10px] text-muted-foreground">
+              {formatarMinutosComoHora(minuto)}
+            </span>
+
+            <div className="h-px flex-1 bg-border" />
+          </div>
+        ))}
+
+        <div className="absolute inset-y-0 left-12 right-0">
+          {itens.map((item) => {
+            const altura =
+              (item.fimMinutos - item.inicioMinutos) *
+              PIXELS_POR_MINUTO;
+
+            return (
+              <div
+                key={item.agendamento.id}
+                className="absolute py-0.5 pl-1"
+                style={{
+                  top:
+                    (item.inicioMinutos - inicioEscala) *
+                    PIXELS_POR_MINUTO,
+                  height: altura,
+                  left: `${(item.coluna / item.totalColunas) * 100}%`,
+                  width: `${100 / item.totalColunas}%`,
+                }}
+              >
+                <CartaoAgendamento
+                  agendamento={item.agendamento}
+                  compacto={altura < ALTURA_MINIMA_CARTAO_PADRAO}
+                  onClick={() => onAbrir(item.agendamento.id)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function calcularLinhaDoTempo(
+  agendamentos: Solicitacao[],
+  dataSelecionada: Date,
+): {
+  itens: ItemLinhaDoTempo[];
+  inicioEscala: number;
+  fimEscala: number;
+} {
+  const itens: ItemLinhaDoTempo[] = agendamentos
+    .map((agendamento) => {
+      const inicioMinutos = obterMinutosDoDia(agendamento.inicio);
+      const duracaoReal = Math.round(
+        (new Date(agendamento.fim).getTime() -
+          new Date(agendamento.inicio).getTime()) /
+        60000,
+      );
+      const duracao =
+        Number.isFinite(duracaoReal) && duracaoReal > 0
+          ? duracaoReal
+          : agendamento.servico.duracaoMinutos > 0
+            ? agendamento.servico.duracaoMinutos
+            : INTERVALO_INICIO_MINUTOS;
+
+      return {
+        agendamento,
+        inicioMinutos,
+        fimMinutos: Math.min(inicioMinutos + duracao, 24 * 60),
+        coluna: 0,
+        totalColunas: 1,
+      };
+    })
+    .sort(
+      (a, b) =>
+        a.inicioMinutos - b.inicioMinutos ||
+        a.fimMinutos - b.fimMinutos,
+    );
+
+  // Agendamentos simultâneos (ex.: profissionais diferentes) dividem a
+  // largura em colunas dentro do mesmo grupo de sobreposição.
+  let grupo: ItemLinhaDoTempo[] = [];
+  let fimPorColuna: number[] = [];
+  let fimDoGrupo = -1;
+
+  const fecharGrupo = () => {
+    grupo.forEach((item) => {
+      item.totalColunas = fimPorColuna.length;
+    });
+    grupo = [];
+    fimPorColuna = [];
+  };
+
+  itens.forEach((item) => {
+    if (item.inicioMinutos >= fimDoGrupo) {
+      fecharGrupo();
+    }
+
+    const colunaLivre = fimPorColuna.findIndex(
+      (fim) => fim <= item.inicioMinutos,
+    );
+
+    if (colunaLivre === -1) {
+      item.coluna = fimPorColuna.length;
+      fimPorColuna.push(item.fimMinutos);
+    } else {
+      item.coluna = colunaLivre;
+      fimPorColuna[colunaLivre] = item.fimMinutos;
+    }
+
+    grupo.push(item);
+    fimDoGrupo = Math.max(fimDoGrupo, item.fimMinutos);
+  });
+
+  fecharGrupo();
+
+  const regra = funcionamentoPorDia[dataSelecionada.getDay()];
+
+  let inicioEscala = regra
+    ? converterHoraParaMinutos(regra.abre)
+    : Number.POSITIVE_INFINITY;
+  let fimEscala = regra
+    ? converterHoraParaMinutos(regra.fecha)
+    : Number.NEGATIVE_INFINITY;
+
+  itens.forEach((item) => {
+    inicioEscala = Math.min(inicioEscala, item.inicioMinutos);
+    fimEscala = Math.max(fimEscala, item.fimMinutos);
+  });
+
+  if (!Number.isFinite(inicioEscala) || !Number.isFinite(fimEscala)) {
+    return { itens, inicioEscala: 0, fimEscala: 0 };
+  }
+
+  return {
+    itens,
+    inicioEscala: Math.floor(inicioEscala / 60) * 60,
+    fimEscala: Math.min(Math.ceil(fimEscala / 60) * 60, 24 * 60),
+  };
+}
+
 function CartaoAgendamento({
   agendamento,
   onClick,
+  compacto = false,
 }: {
   agendamento: Solicitacao;
   onClick: () => void;
+  compacto?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-4 rounded-2xl border border-border bg-background/40 p-4 text-left transition hover:border-gold/40 hover:bg-surface-elevated"
+      className={`flex h-full w-full items-center gap-4 overflow-hidden rounded-2xl border border-border bg-background/40 px-4 text-left transition hover:border-gold/40 hover:bg-surface-elevated ${compacto ? "py-2" : "py-4"
+        }`}
     >
       <div className="flex w-14 shrink-0 flex-col items-center">
         <span className="text-sm font-semibold text-gold">
@@ -1854,6 +2040,21 @@ function formatarHora(valor: string | Date): string {
     minute: "2-digit",
     timeZone: TIMEZONE_PADRAO,
   }).format(new Date(valor));
+}
+
+function obterMinutosDoDia(valor: string | Date): number {
+  const partes = new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: TIMEZONE_PADRAO,
+  }).formatToParts(new Date(valor));
+
+  const mapa = Object.fromEntries(
+    partes.map((parte) => [parte.type, parte.value]),
+  );
+
+  return Number(mapa.hour) * 60 + Number(mapa.minute);
 }
 
 function formatarDataCompleta(valor: string | Date): string {

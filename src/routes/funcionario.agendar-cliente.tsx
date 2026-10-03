@@ -75,6 +75,9 @@ type IndisponibilidadeAgenda = {
 
 const INTERVALO_INICIO_MINUTOS = 5;
 
+// Dias anteriores exibidos para a equipe lançar atendimentos já realizados.
+const DIAS_RETROATIVOS = 7;
+
 const funcionamentoPorDia: Record<
   number,
   {
@@ -149,13 +152,14 @@ function obterNomeDia(dataInput: string): string {
 
 function obterProximosDiasFuncionamento(
   quantidadeDias = 21,
+  diasAnteriores = DIAS_RETROATIVOS,
 ): string[] {
   const dias: string[] = [];
   const hoje = new Date();
 
   hoje.setHours(0, 0, 0, 0);
 
-  for (let indice = 0; indice < quantidadeDias; indice += 1) {
+  for (let indice = -diasAnteriores; indice < quantidadeDias; indice += 1) {
     const data = new Date(hoje);
 
     data.setDate(hoje.getDate() + indice);
@@ -216,16 +220,13 @@ function gerarHorariosDisponiveis(
   const fechamento = converterHoraParaMinutos(regra.fecha);
   const horarios: string[] = [];
 
+  // Horários passados são mantidos para permitir lançamentos retroativos.
   for (
     let horario = abertura;
     horario + duracaoMinutos <= fechamento;
     horario += INTERVALO_INICIO_MINUTOS
   ) {
-    const horarioFormatado = formatarMinutosComoHora(horario);
-
-    if (!horarioJaPassou(dataInput, horarioFormatado)) {
-      horarios.push(horarioFormatado);
-    }
+    horarios.push(formatarMinutosComoHora(horario));
   }
 
   return horarios;
@@ -621,8 +622,14 @@ const formularioCompleto = Boolean(
   }, []);
 
   useEffect(() => {
-    if (!dataSelecionada && proximosDias[0]) {
-      setDataSelecionada(proximosDias[0]);
+    // Mantém hoje (ou o próximo dia de funcionamento) como padrão,
+    // mesmo com dias anteriores disponíveis na lista.
+    const hojeInput = formatarDataInput(new Date());
+    const diaPadrao =
+      proximosDias.find((dia) => dia >= hojeInput) ?? proximosDias[0];
+
+    if (!dataSelecionada && diaPadrao) {
+      setDataSelecionada(diaPadrao);
     }
   }, [dataSelecionada, proximosDias]);
 
@@ -638,8 +645,12 @@ const formularioCompleto = Boolean(
     horariosOrdenadosPorEncaixe.length > 0 &&
     !horariosOrdenadosPorEncaixe.includes(horarioSelecionado)
   ) {
+    // Sugere um horário futuro quando existir; horário passado
+    // só é selecionado automaticamente em dias anteriores.
     setHorarioSelecionado(
-      horariosOrdenadosPorEncaixe[0],
+      horariosOrdenadosPorEncaixe.find(
+        (horario) => !horarioJaPassou(dataSelecionada, horario),
+      ) ?? horariosOrdenadosPorEncaixe[0],
     );
   }
 
@@ -649,6 +660,7 @@ const formularioCompleto = Boolean(
 }, [
   horariosOrdenadosPorEncaixe,
   horarioSelecionado,
+  dataSelecionada,
 ]);
 
   async function handleSubmit(
@@ -1092,9 +1104,10 @@ const formularioCompleto = Boolean(
                 </p>
 
                 <p>
-                  O sistema bloqueia horário passado, conflito de
-                  profissional, conflito do cliente e bloqueios de
-                  agenda.
+                  O sistema bloqueia conflito de profissional, conflito
+                  do cliente e bloqueios de agenda. Horários passados
+                  podem ser lançados para registrar atendimentos já
+                  realizados.
                 </p>
 
                 <p>

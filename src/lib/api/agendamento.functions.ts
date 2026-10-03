@@ -950,14 +950,9 @@ export const funcionarioCriarAgendamentoParaCliente =
         };
       }
 
-      const agora = new Date();
-
-      if (inicio.getTime() <= agora.getTime()) {
-        return {
-          sucesso: false,
-          mensagem: "Escolha um horário futuro.",
-        };
-      }
+      // Diferente de solicitarAgendamento (cliente), a equipe pode lançar
+      // horários passados para registrar atendimentos já realizados.
+      // A permissão vem de exigirOperacional (papel da sessão).
 
       const [cliente, servico, profissional] =
         await Promise.all([
