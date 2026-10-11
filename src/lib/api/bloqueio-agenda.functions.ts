@@ -4,6 +4,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma.server";
 import { obterUsuarioAtual } from "@/lib/session.server";
 
+const INTERVALO_BLOQUEIO_MINUTOS = 5;
+
 const criarBloqueioAgendaSchema = z.object({
   profissionalId: z
     .string()
@@ -51,6 +53,14 @@ async function exigirOperacional() {
   }
 
   return usuario;
+}
+
+function horarioRespeitaGrade(valor: Date): boolean {
+  return (
+    valor.getMinutes() % INTERVALO_BLOQUEIO_MINUTOS === 0 &&
+    valor.getSeconds() === 0 &&
+    valor.getMilliseconds() === 0
+  );
 }
 
 export const listarBloqueiosAgenda = createServerFn({
@@ -102,6 +112,17 @@ export const criarBloqueioAgenda = createServerFn({
       return {
         sucesso: false,
         mensagem: "Data inválida.",
+      };
+    }
+
+    if (
+      !horarioRespeitaGrade(inicio) ||
+      !horarioRespeitaGrade(fim)
+    ) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Escolha horários em intervalos de 5 minutos.",
       };
     }
 
