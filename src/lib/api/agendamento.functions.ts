@@ -218,6 +218,18 @@ const concluirAgendamentoSchema = z.object({
 const TIMEZONE_PADRAO = "America/Sao_Paulo";
 const INTERVALO_INICIO_MINUTOS = 5;
 
+const ALMOCO_INICIO_MINUTOS = 12 * 60;
+const ALMOCO_FIM_MINUTOS = 13 * 60;
+
+function inicioEstaNoHorarioDeAlmoco(
+  minutosInicio: number,
+): boolean {
+  return (
+    minutosInicio >= ALMOCO_INICIO_MINUTOS &&
+    minutosInicio < ALMOCO_FIM_MINUTOS
+  );
+}
+
 // Esse intervalo define apenas os possíveis horários de início.
 // A duração real do atendimento sempre vem de servico.duracaoMinutos.
 const funcionamentoPorDia: Record<
@@ -369,8 +381,15 @@ function validarHorarioNaGrade({
       mensagem: "Escolha um horário dentro do funcionamento da barbearia.",
     };
   }
-
+    //intervalo da barbearia para almoço
   const distanciaDaAbertura = minutosInicio - minutosAbertura;
+  if (inicioEstaNoHorarioDeAlmoco(minutosInicio)) {
+  return {
+    valido: false,
+    mensagem:
+      "Não é possível iniciar um atendimento entre 12:00 e 13:00.",
+  };
+}
 
   if (distanciaDaAbertura % INTERVALO_INICIO_MINUTOS !== 0) {
     return {

@@ -74,7 +74,8 @@ type IndisponibilidadeAgenda = {
 };
 
 const INTERVALO_INICIO_MINUTOS = 5;
-
+const ALMOCO_INICIO_MINUTOS = 12 * 60;
+const ALMOCO_FIM_MINUTOS = 13 * 60;
 const funcionamentoPorDia: Record<
   number,
   {
@@ -221,6 +222,12 @@ function gerarHorariosDisponiveis(
     horario + duracaoMinutos <= fechamento;
     horario += INTERVALO_INICIO_MINUTOS
   ) {
+    if (
+      horario >= ALMOCO_INICIO_MINUTOS &&
+      horario < ALMOCO_FIM_MINUTOS
+    ) {
+      continue;
+    }
     const horarioFormatado = formatarMinutosComoHora(horario);
 
     if (!horarioJaPassou(dataInput, horarioFormatado)) {
@@ -242,7 +249,7 @@ function ehEncaixePerfeito(
 
   const fim = new Date(
     inicio.getTime() +
-      duracaoMinutos * 60 * 1000,
+    duracaoMinutos * 60 * 1000,
   );
 
   return indisponibilidades.some(
@@ -257,9 +264,9 @@ function ehEncaixePerfeito(
 
       return (
         inicio.getTime() ===
-          fimOcupado.getTime() ||
+        fimOcupado.getTime() ||
         fim.getTime() ===
-          inicioOcupado.getTime()
+        inicioOcupado.getTime()
       );
     },
   );
@@ -482,110 +489,110 @@ function FuncionarioAgendarClientePage() {
   }, [dataSelecionada, servicoSelecionado]);
 
   const horariosFiltrados = useMemo(() => {
-  return horariosDisponiveis.filter((horario) => {
-    if (!servicoSelecionado || !dataSelecionada) {
-      return false;
-    }
-
-    const inicioHorario = new Date(
-      criarInicioIsoLocal(dataSelecionada, horario),
-    );
-
-    const fimHorario = new Date(
-      inicioHorario.getTime() +
-        servicoSelecionado.duracaoMinutos * 60 * 1000,
-    );
-
-    return !existeConflitoComIndisponibilidade(
-      inicioHorario,
-      fimHorario,
-      indisponibilidades,
-    );
-  });
-}, [
-  horariosDisponiveis,
-  servicoSelecionado,
-  dataSelecionada,
-  indisponibilidades,
-]);
-
-const horariosOrdenadosPorEncaixe = useMemo(() => {
-  if (
-    !servicoSelecionado ||
-    !dataSelecionada ||
-    horariosFiltrados.length === 0
-  ) {
-    return [];
-  }
-
-  const duracaoMs =
-    servicoSelecionado.duracaoMinutos * 60 * 1000;
-
-  function pontuacaoEncaixe(horario: string): number {
-    const inicio = new Date(
-      criarInicioIsoLocal(dataSelecionada, horario),
-    );
-
-    const fim = new Date(
-      inicio.getTime() + duracaoMs,
-    );
-
-    let menorDistancia = Number.POSITIVE_INFINITY;
-
-    for (const indisponibilidade of indisponibilidades) {
-      const inicioOcupado = new Date(
-        indisponibilidade.inicio,
-      );
-
-      const fimOcupado = new Date(
-        indisponibilidade.fim,
-      );
-
-      const distanciaDepois = Math.abs(
-        inicio.getTime() - fimOcupado.getTime(),
-      );
-
-      const distanciaAntes = Math.abs(
-        fim.getTime() - inicioOcupado.getTime(),
-      );
-
-      menorDistancia = Math.min(
-        menorDistancia,
-        distanciaDepois,
-        distanciaAntes,
-      );
-    }
-
-    return menorDistancia;
-  }
-
-  return [...horariosFiltrados].sort(
-    (horarioA, horarioB) => {
-      const pontuacaoA = pontuacaoEncaixe(horarioA);
-      const pontuacaoB = pontuacaoEncaixe(horarioB);
-
-      if (pontuacaoA !== pontuacaoB) {
-        return pontuacaoA - pontuacaoB;
+    return horariosDisponiveis.filter((horario) => {
+      if (!servicoSelecionado || !dataSelecionada) {
+        return false;
       }
 
-      return horarioA.localeCompare(horarioB);
-    },
-  );
-}, [
-  horariosFiltrados,
-  indisponibilidades,
-  servicoSelecionado,
-  dataSelecionada,
-]);
+      const inicioHorario = new Date(
+        criarInicioIsoLocal(dataSelecionada, horario),
+      );
 
-const formularioCompleto = Boolean(
-  clienteSelecionadoId &&
+      const fimHorario = new Date(
+        inicioHorario.getTime() +
+        servicoSelecionado.duracaoMinutos * 60 * 1000,
+      );
+
+      return !existeConflitoComIndisponibilidade(
+        inicioHorario,
+        fimHorario,
+        indisponibilidades,
+      );
+    });
+  }, [
+    horariosDisponiveis,
+    servicoSelecionado,
+    dataSelecionada,
+    indisponibilidades,
+  ]);
+
+  const horariosOrdenadosPorEncaixe = useMemo(() => {
+    if (
+      !servicoSelecionado ||
+      !dataSelecionada ||
+      horariosFiltrados.length === 0
+    ) {
+      return [];
+    }
+
+    const duracaoMs =
+      servicoSelecionado.duracaoMinutos * 60 * 1000;
+
+    function pontuacaoEncaixe(horario: string): number {
+      const inicio = new Date(
+        criarInicioIsoLocal(dataSelecionada, horario),
+      );
+
+      const fim = new Date(
+        inicio.getTime() + duracaoMs,
+      );
+
+      let menorDistancia = Number.POSITIVE_INFINITY;
+
+      for (const indisponibilidade of indisponibilidades) {
+        const inicioOcupado = new Date(
+          indisponibilidade.inicio,
+        );
+
+        const fimOcupado = new Date(
+          indisponibilidade.fim,
+        );
+
+        const distanciaDepois = Math.abs(
+          inicio.getTime() - fimOcupado.getTime(),
+        );
+
+        const distanciaAntes = Math.abs(
+          fim.getTime() - inicioOcupado.getTime(),
+        );
+
+        menorDistancia = Math.min(
+          menorDistancia,
+          distanciaDepois,
+          distanciaAntes,
+        );
+      }
+
+      return menorDistancia;
+    }
+
+    return [...horariosFiltrados].sort(
+      (horarioA, horarioB) => {
+        const pontuacaoA = pontuacaoEncaixe(horarioA);
+        const pontuacaoB = pontuacaoEncaixe(horarioB);
+
+        if (pontuacaoA !== pontuacaoB) {
+          return pontuacaoA - pontuacaoB;
+        }
+
+        return horarioA.localeCompare(horarioB);
+      },
+    );
+  }, [
+    horariosFiltrados,
+    indisponibilidades,
+    servicoSelecionado,
+    dataSelecionada,
+  ]);
+
+  const formularioCompleto = Boolean(
+    clienteSelecionadoId &&
     servicoId &&
     profissionalId &&
     dataSelecionada &&
     horarioSelecionado,
-);
- 
+  );
+
 
   async function carregarIndisponibilidades(
     profissionalIdSelecionado: string,
@@ -634,22 +641,22 @@ const formularioCompleto = Boolean(
   }, [profissionalId, dataSelecionada]);
 
   useEffect(() => {
-  if (
-    horariosOrdenadosPorEncaixe.length > 0 &&
-    !horariosOrdenadosPorEncaixe.includes(horarioSelecionado)
-  ) {
-    setHorarioSelecionado(
-      horariosOrdenadosPorEncaixe[0],
-    );
-  }
+    if (
+      horariosOrdenadosPorEncaixe.length > 0 &&
+      !horariosOrdenadosPorEncaixe.includes(horarioSelecionado)
+    ) {
+      setHorarioSelecionado(
+        horariosOrdenadosPorEncaixe[0],
+      );
+    }
 
-  if (horariosOrdenadosPorEncaixe.length === 0) {
-    setHorarioSelecionado("");
-  }
-}, [
-  horariosOrdenadosPorEncaixe,
-  horarioSelecionado,
-]);
+    if (horariosOrdenadosPorEncaixe.length === 0) {
+      setHorarioSelecionado("");
+    }
+  }, [
+    horariosOrdenadosPorEncaixe,
+    horarioSelecionado,
+  ]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -889,7 +896,7 @@ const formularioCompleto = Boolean(
                             const ativo = dia === dataSelecionada;
                             const regra =
                               funcionamentoPorDia[
-                                criarDataLocal(dia).getDay()
+                              criarDataLocal(dia).getDay()
                               ];
 
                             return (
@@ -900,11 +907,10 @@ const formularioCompleto = Boolean(
                                   setDataSelecionada(dia);
                                   setHorarioSelecionado("");
                                 }}
-                                className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
-                                  ativo
+                                className={`rounded-xl border px-4 py-3 text-left text-sm transition ${ativo
                                     ? "border-gold bg-gold-soft text-gold"
                                     : "border-border bg-background/40 hover:bg-surface-elevated"
-                                }`}
+                                  }`}
                               >
                                 <span className="block font-medium capitalize">
                                   {obterNomeDia(dia)}
@@ -940,11 +946,10 @@ const formularioCompleto = Boolean(
                                   onClick={() =>
                                     setHorarioSelecionado(horario)
                                   }
-                                  className={`rounded-xl border px-3 py-2 text-sm transition ${
-                                    ativo
+                                  className={`rounded-xl border px-3 py-2 text-sm transition ${ativo
                                       ? "border-gold bg-gold-soft text-gold"
                                       : "border-border bg-background/40 hover:bg-surface-elevated"
-                                  }`}
+                                    }`}
                                 >
                                   {horario}
                                 </button>
@@ -1034,8 +1039,8 @@ const formularioCompleto = Boolean(
                   texto={
                     servicoSelecionado
                       ? `${servicoSelecionado.nome} — ${formatarDinheiro(
-                          servicoSelecionado.precoCentavos,
-                        )}`
+                        servicoSelecionado.precoCentavos,
+                      )}`
                       : "Nenhum serviço selecionado."
                   }
                 />
