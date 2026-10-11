@@ -52,6 +52,12 @@ import {
   operacionalRemarcarAgendamento,
   funcionarioListarDadosParaAgendarCliente,
 } from "@/lib/api/agendamento.functions";
+import {
+  PIXELS_POR_MINUTO,
+  calcularJanelaDaEscala,
+  criarIntervalo,
+  distribuirEmColunas,
+} from "@/lib/agenda-linha-do-tempo";
 
 export const Route = createFileRoute("/funcionario/solicitacoes")({
   component: SolicitacoesPage,
@@ -893,7 +899,8 @@ function SolicitacoesPage() {
                 Carregando agenda...
               </p>
             </div>
-          ) : agendamentosDoDia.length === 0 ? (
+          ) : agendamentosDoDia.length === 0 &&
+            !funcionamentoPorDia[dataSelecionada.getDay()] ? (
             <div className="flex min-h-56 flex-col items-center justify-center px-6 py-10 text-center">
               <CalendarCheck className="h-10 w-10 text-muted-foreground" />
 
@@ -907,15 +914,13 @@ function SolicitacoesPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3 p-4 sm:p-5">
-              {agendamentosDoDia.map((solicitacao) => (
-                <CartaoAgendamento
-                  key={solicitacao.id}
-                  agendamento={solicitacao}
-                  onClick={() => abrirDetalhes(solicitacao.id)}
-                />
-              ))}
-            </div>
+            <LinhaDoTempoDia
+              agendamentos={agendamentosDoDia}
+              funcionamento={
+                funcionamentoPorDia[dataSelecionada.getDay()] ?? null
+              }
+              onAbrir={abrirDetalhes}
+            />
           )}
         </section>
       </div>
@@ -1363,41 +1368,232 @@ function SeletorDeDias({
   );
 }
 
-function CartaoAgendamento({
+function LinhaDoTempoDia({
+  agendamentos,
+  funcionamento,
+  onAbrir,
+}: {
+  agendamentos: Solicitacao[];
+  funcionamento: { abre: string; fecha: string } | null;
+  onAbrir: (agendamentoId: string) => void;
+}) {
+  const intervalos = useMemo(
+    () => agendamentos.map(criarIntervalo),
+    [agendamentos],
+  );
+
+  const colunas = useMemo(
+    () => distribuirEmColunas(intervalos),
+    [intervalos],
+  );
+
+  const aberturaMinutos = funcionamento
+    ? converterHoraParaMinutos(funcionamento.abre)
+    : null;
+  const fechamentoMinutos = funcionamento
+    ? converterHoraParaMinutos(funcionamento.fecha)
+    : null;
+
+  const janela = calcularJanelaDaEscala({
+    aberturaMinutos,
+    fechamentoMinutos,
+    intervalos,
+  });
+
+  if (!janela) {
+    return null;
+  }
+
+  const paraPixels = (minutos: number) =>
+    (minutos - janela.inicioMinutos) * PIXELS_POR_MINUTO;
+
+  const alturaTotal = paraPixels(janela.fimMinutos);
+
+  const marcacoes: number[] = [];
+  for (
+    let minuto = janela.inicioMinutos;
+    minuto <= janela.fimMinutos;
+    minuto += 30
+  ) {
+    marcacoes.push(minuto);
+  }
+
+  // Períodos fora do funcionamento ficam sombreados para não parecerem livres.
+  const periodosFechados: { inicio: number; fim: number }[] =
+    aberturaMinutos === null || fechamentoMinutos === null
+      ? [{ inicio: janela.inicioMinutos, fim: janela.fimMinutos }]
+      : [
+          { inicio: janela.inicioMinutos, fim: aberturaMinutos },
+          { inicio: fechamentoMinutos, fim: janela.fimMinutos },
+        ].filter((periodo) => periodo.fim > periodo.inicio);
+
+  return (
+    <div className="px-3 py-5 sm:px-5">
+      <div className="flex" style={{ height: alturaTotal }}>
+        <div className="relative w-11 shrink-0 sm:w-14">
+          {marcacoes
+            .filter((minuto) => minuto % 60 === 0)
+            .map((minuto) => (
+              <span
+                key={minuto}
+                className="absolute right-2 -translate-y-1/2 text-[11px] tabular-nums text-muted-foreground"
+                style={{ top: paraPixels(minuto) }}
+              >
+                {formatarMinutosComoHora(minuto)}
+              </span>
+            ))}
+        </div>
+
+        <div className="relative min-w-0 flex-1 border-l border-border">
+          {periodosFechados.map((periodo) => (
+            <div
+              key={periodo.inicio}
+              aria-hidden="true"
+              className="absolute inset-x-0 bg-background/50"
+              style={{
+                top: paraPixels(periodo.inicio),
+                height:
+                  (periodo.fim - periodo.inicio) * PIXELS_POR_MINUTO,
+              }}
+            >
+              <span className="absolute right-2 top-1 text-[10px] uppercase tracking-wide text-muted-foreground/70">
+                Fechado
+              </span>
+            </div>
+          ))}
+
+          {marcacoes.map((minuto) => (
+            <div
+              key={minuto}
+              aria-hidden="true"
+              className={`absolute inset-x-0 border-t ${
+                minuto % 60 === 0
+                  ? "border-border"
+                  : "border-dashed border-border/50"
+              }`}
+              style={{ top: paraPixels(minuto) }}
+            />
+          ))}
+
+          {agendamentos.map((agendamento, indice) => {
+            const intervalo = intervalos[indice];
+            const posicao = colunas.get(agendamento.id) ?? {
+              coluna: 0,
+              totalColunas: 1,
+            };
+
+            return (
+              <BlocoAgendamento
+                key={agendamento.id}
+                agendamento={agendamento}
+                top={paraPixels(intervalo.inicioMinutos)}
+                altura={
+                  (intervalo.fimMinutos - intervalo.inicioMinutos) *
+                  PIXELS_POR_MINUTO
+                }
+                coluna={posicao.coluna}
+                totalColunas={posicao.totalColunas}
+                onClick={() => onAbrir(agendamento.id)}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const corStatusBloco: Record<string, string> = {
+  SOLICITADO: "border-l-amber-500",
+  CONFIRMADO: "border-l-emerald-500",
+};
+
+function BlocoAgendamento({
   agendamento,
+  top,
+  altura,
+  coluna,
+  totalColunas,
   onClick,
 }: {
   agendamento: Solicitacao;
+  top: number;
+  altura: number;
+  coluna: number;
+  totalColunas: number;
   onClick: () => void;
 }) {
+  const horario = `${formatarHora(agendamento.inicio)} – ${formatarHora(
+    agendamento.fim,
+  )}`;
+  const resumo = `${horario} · ${agendamento.cliente.nome} · ${
+    agendamento.servico.nome
+  } · ${traduzirStatus(agendamento.status)}`;
+  const compacto = altura < 64;
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center gap-4 rounded-2xl border border-border bg-background/40 p-4 text-left transition hover:border-gold/40 hover:bg-surface-elevated"
+    <div
+      className="absolute z-10 px-0.5 sm:px-1"
+      style={{
+        top,
+        height: altura,
+        left: `${(coluna / totalColunas) * 100}%`,
+        width: `${100 / totalColunas}%`,
+      }}
     >
-      <div className="flex w-14 shrink-0 flex-col items-center">
-        <span className="text-sm font-semibold text-gold">
-          {formatarHora(agendamento.inicio)}
-        </span>
-        <span className="text-[10px] text-muted-foreground">
-          {formatarHora(agendamento.fim)}
-        </span>
+      {/* Fundo sólido para a grade não atravessar o cartão. */}
+      <div className="h-full rounded-xl bg-surface">
+        <button
+          type="button"
+          onClick={onClick}
+          title={resumo}
+          aria-label={resumo}
+          className={`flex h-full w-full min-w-0 overflow-hidden rounded-xl border border-l-4 border-border bg-background/40 text-left transition hover:border-gold/40 hover:bg-surface-elevated ${
+            corStatusBloco[agendamento.status] ?? ""
+          } ${
+            compacto
+              ? "items-center gap-2 px-2 py-0 text-xs"
+              : "items-start gap-3 px-3 py-2"
+          }`}
+        >
+          {compacto ? (
+            <>
+              <span className="shrink-0 font-semibold tabular-nums text-gold">
+                {formatarHora(agendamento.inicio)}
+              </span>
+              <span className="truncate font-medium">
+                {agendamento.cliente.nome}
+              </span>
+              <span className="hidden truncate text-muted-foreground sm:inline">
+                {agendamento.servico.nome}
+              </span>
+            </>
+          ) : (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold tabular-nums text-gold">
+                  {horario}
+                </p>
+                <p className="truncate text-sm font-medium">
+                  {agendamento.cliente.nome}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {agendamento.servico.nome}
+                </p>
+              </div>
+
+              <span
+                className={
+                  totalColunas > 1 ? "hidden lg:inline-flex" : "inline-flex"
+                }
+              >
+                <StatusBadge status={agendamento.status} />
+              </span>
+            </>
+          )}
+        </button>
       </div>
-
-      <div className="h-10 w-px shrink-0 bg-border" />
-
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">
-          {agendamento.cliente.nome}
-        </p>
-        <p className="truncate text-sm text-muted-foreground">
-          {agendamento.servico.nome}
-        </p>
-      </div>
-
-      <StatusBadge status={agendamento.status} />
-    </button>
+    </div>
   );
 }
 
