@@ -22,6 +22,7 @@ import { Route as AdminAssinaturasRouteImport } from './routes/admin.assinaturas
 import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminCorrecoesRouteImport } from './routes/admin.correcoes'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
@@ -36,6 +37,7 @@ import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
 import { Route as FuncionarioAgendarClienteRouteImport } from './routes/funcionario.agendar-cliente'
 import { Route as FuncionarioBloqueiosRouteImport } from './routes/funcionario.bloqueios'
+import { Route as FuncionarioCorrecoesRouteImport } from './routes/funcionario.correcoes'
 import { Route as FuncionarioSolicitacoesRouteImport } from './routes/funcionario.solicitacoes'
 
 const IndexRoute = IndexRouteImport.update({
@@ -101,6 +103,11 @@ const AdminClientesRoute = AdminClientesRouteImport.update({
 const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCorrecoesRoute = AdminCorrecoesRouteImport.update({
+  id: '/correcoes',
+  path: '/correcoes',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
@@ -174,6 +181,11 @@ const FuncionarioBloqueiosRoute = FuncionarioBloqueiosRouteImport.update({
   path: '/bloqueios',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const FuncionarioCorrecoesRoute = FuncionarioCorrecoesRouteImport.update({
+  id: '/correcoes',
+  path: '/correcoes',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
 const FuncionarioSolicitacoesRoute = FuncionarioSolicitacoesRouteImport.update({
   id: '/solicitacoes',
   path: '/solicitacoes',
@@ -193,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
@@ -205,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/cliente/perfil': typeof ClientePerfilRoute
   '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
+  '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
   '/cliente/': typeof ClienteIndexRoute
@@ -220,6 +234,7 @@ export interface FileRoutesByTo {
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
@@ -232,6 +247,7 @@ export interface FileRoutesByTo {
   '/cliente/perfil': typeof ClientePerfilRoute
   '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
+  '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin': typeof AdminIndexRoute
   '/cliente': typeof ClienteIndexRoute
@@ -251,6 +267,7 @@ export interface FileRoutesById {
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
@@ -263,6 +280,7 @@ export interface FileRoutesById {
   '/cliente/perfil': typeof ClientePerfilRoute
   '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
+  '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
   '/cliente/': typeof ClienteIndexRoute
@@ -283,6 +301,7 @@ export interface FileRouteTypes {
     | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
@@ -295,6 +314,7 @@ export interface FileRouteTypes {
     | '/cliente/perfil'
     | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
+    | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
     | '/admin/'
     | '/cliente/'
@@ -310,6 +330,7 @@ export interface FileRouteTypes {
     | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
@@ -322,6 +343,7 @@ export interface FileRouteTypes {
     | '/cliente/perfil'
     | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
+    | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
     | '/admin'
     | '/cliente'
@@ -340,6 +362,7 @@ export interface FileRouteTypes {
     | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
@@ -352,6 +375,7 @@ export interface FileRouteTypes {
     | '/cliente/perfil'
     | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
+    | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
     | '/admin/'
     | '/cliente/'
@@ -461,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConfiguracoesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/correcoes': {
+      id: '/admin/correcoes'
+      path: '/correcoes'
+      fullPath: '/admin/correcoes'
+      preLoaderRoute: typeof AdminCorrecoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/financeiro': {
       id: '/admin/financeiro'
       path: '/financeiro'
@@ -559,6 +590,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioBloqueiosRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/funcionario/correcoes': {
+      id: '/funcionario/correcoes'
+      path: '/correcoes'
+      fullPath: '/funcionario/correcoes'
+      preLoaderRoute: typeof FuncionarioCorrecoesRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/funcionario/solicitacoes': {
       id: '/funcionario/solicitacoes'
       path: '/solicitacoes'
@@ -575,6 +613,7 @@ interface AdminRouteChildren {
   AdminBloqueiosRoute: typeof AdminBloqueiosRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
+  AdminCorrecoesRoute: typeof AdminCorrecoesRoute
   AdminFinanceiroRoute: typeof AdminFinanceiroRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminRelatoriosRoute: typeof AdminRelatoriosRoute
@@ -588,6 +627,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBloqueiosRoute: AdminBloqueiosRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
+  AdminCorrecoesRoute: AdminCorrecoesRoute,
   AdminFinanceiroRoute: AdminFinanceiroRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminRelatoriosRoute: AdminRelatoriosRoute,
@@ -623,6 +663,7 @@ const ClienteRouteWithChildren =
 interface FuncionarioRouteChildren {
   FuncionarioAgendarClienteRoute: typeof FuncionarioAgendarClienteRoute
   FuncionarioBloqueiosRoute: typeof FuncionarioBloqueiosRoute
+  FuncionarioCorrecoesRoute: typeof FuncionarioCorrecoesRoute
   FuncionarioSolicitacoesRoute: typeof FuncionarioSolicitacoesRoute
   FuncionarioIndexRoute: typeof FuncionarioIndexRoute
 }
@@ -630,6 +671,7 @@ interface FuncionarioRouteChildren {
 const FuncionarioRouteChildren: FuncionarioRouteChildren = {
   FuncionarioAgendarClienteRoute: FuncionarioAgendarClienteRoute,
   FuncionarioBloqueiosRoute: FuncionarioBloqueiosRoute,
+  FuncionarioCorrecoesRoute: FuncionarioCorrecoesRoute,
   FuncionarioSolicitacoesRoute: FuncionarioSolicitacoesRoute,
   FuncionarioIndexRoute: FuncionarioIndexRoute,
 }

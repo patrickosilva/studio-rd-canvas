@@ -10,6 +10,7 @@ import {
   CalendarX2,
   Crown,
   DollarSign,
+  History,
   LayoutDashboard,
   Settings,
   UsersRound,
@@ -79,6 +80,11 @@ const items = [
     label: "Monitorar agenda",
     to: "/admin/agenda",
     icon: Calendar,
+  },
+  {
+    label: "Ajustes",
+    to: "/admin/correcoes",
+    icon: History,
   },
   {
     label: "Bloqueios",

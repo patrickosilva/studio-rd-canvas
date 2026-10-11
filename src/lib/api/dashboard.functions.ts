@@ -127,9 +127,9 @@ export const adminBuscarResumoDashboard = createServerFn({
     prisma.agendamento.findMany({
       where: {
         status: "CONCLUIDO",
-        pagoEm: {
+        inicio: {
           gte: hojeInicio,
-          lte: hojeFim,
+          lte: agora,
         },
       },
       select: {
@@ -145,9 +145,9 @@ export const adminBuscarResumoDashboard = createServerFn({
     prisma.agendamento.findMany({
       where: {
         status: "CONCLUIDO",
-        pagoEm: {
+        inicio: {
           gte: mesInicio,
-          lte: mesFim,
+          lte: agora,
         },
       },
       select: {

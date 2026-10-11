@@ -938,7 +938,10 @@ function FinanceiroPage() {
 function obterDataFinanceiraAgendamento(
   agendamento: AgendamentoFinanceiro,
 ): string | Date {
-  return agendamento.pagoEm ?? agendamento.inicio;
+  // Para atendimentos, o financeiro segue a data em que o serviço
+  // aconteceu. pagoEm continua sendo preservado como auditoria do
+  // momento em que o pagamento foi registrado.
+  return agendamento.inicio;
 }
 
 function obterValorRealizado(

@@ -38,6 +38,7 @@ type AgendamentoAdmin = {
   motivoRecusa: string | null;
   criadoEm: string | Date;
   atualizadoEm: string | Date;
+  valorPagoCentavos: number | null;
 
   cliente: {
     id: string;
@@ -304,6 +305,30 @@ function obterClasseStatus(status: string): string {
   return "bg-surface-elevated text-muted-foreground";
 }
 
+function obterDuracaoExibida(agendamento: AgendamentoAdmin): number {
+  if (agendamento.status !== "CONCLUIDO") {
+    return agendamento.servico.duracaoMinutos;
+  }
+
+  const inicio = new Date(agendamento.inicio).getTime();
+  const fim = new Date(agendamento.fim).getTime();
+  const duracaoReal = Math.round((fim - inicio) / 60000);
+
+  return duracaoReal > 0
+    ? duracaoReal
+    : agendamento.servico.duracaoMinutos;
+}
+
+function obterValorExibido(agendamento: AgendamentoAdmin): number {
+  if (agendamento.status === "CONCLUIDO") {
+    return (
+      agendamento.valorPagoCentavos ??
+      agendamento.servico.precoCentavos
+    );
+  }
+
+  return agendamento.servico.precoCentavos;
+}
 function podeRemarcarAgendamento(agendamento: AgendamentoAdmin): boolean {
   return ["SOLICITADO", "CONFIRMADO"].includes(agendamento.status);
 }
@@ -381,20 +406,12 @@ function AdminAgendaPage() {
           total + agendamento.servico.precoCentavos,
         0,
       );
-
-    const receitaConcluida = concluidos.reduce(
-      (total, agendamento) =>
-        total + agendamento.servico.precoCentavos,
-      0,
-    );
-
-    return {
+return {
       total: agendamentos.length,
       solicitados: solicitados.length,
       confirmados: confirmados.length,
       concluidos: concluidos.length,
       receitaPrevista,
-      receitaConcluida,
     };
   }, [agendamentos]);
 
@@ -600,7 +617,7 @@ function AdminAgendaPage() {
         </div>
       )}
 
-      <div className="mb-8 grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+      <div className="mb-8 grid gap-4 md:grid-cols-3 xl:grid-cols-5">
         <section className="rounded-2xl border border-border bg-surface p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs uppercase tracking-widest text-muted-foreground">
@@ -692,26 +709,6 @@ function AdminAgendaPage() {
             solicitado + confirmado
           </p>
         </section>
-
-        <section className="rounded-2xl border border-border bg-surface p-5 xl:col-span-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              Realizado
-            </span>
-
-            <DollarSign className="h-4 w-4 text-gold" />
-          </div>
-
-          <div className="mt-3 text-2xl font-display">
-            {carregando
-              ? "..."
-              : formatarMoeda(resumo.receitaConcluida)}
-          </div>
-
-          <p className="mt-1 text-xs text-muted-foreground">
-            concluído
-          </p>
-        </section>
       </div>
 
       {carregando ? (
@@ -776,9 +773,9 @@ function AdminAgendaPage() {
 
                       <p className="flex items-center gap-2">
                         <Scissors className="h-4 w-4 text-gold" />
-                        {agendamento.servico.duracaoMinutos} min ·{" "}
+                        {obterDuracaoExibida(agendamento)} min ·{" "}
                         {formatarMoeda(
-                          agendamento.servico.precoCentavos,
+                          obterValorExibido(agendamento),
                         )}
                       </p>
 

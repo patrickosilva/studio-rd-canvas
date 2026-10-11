@@ -10,6 +10,7 @@ import {
   CalendarCheck,
   CalendarPlus,
   CalendarX2,
+  History,
   LayoutDashboard,
 } from "lucide-react";
 
@@ -68,6 +69,11 @@ const itemsFuncionario = [
     label: "Agenda",
     to: "/funcionario/solicitacoes",
     icon: CalendarCheck,
+  },
+  {
+    label: "Ajustes",
+    to: "/funcionario/correcoes",
+    icon: History,
   },
   {
     label: "Bloqueios",

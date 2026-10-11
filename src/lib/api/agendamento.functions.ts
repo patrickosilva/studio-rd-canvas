@@ -215,6 +215,122 @@ const concluirAgendamentoSchema = z.object({
     .or(z.literal("")),
 });
 
+
+const corrigirServicoConcluidoSchema = z.object({
+  agendamentoId: z
+    .string()
+    .trim()
+    .min(1, "Atendimento inválido."),
+
+  servicoId: z
+    .string()
+    .trim()
+    .min(1, "Escolha o serviço correto."),
+
+  valorPagoCentavos: z
+    .number()
+    .int("O valor precisa estar em centavos.")
+    .min(0, "O valor não pode ser negativo."),
+
+  motivo: z
+    .string()
+    .trim()
+    .min(3, "Informe o motivo da correção.")
+    .max(500, "O motivo é muito grande."),
+});
+
+const JANELA_CORRECAO_SERVICO_MS =
+  7 * 24 * 60 * 60 * 1000;
+
+function obterLimiteCorrecaoServico(
+  agora: Date = new Date(),
+): Date {
+  return new Date(
+    agora.getTime() - JANELA_CORRECAO_SERVICO_MS,
+  );
+}
+
+
+const formasPagamentoAjusteHistorico = [
+  "PIX",
+  "DINHEIRO",
+  "CARTAO_DEBITO",
+  "CARTAO_CREDITO",
+  "ASSINATURA",
+  "CORTESIA",
+  "OUTRO",
+] as const;
+
+const atendimentoHistoricoBaseSchema = z.object({
+  clienteId: z.string().trim().min(1, "Escolha o cliente."),
+  profissionalId: z
+    .string()
+    .trim()
+    .min(1, "Escolha o profissional."),
+  servicoId: z.string().trim().min(1, "Escolha o serviço."),
+  inicio: z.string().trim().min(1, "Informe o início."),
+  fim: z.string().trim().min(1, "Informe o término."),
+  formaPagamento: z.enum(formasPagamentoAjusteHistorico),
+  valorPagoCentavos: z
+    .number()
+    .int("O valor precisa estar em centavos.")
+    .min(0, "O valor não pode ser negativo."),
+  motivo: z
+    .string()
+    .trim()
+    .min(3, "Informe o motivo do ajuste.")
+    .max(500, "O motivo é muito grande."),
+});
+
+const criarAtendimentoRetroativoSchema =
+  atendimentoHistoricoBaseSchema;
+
+const atualizarAtendimentoConcluidoSchema =
+  atendimentoHistoricoBaseSchema.extend({
+    agendamentoId: z
+      .string()
+      .trim()
+      .min(1, "Atendimento inválido."),
+  });
+
+const JANELA_AJUSTE_HISTORICO_MS =
+  7 * 24 * 60 * 60 * 1000;
+
+function validarJanelaAjusteHistorico({
+  inicio,
+  fim,
+  agora = new Date(),
+}: {
+  inicio: Date;
+  fim: Date;
+  agora?: Date;
+}): string | null {
+  if (fim.getTime() <= inicio.getTime()) {
+    return "O horário de término precisa ser depois do início.";
+  }
+
+  const limite = new Date(
+    agora.getTime() - JANELA_AJUSTE_HISTORICO_MS,
+  );
+
+  if (
+    inicio.getTime() < limite.getTime() ||
+    inicio.getTime() > agora.getTime() ||
+    fim.getTime() > agora.getTime()
+  ) {
+    return "O atendimento precisa estar dentro dos últimos 7 dias e já ter terminado.";
+  }
+
+  return null;
+}
+
+function formatarValorAuditoria(valorCentavos: number | null): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format((valorCentavos ?? 0) / 100);
+}
+
 const TIMEZONE_PADRAO = "America/Sao_Paulo";
 const INTERVALO_INICIO_MINUTOS = 5;
 
@@ -1567,6 +1683,886 @@ export const funcionarioRecusarAgendamento =
         sucesso: true,
         mensagem: "Solicitação recusada.",
         agendamento: agendamentoAtualizado,
+      };
+    });
+
+
+
+export const operacionalCriarAtendimentoRetroativo =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(criarAtendimentoRetroativoSchema)
+    .handler(async ({ data }) => {
+      const usuario = await exigirOperacional();
+
+      const inicio = converterData(data.inicio);
+      const fim = converterData(data.fim);
+
+      if (!inicio || !fim) {
+        return {
+          sucesso: false,
+          mensagem: "Data ou horário inválido.",
+        };
+      }
+
+      const agora = new Date();
+      const erroJanela = validarJanelaAjusteHistorico({
+        inicio,
+        fim,
+        agora,
+      });
+
+      if (erroJanela) {
+        return {
+          sucesso: false,
+          mensagem: erroJanela,
+        };
+      }
+
+      const [cliente, profissional, servico] = await Promise.all([
+        prisma.usuario.findFirst({
+          where: {
+            id: data.clienteId,
+            papel: "CLIENTE",
+          },
+          select: {
+            id: true,
+            nome: true,
+          },
+        }),
+        prisma.profissional.findFirst({
+          where: {
+            id: data.profissionalId,
+            ativo: true,
+          },
+          select: {
+            id: true,
+            nome: true,
+          },
+        }),
+        prisma.servico.findFirst({
+          where: {
+            id: data.servicoId,
+            ativo: true,
+          },
+          select: {
+            id: true,
+            nome: true,
+            precoCentavos: true,
+          },
+        }),
+      ]);
+
+      if (!cliente) {
+        return {
+          sucesso: false,
+          mensagem: "Cliente não encontrado.",
+        };
+      }
+
+      if (!profissional) {
+        return {
+          sucesso: false,
+          mensagem: "Profissional não encontrado ou inativo.",
+        };
+      }
+
+      if (!servico) {
+        return {
+          sucesso: false,
+          mensagem: "Serviço não encontrado ou inativo.",
+        };
+      }
+
+      const valorFinal =
+        data.formaPagamento === "ASSINATURA"
+          ? 0
+          : data.valorPagoCentavos;
+
+      const auditoria = [
+        `[LANÇAMENTO RETROATIVO ${agora.toISOString()}]`,
+        `${usuario.nome} registrou atendimento passado.`,
+        `Cliente: ${cliente.nome}.`,
+        `Profissional: ${profissional.nome}.`,
+        `Serviço: ${servico.nome}.`,
+        `Período: ${inicio.toISOString()} até ${fim.toISOString()}.`,
+        `Pagamento: ${data.formaPagamento}.`,
+        `Valor: ${formatarValorAuditoria(valorFinal)}.`,
+        `Motivo: ${data.motivo.trim()}`,
+      ].join(" ");
+
+      try {
+        const agendamento = await prisma.$transaction(
+          async (tx) => {
+            let assinatura:
+              | {
+                  id: string;
+                  plano: {
+                    nome: string;
+                  };
+                }
+              | null = null;
+
+            if (data.formaPagamento === "ASSINATURA") {
+              assinatura =
+                await tx.assinaturaCliente.findFirst({
+                  where: {
+                    clienteId: cliente.id,
+                    vigenciaInicio: {
+                      lte: inicio,
+                    },
+                    vigenciaFim: {
+                      gte: inicio,
+                    },
+                    saldoCortes: {
+                      gt: 0,
+                    },
+                  },
+                  orderBy: {
+                    criadoEm: "desc",
+                  },
+                  select: {
+                    id: true,
+                    plano: {
+                      select: {
+                        nome: true,
+                      },
+                    },
+                  },
+                });
+
+              if (!assinatura) {
+                throw new Error(
+                  "ASSINATURA_RETROATIVA_INDISPONIVEL",
+                );
+              }
+            }
+
+            const criado = await tx.agendamento.create({
+              data: {
+                clienteId: cliente.id,
+                profissionalId: profissional.id,
+                servicoId: servico.id,
+                inicio,
+                fim,
+                status: "CONCLUIDO",
+                formaPagamento: data.formaPagamento,
+                valorPagoCentavos: valorFinal,
+                pagoEm: fim,
+                observacaoInterna: auditoria,
+                observacaoPagamento:
+                  data.formaPagamento === "ASSINATURA"
+                    ? `Atendimento retroativo descontado da assinatura ${assinatura?.plano.nome}.`
+                    : null,
+              },
+              select: {
+                id: true,
+                inicio: true,
+                fim: true,
+                status: true,
+                formaPagamento: true,
+                valorPagoCentavos: true,
+                pagoEm: true,
+                observacaoInterna: true,
+                cliente: {
+                  select: {
+                    id: true,
+                    nome: true,
+                    email: true,
+                    telefone: true,
+                  },
+                },
+                profissional: {
+                  select: {
+                    id: true,
+                    nome: true,
+                  },
+                },
+                servico: {
+                  select: {
+                    id: true,
+                    nome: true,
+                    duracaoMinutos: true,
+                    precoCentavos: true,
+                  },
+                },
+              },
+            });
+
+            if (assinatura) {
+              await tx.assinaturaCliente.update({
+                where: {
+                  id: assinatura.id,
+                },
+                data: {
+                  saldoCortes: {
+                    decrement: 1,
+                  },
+                },
+              });
+
+              await tx.usoAssinatura.create({
+                data: {
+                  assinaturaId: assinatura.id,
+                  agendamentoId: criado.id,
+                  quantidadeCortes: 1,
+                },
+              });
+            }
+
+            return criado;
+          },
+        );
+
+        return {
+          sucesso: true,
+          mensagem:
+            "Atendimento passado registrado com sucesso.",
+          agendamento,
+        };
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message ===
+            "ASSINATURA_RETROATIVA_INDISPONIVEL"
+        ) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Não existe assinatura com saldo válida para esse cliente na data informada.",
+          };
+        }
+
+        throw error;
+      }
+    });
+
+export const operacionalAtualizarAtendimentoConcluido =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(atualizarAtendimentoConcluidoSchema)
+    .handler(async ({ data }) => {
+      const usuario = await exigirOperacional();
+
+      const novoInicio = converterData(data.inicio);
+      const novoFim = converterData(data.fim);
+
+      if (!novoInicio || !novoFim) {
+        return {
+          sucesso: false,
+          mensagem: "Data ou horário inválido.",
+        };
+      }
+
+      const agora = new Date();
+      const erroNovaJanela = validarJanelaAjusteHistorico({
+        inicio: novoInicio,
+        fim: novoFim,
+        agora,
+      });
+
+      if (erroNovaJanela) {
+        return {
+          sucesso: false,
+          mensagem: erroNovaJanela,
+        };
+      }
+
+      const atual = await prisma.agendamento.findUnique({
+        where: {
+          id: data.agendamentoId,
+        },
+        select: {
+          id: true,
+          status: true,
+          inicio: true,
+          fim: true,
+          formaPagamento: true,
+          valorPagoCentavos: true,
+          pagoEm: true,
+          observacaoInterna: true,
+          observacaoPagamento: true,
+          cliente: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+          profissional: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+          servico: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+          usoAssinatura: {
+            select: {
+              id: true,
+              assinaturaId: true,
+              quantidadeCortes: true,
+            },
+          },
+        },
+      });
+
+      if (!atual) {
+        return {
+          sucesso: false,
+          mensagem: "Atendimento não encontrado.",
+        };
+      }
+
+      if (atual.status !== "CONCLUIDO") {
+        return {
+          sucesso: false,
+          mensagem:
+            "Somente atendimentos concluídos podem ser ajustados aqui.",
+        };
+      }
+
+      const erroJanelaAtual = validarJanelaAjusteHistorico({
+        inicio: atual.inicio,
+        fim: atual.fim,
+        agora,
+      });
+
+      if (erroJanelaAtual) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Este atendimento ultrapassou a janela de 7 dias para ajustes.",
+        };
+      }
+
+      const [cliente, profissional, servico] = await Promise.all([
+        prisma.usuario.findFirst({
+          where: {
+            id: data.clienteId,
+            papel: "CLIENTE",
+          },
+          select: {
+            id: true,
+            nome: true,
+          },
+        }),
+        prisma.profissional.findFirst({
+          where: {
+            id: data.profissionalId,
+            ativo: true,
+          },
+          select: {
+            id: true,
+            nome: true,
+          },
+        }),
+        prisma.servico.findFirst({
+          where: {
+            id: data.servicoId,
+            ativo: true,
+          },
+          select: {
+            id: true,
+            nome: true,
+            precoCentavos: true,
+          },
+        }),
+      ]);
+
+      if (!cliente) {
+        return {
+          sucesso: false,
+          mensagem: "Cliente não encontrado.",
+        };
+      }
+
+      if (!profissional) {
+        return {
+          sucesso: false,
+          mensagem: "Profissional não encontrado ou inativo.",
+        };
+      }
+
+      if (!servico) {
+        return {
+          sucesso: false,
+          mensagem: "Serviço não encontrado ou inativo.",
+        };
+      }
+
+      const valorFinal =
+        data.formaPagamento === "ASSINATURA"
+          ? 0
+          : data.valorPagoCentavos;
+
+      const linhaAuditoria = [
+        `[AJUSTE DE ATENDIMENTO ${agora.toISOString()}]`,
+        `${usuario.nome} alterou o atendimento.`,
+        `Cliente: "${atual.cliente.nome}" -> "${cliente.nome}".`,
+        `Profissional: "${atual.profissional.nome}" -> "${profissional.nome}".`,
+        `Serviço: "${atual.servico.nome}" -> "${servico.nome}".`,
+        `Período: ${atual.inicio.toISOString()}–${atual.fim.toISOString()} -> ${novoInicio.toISOString()}–${novoFim.toISOString()}.`,
+        `Pagamento: ${atual.formaPagamento ?? "NÃO INFORMADO"} -> ${data.formaPagamento}.`,
+        `Valor: ${formatarValorAuditoria(atual.valorPagoCentavos)} -> ${formatarValorAuditoria(valorFinal)}.`,
+        `Motivo: ${data.motivo.trim()}`,
+      ].join(" ");
+
+      const novaObservacaoInterna = [
+        atual.observacaoInterna?.trim(),
+        linhaAuditoria,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      try {
+        const agendamento = await prisma.$transaction(
+          async (tx) => {
+            const desejaAssinatura =
+              data.formaPagamento === "ASSINATURA";
+
+            if (atual.usoAssinatura) {
+              if (!desejaAssinatura) {
+                await tx.assinaturaCliente.update({
+                  where: {
+                    id: atual.usoAssinatura.assinaturaId,
+                  },
+                  data: {
+                    saldoCortes: {
+                      increment:
+                        atual.usoAssinatura.quantidadeCortes,
+                    },
+                  },
+                });
+
+                await tx.usoAssinatura.delete({
+                  where: {
+                    id: atual.usoAssinatura.id,
+                  },
+                });
+              } else {
+                const assinaturaAtualAindaValida =
+                  await tx.assinaturaCliente.findFirst({
+                    where: {
+                      id: atual.usoAssinatura.assinaturaId,
+                      clienteId: cliente.id,
+                      vigenciaInicio: {
+                        lte: novoInicio,
+                      },
+                      vigenciaFim: {
+                        gte: novoInicio,
+                      },
+                    },
+                    select: {
+                      id: true,
+                    },
+                  });
+
+                if (!assinaturaAtualAindaValida) {
+                  await tx.assinaturaCliente.update({
+                    where: {
+                      id: atual.usoAssinatura.assinaturaId,
+                    },
+                    data: {
+                      saldoCortes: {
+                        increment:
+                          atual.usoAssinatura.quantidadeCortes,
+                      },
+                    },
+                  });
+
+                  const novaAssinatura =
+                    await tx.assinaturaCliente.findFirst({
+                      where: {
+                        clienteId: cliente.id,
+                        vigenciaInicio: {
+                          lte: novoInicio,
+                        },
+                        vigenciaFim: {
+                          gte: novoInicio,
+                        },
+                        saldoCortes: {
+                          gt: 0,
+                        },
+                      },
+                      orderBy: {
+                        criadoEm: "desc",
+                      },
+                      select: {
+                        id: true,
+                      },
+                    });
+
+                  if (!novaAssinatura) {
+                    throw new Error(
+                      "ASSINATURA_AJUSTE_INDISPONIVEL",
+                    );
+                  }
+
+                  await tx.assinaturaCliente.update({
+                    where: {
+                      id: novaAssinatura.id,
+                    },
+                    data: {
+                      saldoCortes: {
+                        decrement:
+                          atual.usoAssinatura.quantidadeCortes,
+                      },
+                    },
+                  });
+
+                  await tx.usoAssinatura.update({
+                    where: {
+                      id: atual.usoAssinatura.id,
+                    },
+                    data: {
+                      assinaturaId: novaAssinatura.id,
+                    },
+                  });
+                }
+              }
+            } else if (desejaAssinatura) {
+              const assinatura =
+                await tx.assinaturaCliente.findFirst({
+                  where: {
+                    clienteId: cliente.id,
+                    vigenciaInicio: {
+                      lte: novoInicio,
+                    },
+                    vigenciaFim: {
+                      gte: novoInicio,
+                    },
+                    saldoCortes: {
+                      gt: 0,
+                    },
+                  },
+                  orderBy: {
+                    criadoEm: "desc",
+                  },
+                  select: {
+                    id: true,
+                  },
+                });
+
+              if (!assinatura) {
+                throw new Error(
+                  "ASSINATURA_AJUSTE_INDISPONIVEL",
+                );
+              }
+
+              await tx.assinaturaCliente.update({
+                where: {
+                  id: assinatura.id,
+                },
+                data: {
+                  saldoCortes: {
+                    decrement: 1,
+                  },
+                },
+              });
+
+              await tx.usoAssinatura.create({
+                data: {
+                  assinaturaId: assinatura.id,
+                  agendamentoId: atual.id,
+                  quantidadeCortes: 1,
+                },
+              });
+            }
+
+            return tx.agendamento.update({
+              where: {
+                id: atual.id,
+              },
+              data: {
+                clienteId: cliente.id,
+                profissionalId: profissional.id,
+                servicoId: servico.id,
+                inicio: novoInicio,
+                fim: novoFim,
+                formaPagamento: data.formaPagamento,
+                valorPagoCentavos: valorFinal,
+                pagoEm: atual.pagoEm ?? novoFim,
+                observacaoPagamento:
+                  data.formaPagamento === "ASSINATURA"
+                    ? "Atendimento ajustado com uso de assinatura RD Black."
+                    : atual.formaPagamento === data.formaPagamento
+                      ? atual.observacaoPagamento
+                      : null,
+                observacaoInterna: novaObservacaoInterna,
+              },
+              select: {
+                id: true,
+                inicio: true,
+                fim: true,
+                status: true,
+                formaPagamento: true,
+                valorPagoCentavos: true,
+                pagoEm: true,
+                observacaoInterna: true,
+                cliente: {
+                  select: {
+                    id: true,
+                    nome: true,
+                    email: true,
+                    telefone: true,
+                  },
+                },
+                profissional: {
+                  select: {
+                    id: true,
+                    nome: true,
+                  },
+                },
+                servico: {
+                  select: {
+                    id: true,
+                    nome: true,
+                    duracaoMinutos: true,
+                    precoCentavos: true,
+                  },
+                },
+              },
+            });
+          },
+        );
+
+        return {
+          sucesso: true,
+          mensagem:
+            "Atendimento ajustado com sucesso. Agenda e financeiro foram atualizados.",
+          agendamento,
+        };
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message ===
+            "ASSINATURA_AJUSTE_INDISPONIVEL"
+        ) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Não existe assinatura com saldo válida para esse cliente na data informada.",
+          };
+        }
+
+        throw error;
+      }
+    });
+
+export const operacionalListarAtendimentosCorrigiveis =
+  createServerFn({
+    method: "GET",
+  }).handler(async () => {
+    await exigirOperacional();
+
+    const agora = new Date();
+    const limite = obterLimiteCorrecaoServico(agora);
+
+    return prisma.agendamento.findMany({
+      where: {
+        status: "CONCLUIDO",
+        inicio: {
+          gte: limite,
+          lte: agora,
+        },
+      },
+      orderBy: {
+        inicio: "desc",
+      },
+      select: {
+        id: true,
+        inicio: true,
+        fim: true,
+        status: true,
+        formaPagamento: true,
+        valorPagoCentavos: true,
+        pagoEm: true,
+        observacaoInterna: true,
+
+        cliente: {
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+            telefone: true,
+          },
+        },
+
+        profissional: {
+          select: {
+            id: true,
+            nome: true,
+          },
+        },
+
+        servico: {
+          select: {
+            id: true,
+            nome: true,
+            duracaoMinutos: true,
+            precoCentavos: true,
+          },
+        },
+      },
+    });
+  });
+
+export const operacionalCorrigirServicoConcluido =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(corrigirServicoConcluidoSchema)
+    .handler(async ({ data }) => {
+      const usuario = await exigirOperacional();
+
+      const agora = new Date();
+      const limite = obterLimiteCorrecaoServico(agora);
+
+      const agendamento = await prisma.agendamento.findUnique({
+        where: {
+          id: data.agendamentoId,
+        },
+        select: {
+          id: true,
+          status: true,
+          inicio: true,
+          fim: true,
+          servicoId: true,
+          observacaoInterna: true,
+          formaPagamento: true,
+          valorPagoCentavos: true,
+          pagoEm: true,
+
+          servico: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+      });
+
+      if (!agendamento) {
+        return {
+          sucesso: false,
+          mensagem: "Atendimento não encontrado.",
+        };
+      }
+
+      if (agendamento.status !== "CONCLUIDO") {
+        return {
+          sucesso: false,
+          mensagem:
+            "Somente atendimentos concluídos podem ter o serviço corrigido.",
+        };
+      }
+
+      if (
+        agendamento.inicio < limite ||
+        agendamento.inicio > agora
+      ) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Este atendimento ultrapassou o período de 7 dias permitido para correções.",
+        };
+      }
+
+      if (agendamento.servicoId === data.servicoId) {
+        return {
+          sucesso: false,
+          mensagem:
+            "O serviço escolhido já é o serviço atual deste atendimento.",
+        };
+      }
+
+      const novoServico = await prisma.servico.findFirst({
+        where: {
+          id: data.servicoId,
+          ativo: true,
+        },
+        select: {
+          id: true,
+          nome: true,
+          duracaoMinutos: true,
+          precoCentavos: true,
+        },
+      });
+
+      if (!novoServico) {
+        return {
+          sucesso: false,
+          mensagem: "O novo serviço não foi encontrado ou está inativo.",
+        };
+      }
+
+      const valorPagoCentavosCorrigido =
+        agendamento.formaPagamento === "ASSINATURA"
+          ? 0
+          : data.valorPagoCentavos;
+
+      const valorAnteriorTexto = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format((agendamento.valorPagoCentavos ?? 0) / 100);
+
+      const valorNovoTexto = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(valorPagoCentavosCorrigido / 100);
+      const motivo = data.motivo.trim();
+      const linhaAuditoria = [
+        `[CORREÇÃO DE SERVIÇO ${agora.toISOString()}]`,
+        `${usuario.nome} alterou "${agendamento.servico.nome}" para "${novoServico.nome}" e o valor de ${valorAnteriorTexto} para ${valorNovoTexto}.`,
+        `Motivo: ${motivo}`,
+      ].join(" ");
+
+      const observacaoInterna = [
+        agendamento.observacaoInterna?.trim(),
+        linhaAuditoria,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      const atualizado = await prisma.agendamento.update({
+        where: {
+          id: agendamento.id,
+        },
+        data: {
+          servicoId: novoServico.id,
+          valorPagoCentavos: valorPagoCentavosCorrigido,
+          observacaoInterna,
+        },
+        select: {
+          id: true,
+          inicio: true,
+          fim: true,
+          status: true,
+          formaPagamento: true,
+          valorPagoCentavos: true,
+          pagoEm: true,
+
+          servico: {
+            select: {
+              id: true,
+              nome: true,
+              duracaoMinutos: true,
+              precoCentavos: true,
+            },
+          },
+        },
+      });
+
+      return {
+        sucesso: true,
+        mensagem: `Atendimento corrigido para "${novoServico.nome}" com valor ${valorNovoTexto}. Horário e forma de pagamento foram preservados.`,
+        agendamento: atualizado,
       };
     });
 
