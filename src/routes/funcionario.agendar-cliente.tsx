@@ -191,6 +191,26 @@ function criarInicioIsoLocal(
   return `${dataInput}T${horario}`;
 }
 
+function horarioValido(horario: string): boolean {
+  const match = horario.match(/^(\d{2}):(\d{2})$/);
+
+  return Boolean(
+    match && Number(match[1]) < 24 && Number(match[2]) < 60,
+  );
+}
+
+function converterDuracaoPersonalizada(valor: string): number | null {
+  const texto = valor.trim();
+
+  if (!/^\d+$/.test(texto)) {
+    return null;
+  }
+
+  const minutos = Number(texto);
+
+  return minutos > 0 ? minutos : null;
+}
+
 function horarioJaPassou(
   dataInput: string,
   horario: string,
@@ -427,6 +447,12 @@ function FuncionarioAgendarClientePage() {
   const [observacaoCliente, setObservacaoCliente] =
     useState("");
 
+  // Horário personalizado: a equipe digita início e duração livremente;
+  // o backend só barra conflito com outro atendimento ativo.
+  const [modoPersonalizado, setModoPersonalizado] = useState(false);
+  const [horarioPersonalizado, setHorarioPersonalizado] = useState("");
+  const [duracaoPersonalizada, setDuracaoPersonalizada] = useState("");
+
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
@@ -585,12 +611,20 @@ function FuncionarioAgendarClientePage() {
     dataSelecionada,
   ]);
 
+  const horarioEscolhido = modoPersonalizado
+    ? horarioPersonalizado
+    : horarioSelecionado;
+
+  const duracaoEscolhida = modoPersonalizado
+    ? converterDuracaoPersonalizada(duracaoPersonalizada)
+    : servicoSelecionado?.duracaoMinutos ?? null;
+
   const formularioCompleto = Boolean(
     clienteSelecionadoId &&
     servicoId &&
     profissionalId &&
     dataSelecionada &&
-    horarioSelecionado,
+    horarioEscolhido,
   );
 
 
@@ -671,10 +705,22 @@ function FuncionarioAgendarClientePage() {
       !servicoId ||
       !profissionalId ||
       !dataSelecionada ||
-      !horarioSelecionado
+      !horarioEscolhido
     ) {
       setErro("Escolha cliente, serviço, profissional, dia e horário.");
       return;
+    }
+
+    if (modoPersonalizado) {
+      if (!horarioValido(horarioEscolhido)) {
+        setErro("Informe um horário válido no formato HH:MM.");
+        return;
+      }
+
+      if (duracaoEscolhida === null) {
+        setErro("Informe uma duração válida, em minutos, maior que zero.");
+        return;
+      }
     }
 
     setSalvando(true);
@@ -687,9 +733,15 @@ function FuncionarioAgendarClientePage() {
           profissionalId,
           inicio: criarInicioIsoLocal(
             dataSelecionada,
-            horarioSelecionado,
+            horarioEscolhido,
           ),
           observacaoCliente,
+          ...(modoPersonalizado && duracaoEscolhida !== null
+            ? {
+              horarioPersonalizado: true,
+              duracaoMinutos: duracaoEscolhida,
+            }
+            : {}),
         },
       });
 
@@ -707,6 +759,8 @@ function FuncionarioAgendarClientePage() {
       setHorarioSelecionado("");
       setIndisponibilidades([]);
       setObservacaoCliente("");
+      setHorarioPersonalizado("");
+      setDuracaoPersonalizada("");
     } catch (error) {
       console.error(error);
       setErro("Não foi possível criar o agendamento.");
@@ -824,6 +878,17 @@ function FuncionarioAgendarClientePage() {
                         onChange={(event) => {
                           setServicoId(event.target.value);
                           setHorarioSelecionado("");
+
+                          const novoServico = servicos.find(
+                            (servico) =>
+                              servico.id === event.target.value,
+                          );
+
+                          setDuracaoPersonalizada(
+                            novoServico
+                              ? String(novoServico.duracaoMinutos)
+                              : "",
+                          );
                         }}
                         className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
                         required
@@ -888,6 +953,123 @@ function FuncionarioAgendarClientePage() {
                     descricao="Escolha um dia e um horário em que o serviço caiba inteiro."
                   >
                     <div className="space-y-5">
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          {
+                            personalizado: false,
+                            titulo: "Horários disponíveis",
+                            descricao: "Grade usada pelos clientes",
+                          },
+                          {
+                            personalizado: true,
+                            titulo: "Horário personalizado",
+                            descricao:
+                              "Encaixe, almoço ou fora do expediente",
+                          },
+                        ].map((opcao) => {
+                          const ativo =
+                            opcao.personalizado === modoPersonalizado;
+
+                          return (
+                            <button
+                              key={opcao.titulo}
+                              type="button"
+                              aria-pressed={ativo}
+                              onClick={() =>
+                                setModoPersonalizado(opcao.personalizado)
+                              }
+                              className={`rounded-xl border px-4 py-3 text-left text-sm transition ${ativo
+                                  ? "border-gold bg-gold-soft text-gold"
+                                  : "border-border bg-background/40 hover:bg-surface-elevated"
+                                }`}
+                            >
+                              <span className="block font-medium">
+                                {opcao.titulo}
+                              </span>
+
+                              <span className="mt-1 block text-xs text-muted-foreground">
+                                {opcao.descricao}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {modoPersonalizado ? (
+                        <div className="space-y-3">
+                          <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="grid gap-2">
+                              <Label htmlFor="dataPersonalizada">Dia</Label>
+
+                              <input
+                                id="dataPersonalizada"
+                                type="date"
+                                value={dataSelecionada}
+                                onChange={(event) =>
+                                  setDataSelecionada(event.target.value)
+                                }
+                                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+                              />
+                            </div>
+
+                            <div className="grid gap-2">
+                              <Label htmlFor="horarioPersonalizado">
+                                Início
+                              </Label>
+
+                              <input
+                                id="horarioPersonalizado"
+                                type="time"
+                                step={60}
+                                value={horarioPersonalizado}
+                                onChange={(event) =>
+                                  setHorarioPersonalizado(
+                                    event.target.value,
+                                  )
+                                }
+                                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+                              />
+                            </div>
+
+                            <div className="grid gap-2">
+                              <Label htmlFor="duracaoPersonalizada">
+                                Duração (min)
+                              </Label>
+
+                              <input
+                                id="duracaoPersonalizada"
+                                type="number"
+                                inputMode="numeric"
+                                min={1}
+                                step={1}
+                                value={duracaoPersonalizada}
+                                onChange={(event) =>
+                                  setDuracaoPersonalizada(
+                                    event.target.value,
+                                  )
+                                }
+                                placeholder={
+                                  servicoSelecionado
+                                    ? String(
+                                      servicoSelecionado.duracaoMinutos,
+                                    )
+                                    : "Ex.: 30"
+                                }
+                                className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+                              />
+                            </div>
+                          </div>
+
+                          <p className="text-xs leading-5 text-muted-foreground">
+                            Intervalos, bloqueios e expediente não
+                            limitam este horário. O sistema só impede
+                            conflito com outro atendimento do
+                            profissional ou do cliente. A duração vale
+                            apenas para este agendamento.
+                          </p>
+                        </div>
+                      ) : (
+                      <>
                       <div>
                         <Label>Dia</Label>
 
@@ -958,6 +1140,8 @@ function FuncionarioAgendarClientePage() {
                           </div>
                         )}
                       </div>
+                      </>
+                      )}
                     </div>
                   </EtapaFormulario>
 
@@ -1059,8 +1243,8 @@ function FuncionarioAgendarClientePage() {
                   icon={Clock}
                   titulo="Duração"
                   texto={
-                    servicoSelecionado
-                      ? `${servicoSelecionado.duracaoMinutos} minutos`
+                    servicoSelecionado && duracaoEscolhida !== null
+                      ? `${duracaoEscolhida} minutos`
                       : "Selecione um serviço para ver a duração."
                   }
                 />
@@ -1069,8 +1253,15 @@ function FuncionarioAgendarClientePage() {
                   icon={Clock}
                   titulo="Horário"
                   texto={
-                    dataSelecionada && horarioSelecionado
-                      ? `${obterNomeDia(dataSelecionada)} às ${horarioSelecionado}`
+                    dataSelecionada && horarioValido(horarioEscolhido)
+                      ? `${obterNomeDia(dataSelecionada)} às ${horarioEscolhido}${duracaoEscolhida !== null
+                        ? ` até ${formatarMinutosComoHora(
+                          (converterHoraParaMinutos(horarioEscolhido) +
+                            duracaoEscolhida) %
+                          (24 * 60),
+                        )}`
+                        : ""
+                      }`
                       : "Nenhum horário selecionado."
                   }
                 />

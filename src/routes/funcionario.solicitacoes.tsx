@@ -2,6 +2,7 @@ import {
   type FormEvent,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -242,6 +243,13 @@ function SolicitacoesPage() {
   const [indisponibilidadesRemarcacao, setIndisponibilidadesRemarcacao] =
     useState<IndisponibilidadeAgenda[]>([]);
 
+  // Horário personalizado: a equipe digita início e duração livremente;
+  // o backend só barra conflito com outro atendimento ativo.
+  const [remarcacaoPersonalizada, setRemarcacaoPersonalizada] =
+    useState(false);
+  const [horarioPersonalizado, setHorarioPersonalizado] = useState("");
+  const [duracaoPersonalizada, setDuracaoPersonalizada] = useState("");
+
   const [
     formasPagamentoPorAgendamento,
     setFormasPagamentoPorAgendamento,
@@ -252,36 +260,77 @@ function SolicitacoesPage() {
     setValoresPagosPorAgendamento,
   ] = useState<Record<string, string>>({});
 
-  async function carregarDados() {
+  // Evita que a resposta de uma semana anterior sobrescreva a atual
+  // quando a navegação é mais rápida que a rede.
+  const ultimaConsultaRef = useRef(0);
+
+  // Semana exibida agora: uma ação que termina depois de uma troca de
+  // semana recarrega a semana atual, e não a capturada no clique.
+  const semanaAtualRef = useRef("");
+
+  // Busca só a semana exibida (seletor de dias + linha do tempo),
+  // com concluídos; o histórico fica acessível navegando pelas semanas.
+  async function carregarAgendamentos(semana = semanaAtualRef.current) {
+    const consulta = ++ultimaConsultaRef.current;
+
     setCarregando(true);
     setErro("");
 
     try {
-      const [resposta, dadosAgendamento] = await Promise.all([
-        carregarSolicitacoes(),
-        carregarDadosParaAgendarCliente(),
-      ]);
+      const resposta = await carregarSolicitacoes({
+        data: {
+          inicio: semana,
+          fim: formatarDataInput(adicionarDias(criarDataLocal(semana), 7)),
+        },
+      });
 
-      setSolicitacoes(resposta);
+      if (consulta === ultimaConsultaRef.current) {
+        setSolicitacoes(resposta);
+      }
+    } catch (error) {
+      console.error(error);
+
+      if (consulta === ultimaConsultaRef.current) {
+        setErro("Não foi possível carregar a agenda.");
+      }
+    } finally {
+      if (consulta === ultimaConsultaRef.current) {
+        setCarregando(false);
+      }
+    }
+  }
+
+  async function carregarServicos() {
+    try {
+      const dadosAgendamento = await carregarDadosParaAgendarCliente();
+
       setServicosDisponiveis(dadosAgendamento.servicos);
-
     } catch (error) {
       console.error(error);
 
       setErro("Não foi possível carregar a agenda.");
-    } finally {
-      setCarregando(false);
     }
   }
 
+  async function carregarDados() {
+    await Promise.all([carregarAgendamentos(), carregarServicos()]);
+  }
+
   useEffect(() => {
-    void carregarDados();
+    void carregarServicos();
   }, []);
 
   const inicioSemana = useMemo(
     () => obterInicioDaSemana(dataSelecionada),
     [dataSelecionada],
   );
+
+  const chaveSemana = formatarDataInput(inicioSemana);
+
+  useEffect(() => {
+    semanaAtualRef.current = chaveSemana;
+    void carregarAgendamentos(chaveSemana);
+  }, [chaveSemana]);
 
   const diasDaSemana = useMemo(
     () =>
@@ -510,6 +559,12 @@ function SolicitacoesPage() {
 
     setHorarioRemarcacao("");
     setIndisponibilidadesRemarcacao([]);
+
+    setRemarcacaoPersonalizada(false);
+    setHorarioPersonalizado(formatarHora(agendamento.inicio));
+    setDuracaoPersonalizada(
+      String(calcularDuracaoMinutos(agendamento.inicio, agendamento.fim)),
+    );
   }
 
   function fecharModalRemarcacao() {
@@ -518,6 +573,9 @@ function SolicitacoesPage() {
     setDataRemarcacao("");
     setHorarioRemarcacao("");
     setIndisponibilidadesRemarcacao([]);
+    setRemarcacaoPersonalizada(false);
+    setHorarioPersonalizado("");
+    setDuracaoPersonalizada("");
   }
 
   async function carregarIndisponibilidadesRemarcacao(
@@ -600,7 +658,7 @@ function SolicitacoesPage() {
 
       setMensagem(resultado.mensagem);
 
-      await carregarDados();
+      await carregarAgendamentos();
     } catch (error) {
       console.error(error);
 
@@ -656,7 +714,7 @@ function SolicitacoesPage() {
       setMensagem(resultado.mensagem);
       fecharModalAcao();
 
-      await carregarDados();
+      await carregarAgendamentos();
     } catch (error) {
       console.error(error);
 
@@ -667,16 +725,36 @@ function SolicitacoesPage() {
   }
 
   async function handleSalvarRemarcacao() {
+    const horarioEscolhido = remarcacaoPersonalizada
+      ? horarioPersonalizado
+      : horarioRemarcacao;
+
     if (
       !agendamentoRemarcacao ||
       !servicoRemarcacaoId ||
       !dataRemarcacao ||
-      !horarioRemarcacao
+      !horarioEscolhido
     ) {
       setErro(
         "Escolha o serviço, o novo dia e o novo horário para remarcar.",
       );
       return;
+    }
+
+    const duracaoMinutos = remarcacaoPersonalizada
+      ? converterDuracaoPersonalizada(duracaoPersonalizada)
+      : null;
+
+    if (remarcacaoPersonalizada) {
+      if (!horarioValido(horarioEscolhido)) {
+        setErro("Informe um horário válido no formato HH:MM.");
+        return;
+      }
+
+      if (duracaoMinutos === null) {
+        setErro("Informe uma duração válida, em minutos, maior que zero.");
+        return;
+      }
     }
 
     setMensagem("");
@@ -690,8 +768,14 @@ function SolicitacoesPage() {
           servicoId: servicoRemarcacaoId,
           inicio: criarInicioIsoLocal(
             dataRemarcacao,
-            horarioRemarcacao,
+            horarioEscolhido,
           ),
+          ...(remarcacaoPersonalizada && duracaoMinutos !== null
+            ? {
+              horarioPersonalizado: true,
+              duracaoMinutos,
+            }
+            : {}),
         },
       });
 
@@ -703,7 +787,7 @@ function SolicitacoesPage() {
       setMensagem(resultado.mensagem);
       fecharModalRemarcacao();
 
-      await carregarDados();
+      await carregarAgendamentos();
     } catch (error) {
       console.error(error);
       setErro("Não foi possível remarcar o agendamento.");
@@ -750,7 +834,7 @@ function SolicitacoesPage() {
 
       setMensagem(resultado.mensagem);
 
-      await carregarDados();
+      await carregarAgendamentos();
     } catch (error) {
       console.error(error);
 
@@ -784,7 +868,7 @@ function SolicitacoesPage() {
       setMensagem(resultado.mensagem);
       fecharModalAcao();
 
-      await carregarDados();
+      await carregarAgendamentos();
     } catch (error) {
       console.error(error);
 
@@ -1109,7 +1193,11 @@ function SolicitacoesPage() {
                 </p>
                 <p className="mt-1 font-medium">
                   {agendamentoRemarcacao.servico.nome} ·{" "}
-                  {agendamentoRemarcacao.servico.duracaoMinutos} min
+                  {calcularDuracaoMinutos(
+                    agendamentoRemarcacao.inicio,
+                    agendamentoRemarcacao.fim,
+                  )}{" "}
+                  min
                 </p>
               </div>
 
@@ -1143,6 +1231,16 @@ function SolicitacoesPage() {
                 onChange={(event) => {
                   setServicoRemarcacaoId(event.target.value);
                   setHorarioRemarcacao("");
+
+                  const novoServico = servicosDisponiveis.find(
+                    (servico) => servico.id === event.target.value,
+                  );
+
+                  if (novoServico) {
+                    setDuracaoPersonalizada(
+                      String(novoServico.duracaoMinutos),
+                    );
+                  }
                 }}
                 className="mt-3 h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
               >
@@ -1154,6 +1252,132 @@ function SolicitacoesPage() {
               </select>
             </div>
             <div className="mt-6 space-y-5">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  {
+                    personalizado: false,
+                    titulo: "Horários disponíveis",
+                    descricao: "Grade usada pelos clientes",
+                  },
+                  {
+                    personalizado: true,
+                    titulo: "Horário personalizado",
+                    descricao: "Encaixe, almoço ou fora do expediente",
+                  },
+                ].map((opcao) => {
+                  const ativo =
+                    opcao.personalizado === remarcacaoPersonalizada;
+
+                  return (
+                    <button
+                      key={opcao.titulo}
+                      type="button"
+                      aria-pressed={ativo}
+                      onClick={() =>
+                        setRemarcacaoPersonalizada(opcao.personalizado)
+                      }
+                      className={`rounded-xl border px-4 py-3 text-left text-sm transition ${ativo
+                        ? "border-gold bg-gold-soft text-gold"
+                        : "border-border bg-background/40 hover:bg-surface-elevated"
+                        }`}
+                    >
+                      <span className="block font-medium">
+                        {opcao.titulo}
+                      </span>
+
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        {opcao.descricao}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {remarcacaoPersonalizada ? (
+                <div className="space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="remarcacao-data"
+                        className="text-xs uppercase tracking-widest text-muted-foreground"
+                      >
+                        Dia
+                      </label>
+
+                      <input
+                        id="remarcacao-data"
+                        type="date"
+                        value={dataRemarcacao}
+                        onChange={(event) =>
+                          setDataRemarcacao(event.target.value)
+                        }
+                        className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="remarcacao-horario"
+                        className="text-xs uppercase tracking-widest text-muted-foreground"
+                      >
+                        Início
+                      </label>
+
+                      <input
+                        id="remarcacao-horario"
+                        type="time"
+                        step={60}
+                        value={horarioPersonalizado}
+                        onChange={(event) =>
+                          setHorarioPersonalizado(event.target.value)
+                        }
+                        className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="remarcacao-duracao"
+                        className="text-xs uppercase tracking-widest text-muted-foreground"
+                      >
+                        Duração (min)
+                      </label>
+
+                      <input
+                        id="remarcacao-duracao"
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        step={1}
+                        value={duracaoPersonalizada}
+                        onChange={(event) =>
+                          setDuracaoPersonalizada(event.target.value)
+                        }
+                        className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    {(() => {
+                      const duracao = converterDuracaoPersonalizada(
+                        duracaoPersonalizada,
+                      );
+
+                      if (!horarioValido(horarioPersonalizado) || !duracao) {
+                        return "Informe início e duração para ver o término.";
+                      }
+
+                      return `Término previsto: ${formatarMinutosComoHora(
+                        (converterHoraParaMinutos(horarioPersonalizado) +
+                          duracao) %
+                          (24 * 60),
+                      )}. Intervalos, bloqueios e expediente não limitam este horário; apenas conflitos com outros atendimentos do profissional.`;
+                    })()}
+                  </p>
+                </div>
+              ) : (
+              <>
               <div>
                 <label className="text-xs uppercase tracking-widest text-muted-foreground">
                   Novo dia
@@ -1223,6 +1447,8 @@ function SolicitacoesPage() {
                   </div>
                 )}
               </div>
+              </>
+              )}
             </div>
 
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -1243,7 +1469,9 @@ function SolicitacoesPage() {
                   processandoId === agendamentoRemarcacao.id ||
                   !servicoRemarcacaoId ||
                   !dataRemarcacao ||
-                  !horarioRemarcacao
+                  !(remarcacaoPersonalizada
+                    ? horarioPersonalizado
+                    : horarioRemarcacao)
                 }
                 className="h-11 rounded-xl"
               >
@@ -1506,6 +1734,7 @@ function LinhaDoTempoDia({
 const corStatusBloco: Record<string, string> = {
   SOLICITADO: "border-l-amber-500",
   CONFIRMADO: "border-l-emerald-500",
+  CONCLUIDO: "border-l-gold",
 };
 
 function BlocoAgendamento({
@@ -1773,7 +2002,7 @@ function ConteudoDetalhes({
           title="Serviço"
           lines={[
             agendamento.servico.nome,
-            `${agendamento.servico.duracaoMinutos} min`,
+            `${calcularDuracaoMinutos(agendamento.inicio, agendamento.fim)} min`,
             formatarMoeda(agendamento.servico.precoCentavos),
           ]}
         />
@@ -1824,8 +2053,8 @@ function ConteudoDetalhes({
               </p>
 
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Remarque este atendimento usando os horários
-                disponíveis conforme a duração do serviço.
+                Remarque pelos horários disponíveis ou defina um
+                horário e uma duração personalizados.
               </p>
             </div>
 
@@ -2291,6 +2520,36 @@ function criarInicioIsoLocal(
   horario: string,
 ): string {
   return `${dataInput}T${horario}`;
+}
+
+// Duração real do atendimento (pode diferir do catálogo).
+function calcularDuracaoMinutos(
+  inicio: string | Date,
+  fim: string | Date,
+): number {
+  return Math.round(
+    (new Date(fim).getTime() - new Date(inicio).getTime()) / 60000,
+  );
+}
+
+function horarioValido(horario: string): boolean {
+  const match = horario.match(/^(\d{2}):(\d{2})$/);
+
+  return Boolean(
+    match && Number(match[1]) < 24 && Number(match[2]) < 60,
+  );
+}
+
+function converterDuracaoPersonalizada(valor: string): number | null {
+  const texto = valor.trim();
+
+  if (!/^\d+$/.test(texto)) {
+    return null;
+  }
+
+  const minutos = Number(texto);
+
+  return minutos > 0 ? minutos : null;
 }
 
 function existeConflitoComIndisponibilidade({

@@ -79,6 +79,24 @@ const solicitarAgendamentoSchema = z.object({
     .or(z.literal("")),
 });
 
+const DURACAO_PERSONALIZADA_MAXIMA_MINUTOS = 12 * 60;
+
+// Campos opcionais usados só pela equipe para encaixes manuais.
+// Sem eles, as regras de grade, almoço e bloqueio continuam valendo.
+const horarioPersonalizadoSchemaCampos = {
+  horarioPersonalizado: z.boolean().optional(),
+
+  duracaoMinutos: z
+    .number()
+    .int("A duração precisa ser em minutos inteiros.")
+    .min(1, "A duração precisa ser de pelo menos 1 minuto.")
+    .max(
+      DURACAO_PERSONALIZADA_MAXIMA_MINUTOS,
+      "A duração é muito grande.",
+    )
+    .optional(),
+};
+
 const funcionarioCriarAgendamentoParaClienteSchema = z.object({
   clienteId: z
     .string()
@@ -106,6 +124,8 @@ const funcionarioCriarAgendamentoParaClienteSchema = z.object({
     .max(500, "A observação é muito grande.")
     .optional()
     .or(z.literal("")),
+
+  ...horarioPersonalizadoSchemaCampos,
 });
 
 const alterarStatusSchema = z.object({
@@ -144,6 +164,8 @@ const remarcarAgendamentoSchema = z.object({
     .string()
     .trim()
     .min(1, "Escolha uma nova data e horário."),
+
+  ...horarioPersonalizadoSchemaCampos,
 });
 const cancelarAgendamentoClienteSchema = z.object({
   agendamentoId: z
@@ -172,6 +194,24 @@ const cancelarAgendamentoEquipeSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
+// Limita o tamanho de cada consulta, não o histórico: qualquer data
+// continua consultável, uma janela por vez.
+const PERIODO_MAXIMO_LISTAGEM_DIAS = 42;
+
+const listarSolicitacoesSchema = z
+  .object({
+    inicio: z
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Data inicial inválida."),
+
+    fim: z
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Data final inválida."),
+  })
+  .optional();
 
 const listarIndisponibilidadesAgendaSchema = z.object({
   profissionalId: z
@@ -590,6 +630,92 @@ async function existeBloqueioAgenda({
   });
 
   return Boolean(bloqueio);
+}
+
+// Horário personalizado da equipe: dispensa expediente, almoço, bloqueios
+// e a grade de 5 em 5 minutos, mas o atendimento precisa caber no dia.
+function validarHorarioPersonalizado({
+  inicio,
+  duracaoMinutos,
+}: {
+  inicio: Date;
+  duracaoMinutos: number;
+}): string | null {
+  const partes = obterPartesDataSaoPaulo(inicio);
+  const minutosInicio = (partes.hora % 24) * 60 + partes.minuto;
+
+  if (minutosInicio + duracaoMinutos > 24 * 60) {
+    return "O atendimento precisa terminar no mesmo dia.";
+  }
+
+  return null;
+}
+
+// Mesmo critério de existeConflitoDeHorario, mas devolve o atendimento
+// para que a equipe saiba exatamente com quem o horário colide.
+async function buscarAgendamentoConflitante({
+  profissionalId,
+  inicio,
+  fim,
+  ignorarAgendamentoId,
+}: {
+  profissionalId: string;
+  inicio: Date;
+  fim: Date;
+  ignorarAgendamentoId?: string;
+}) {
+  return prisma.agendamento.findFirst({
+    where: {
+      profissionalId,
+      id: ignorarAgendamentoId
+        ? {
+          not: ignorarAgendamentoId,
+        }
+        : undefined,
+      status: {
+        in: ["SOLICITADO", "CONFIRMADO"],
+      },
+      inicio: {
+        lt: fim,
+      },
+      fim: {
+        gt: inicio,
+      },
+    },
+    orderBy: {
+      inicio: "asc",
+    },
+    select: {
+      inicio: true,
+      fim: true,
+      cliente: {
+        select: {
+          nome: true,
+        },
+      },
+      servico: {
+        select: {
+          nome: true,
+        },
+      },
+    },
+  });
+}
+
+function descreverConflito(conflito: {
+  inicio: Date;
+  fim: Date;
+  cliente: { nome: string };
+  servico: { nome: string };
+}): string {
+  const formatarHora = (data: Date) =>
+    new Intl.DateTimeFormat("pt-BR", {
+      timeZone: TIMEZONE_PADRAO,
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(data);
+
+  return `Conflito com o atendimento de ${conflito.cliente.nome} (${conflito.servico.nome}) das ${formatarHora(conflito.inicio)} às ${formatarHora(conflito.fim)}. Escolha outro horário ou ajuste a duração.`;
 }
 
 async function criarNotificacaoNovoAgendamento({
@@ -1155,52 +1281,85 @@ export const funcionarioCriarAgendamentoParaCliente =
         };
       }
 
-      const fim = calcularFim(
-        inicio,
-        servico.duracaoMinutos,
-      );
+      const horarioPersonalizado =
+        data.horarioPersonalizado === true;
 
-      const horarioNaGrade = validarHorarioNaGrade({
-        inicio,
-        duracaoMinutos: servico.duracaoMinutos,
-      });
+      // A duração individual só vale no horário personalizado;
+      // o catálogo do serviço nunca é alterado.
+      const duracaoMinutos = horarioPersonalizado
+        ? data.duracaoMinutos ?? servico.duracaoMinutos
+        : servico.duracaoMinutos;
 
-      if (!horarioNaGrade.valido) {
-        return {
-          sucesso: false,
-          mensagem:
-            horarioNaGrade.mensagem ||
-            "Escolha um horário válido da agenda da barbearia.",
-        };
-      }
+      const fim = calcularFim(inicio, duracaoMinutos);
 
-      const horarioBloqueado = await existeBloqueioAgenda({
-        profissionalId: profissional.id,
-        inicio,
-        fim,
-      });
+      if (horarioPersonalizado) {
+        const erroHorario = validarHorarioPersonalizado({
+          inicio,
+          duracaoMinutos,
+        });
 
-      if (horarioBloqueado) {
-        return {
-          sucesso: false,
-          mensagem:
-            "Esse horário está bloqueado na agenda da barbearia.",
-        };
-      }
+        if (erroHorario) {
+          return {
+            sucesso: false,
+            mensagem: erroHorario,
+          };
+        }
 
-      const profissionalOcupado =
-        await existeConflitoDeHorario({
+        const conflito = await buscarAgendamentoConflitante({
           profissionalId: profissional.id,
           inicio,
           fim,
         });
 
-      if (profissionalOcupado) {
-        return {
-          sucesso: false,
-          mensagem:
-            "Esse profissional já possui uma solicitação ou agendamento nesse horário.",
-        };
+        if (conflito) {
+          return {
+            sucesso: false,
+            mensagem: descreverConflito(conflito),
+          };
+        }
+      } else {
+        const horarioNaGrade = validarHorarioNaGrade({
+          inicio,
+          duracaoMinutos: servico.duracaoMinutos,
+        });
+
+        if (!horarioNaGrade.valido) {
+          return {
+            sucesso: false,
+            mensagem:
+              horarioNaGrade.mensagem ||
+              "Escolha um horário válido da agenda da barbearia.",
+          };
+        }
+
+        const horarioBloqueado = await existeBloqueioAgenda({
+          profissionalId: profissional.id,
+          inicio,
+          fim,
+        });
+
+        if (horarioBloqueado) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Esse horário está bloqueado na agenda da barbearia.",
+          };
+        }
+
+        const profissionalOcupado =
+          await existeConflitoDeHorario({
+            profissionalId: profissional.id,
+            inicio,
+            fim,
+          });
+
+        if (profissionalOcupado) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Esse profissional já possui uma solicitação ou agendamento nesse horário.",
+          };
+        }
       }
 
       const clienteOcupado =
@@ -1449,14 +1608,46 @@ export const listarMeusAgendamentos = createServerFn({
 export const funcionarioListarSolicitacoes =
   createServerFn({
     method: "GET",
-  }).handler(async () => {
+  })
+    .validator(listarSolicitacoesSchema)
+    .handler(async ({ data }) => {
     await exigirOperacional();
+
+    // Sem período (painel): só os ativos, como sempre foi.
+    // Com período (agenda): inclui concluídos, filtrando no banco pelo
+    // início dentro de [inicio, fim) no fuso da barbearia.
+    let periodo: { inicio: Date; fim: Date } | null = null;
+
+    if (data) {
+      const inicio = converterData(`${data.inicio}T00:00`);
+      const fim = converterData(`${data.fim}T00:00`);
+
+      if (
+        !inicio ||
+        !fim ||
+        fim.getTime() <= inicio.getTime() ||
+        fim.getTime() - inicio.getTime() >
+          PERIODO_MAXIMO_LISTAGEM_DIAS * 24 * 60 * 60 * 1000
+      ) {
+        throw new Error("Período inválido.");
+      }
+
+      periodo = { inicio, fim };
+    }
 
     return prisma.agendamento.findMany({
       where: {
         status: {
-          in: ["SOLICITADO", "CONFIRMADO"],
+          in: periodo
+            ? ["SOLICITADO", "CONFIRMADO", "CONCLUIDO"]
+            : ["SOLICITADO", "CONFIRMADO"],
         },
+        inicio: periodo
+          ? {
+            gte: periodo.inicio,
+            lt: periodo.fim,
+          }
+          : undefined,
       },
       orderBy: {
         inicio: "asc",
@@ -2767,7 +2958,13 @@ export const operacionalRemarcarAgendamento =
         };
       }
 
-      if (novoInicio.getTime() <= new Date().getTime()) {
+      const horarioPersonalizado =
+        data.horarioPersonalizado === true;
+
+      if (
+        !horarioPersonalizado &&
+        novoInicio.getTime() <= new Date().getTime()
+      ) {
         return {
           sucesso: false,
           mensagem: "Escolha um horário futuro.",
@@ -2849,55 +3046,107 @@ export const operacionalRemarcarAgendamento =
         };
       }
 
-      const novoFim = calcularFim(
-        novoInicio,
-        novoServico.duracaoMinutos,
-      );
+      const mesmoInicio =
+        novoInicio.getTime() === agendamento.inicio.getTime();
 
-      const horarioNaGrade = validarHorarioNaGrade({
-        inicio: novoInicio,
-        duracaoMinutos: novoServico.duracaoMinutos,
-      });
-
-      if (!horarioNaGrade.valido) {
+      // Manter o início permite ajustar só a duração de um
+      // atendimento que já começou.
+      if (
+        horarioPersonalizado &&
+        !mesmoInicio &&
+        novoInicio.getTime() <= new Date().getTime()
+      ) {
         return {
           sucesso: false,
-          mensagem:
-            horarioNaGrade.mensagem ||
-            "Escolha um horário válido na agenda da barbearia.",
+          mensagem: "Escolha um horário futuro.",
         };
       }
 
-      const horarioBloqueado = await existeBloqueioAgenda({
-        profissionalId: agendamento.profissionalId,
-        inicio: novoInicio,
-        fim: novoFim,
-      });
+      const duracaoMinutos = horarioPersonalizado
+        ? data.duracaoMinutos ?? novoServico.duracaoMinutos
+        : novoServico.duracaoMinutos;
 
-      if (horarioBloqueado) {
-        return {
-          sucesso: false,
-          mensagem:
-            "Esse horário está bloqueado na agenda da barbearia.",
-        };
-      }
+      const novoFim = calcularFim(novoInicio, duracaoMinutos);
 
-      const conflito = await existeConflitoDeHorario({
-        profissionalId: agendamento.profissionalId,
-        inicio: novoInicio,
-        fim: novoFim,
-        ignorarAgendamentoId: agendamento.id,
-      });
+      if (horarioPersonalizado) {
+        const erroHorario = validarHorarioPersonalizado({
+          inicio: novoInicio,
+          duracaoMinutos,
+        });
 
-      if (conflito) {
-        return {
-          sucesso: false,
-          mensagem:
-            "Já existe outro agendamento ocupando esse horário.",
-        };
+        if (erroHorario) {
+          return {
+            sucesso: false,
+            mensagem: erroHorario,
+          };
+        }
+
+        const conflito = await buscarAgendamentoConflitante({
+          profissionalId: agendamento.profissionalId,
+          inicio: novoInicio,
+          fim: novoFim,
+          ignorarAgendamentoId: agendamento.id,
+        });
+
+        if (conflito) {
+          return {
+            sucesso: false,
+            mensagem: descreverConflito(conflito),
+          };
+        }
+      } else {
+        const horarioNaGrade = validarHorarioNaGrade({
+          inicio: novoInicio,
+          duracaoMinutos: novoServico.duracaoMinutos,
+        });
+
+        if (!horarioNaGrade.valido) {
+          return {
+            sucesso: false,
+            mensagem:
+              horarioNaGrade.mensagem ||
+              "Escolha um horário válido na agenda da barbearia.",
+          };
+        }
+
+        const horarioBloqueado = await existeBloqueioAgenda({
+          profissionalId: agendamento.profissionalId,
+          inicio: novoInicio,
+          fim: novoFim,
+        });
+
+        if (horarioBloqueado) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Esse horário está bloqueado na agenda da barbearia.",
+          };
+        }
+
+        const conflito = await existeConflitoDeHorario({
+          profissionalId: agendamento.profissionalId,
+          inicio: novoInicio,
+          fim: novoFim,
+          ignorarAgendamentoId: agendamento.id,
+        });
+
+        if (conflito) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Já existe outro agendamento ocupando esse horário.",
+          };
+        }
       }
 
       const inicioAnterior = agendamento.inicio;
+
+      // Só a duração mudou: o lembrete já enviado continua válido e
+      // o cliente não precisa de aviso de reagendamento.
+      const apenasDuracaoAlterada =
+        horarioPersonalizado &&
+        mesmoInicio &&
+        novoServico.id === agendamento.servico.id;
 
       const agendamentoAtualizado =
         await prisma.agendamento.update({
@@ -2909,7 +3158,7 @@ export const operacionalRemarcarAgendamento =
             servicoId: novoServico.id,
             inicio: novoInicio,
             fim: novoFim,
-            reminderSentAt: null,
+            reminderSentAt: apenasDuracaoAlterada ? undefined : null,
           },
 
           select: {
@@ -2944,6 +3193,14 @@ export const operacionalRemarcarAgendamento =
             },
           },
         });
+
+      if (apenasDuracaoAlterada) {
+        return {
+          sucesso: true,
+          mensagem: "Agendamento atualizado com sucesso.",
+          agendamento: agendamentoAtualizado,
+        };
+      }
 
       await criarNotificacaoNovoAgendamento({
         clienteNome: agendamento.cliente.nome,
