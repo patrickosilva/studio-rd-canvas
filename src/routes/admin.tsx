@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Settings,
   UsersRound,
+  UserRound,
 } from "lucide-react";
 import { NotificadorNativo } from "@/components/notificacoes/NotificadorNativo";
 import { DashboardShell } from "@/components/dashboard/Sidebar";
@@ -110,6 +111,11 @@ const items = [
     label: "Usuários",
     to: "/admin/usuarios",
     icon: UsersRound,
+  },
+  {
+    label: "Minha conta",
+    to: "/admin/conta",
+    icon: UserRound,
   },
   {
     label: "Configurações",

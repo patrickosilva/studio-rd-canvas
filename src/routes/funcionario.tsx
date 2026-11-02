@@ -12,6 +12,7 @@ import {
   CalendarX2,
   History,
   LayoutDashboard,
+  UserRound,
 } from "lucide-react";
 
 import { DashboardShell } from "@/components/dashboard/Sidebar";
@@ -85,7 +86,11 @@ const itemsFuncionario = [
     to: "/funcionario/agendar-cliente",
     icon: CalendarPlus,
   },
-];
+  {
+    label: "Minha conta",
+    to: "/funcionario/conta",
+    icon: UserRound,
+  },];
 
 function FuncionarioLayout() {
   const { usuario } = rootRoute.useRouteContext();

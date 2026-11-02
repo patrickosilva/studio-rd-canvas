@@ -55,6 +55,7 @@ export const ModelName = {
   Usuario: 'Usuario',
   Servico: 'Servico',
   Profissional: 'Profissional',
+  ContaOAuth: 'ContaOAuth',
   Sessao: 'Sessao',
   Agendamento: 'Agendamento',
   BloqueioAgenda: 'BloqueioAgenda',
@@ -63,7 +64,9 @@ export const ModelName = {
   UsoAssinatura: 'UsoAssinatura',
   PagamentoAssinatura: 'PagamentoAssinatura',
   Notificacao: 'Notificacao',
-  TokenRedefinicaoSenha: 'TokenRedefinicaoSenha'
+  TokenRedefinicaoSenha: 'TokenRedefinicaoSenha',
+  EventoSeguranca: 'EventoSeguranca',
+  EventoWebhookResend: 'EventoWebhookResend'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -103,7 +106,9 @@ export const UsuarioScalarFieldEnum = {
   papel: 'papel',
   ativo: 'ativo',
   criadoEm: 'criadoEm',
-  atualizadoEm: 'atualizadoEm'
+  atualizadoEm: 'atualizadoEm',
+  termosVersaoAceita: 'termosVersaoAceita',
+  termosAceitosEm: 'termosAceitosEm'
 } as const
 
 export type UsuarioScalarFieldEnum = (typeof UsuarioScalarFieldEnum)[keyof typeof UsuarioScalarFieldEnum]
@@ -137,11 +142,28 @@ export const ProfissionalScalarFieldEnum = {
 export type ProfissionalScalarFieldEnum = (typeof ProfissionalScalarFieldEnum)[keyof typeof ProfissionalScalarFieldEnum]
 
 
+export const ContaOAuthScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  provedor: 'provedor',
+  providerUserId: 'providerUserId',
+  emailNoVinculo: 'emailNoVinculo',
+  ultimoLoginEm: 'ultimoLoginEm',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type ContaOAuthScalarFieldEnum = (typeof ContaOAuthScalarFieldEnum)[keyof typeof ContaOAuthScalarFieldEnum]
+
+
 export const SessaoScalarFieldEnum = {
   id: 'id',
   tokenHash: 'tokenHash',
   usuarioId: 'usuarioId',
   expiraEm: 'expiraEm',
+  persistente: 'persistente',
+  ultimaAtividadeEm: 'ultimaAtividadeEm',
+  userAgent: 'userAgent',
   criadoEm: 'criadoEm'
 } as const
 
@@ -266,10 +288,37 @@ export const TokenRedefinicaoSenhaScalarFieldEnum = {
   usado: 'usado',
   expiraEm: 'expiraEm',
   criadoEm: 'criadoEm',
-  atualizadoEm: 'atualizadoEm'
+  atualizadoEm: 'atualizadoEm',
+  resendEmailId: 'resendEmailId',
+  resendMessageId: 'resendMessageId',
+  emailStatus: 'emailStatus',
+  emailStatusAtualizadoEm: 'emailStatusAtualizadoEm'
 } as const
 
 export type TokenRedefinicaoSenhaScalarFieldEnum = (typeof TokenRedefinicaoSenhaScalarFieldEnum)[keyof typeof TokenRedefinicaoSenhaScalarFieldEnum]
+
+
+export const EventoSegurancaScalarFieldEnum = {
+  id: 'id',
+  tipo: 'tipo',
+  chaveHash: 'chaveHash',
+  sucesso: 'sucesso',
+  rota: 'rota',
+  criadoEm: 'criadoEm'
+} as const
+
+export type EventoSegurancaScalarFieldEnum = (typeof EventoSegurancaScalarFieldEnum)[keyof typeof EventoSegurancaScalarFieldEnum]
+
+
+export const EventoWebhookResendScalarFieldEnum = {
+  id: 'id',
+  eventoId: 'eventoId',
+  tipo: 'tipo',
+  resendEmailId: 'resendEmailId',
+  recebidoEm: 'recebidoEm'
+} as const
+
+export type EventoWebhookResendScalarFieldEnum = (typeof EventoWebhookResendScalarFieldEnum)[keyof typeof EventoWebhookResendScalarFieldEnum]
 
 
 export const SortOrder = {

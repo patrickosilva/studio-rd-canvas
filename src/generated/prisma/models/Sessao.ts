@@ -29,6 +29,9 @@ export type SessaoMinAggregateOutputType = {
   tokenHash: string | null
   usuarioId: string | null
   expiraEm: Date | null
+  persistente: boolean | null
+  ultimaAtividadeEm: Date | null
+  userAgent: string | null
   criadoEm: Date | null
 }
 
@@ -37,6 +40,9 @@ export type SessaoMaxAggregateOutputType = {
   tokenHash: string | null
   usuarioId: string | null
   expiraEm: Date | null
+  persistente: boolean | null
+  ultimaAtividadeEm: Date | null
+  userAgent: string | null
   criadoEm: Date | null
 }
 
@@ -45,6 +51,9 @@ export type SessaoCountAggregateOutputType = {
   tokenHash: number
   usuarioId: number
   expiraEm: number
+  persistente: number
+  ultimaAtividadeEm: number
+  userAgent: number
   criadoEm: number
   _all: number
 }
@@ -55,6 +64,9 @@ export type SessaoMinAggregateInputType = {
   tokenHash?: true
   usuarioId?: true
   expiraEm?: true
+  persistente?: true
+  ultimaAtividadeEm?: true
+  userAgent?: true
   criadoEm?: true
 }
 
@@ -63,6 +75,9 @@ export type SessaoMaxAggregateInputType = {
   tokenHash?: true
   usuarioId?: true
   expiraEm?: true
+  persistente?: true
+  ultimaAtividadeEm?: true
+  userAgent?: true
   criadoEm?: true
 }
 
@@ -71,6 +86,9 @@ export type SessaoCountAggregateInputType = {
   tokenHash?: true
   usuarioId?: true
   expiraEm?: true
+  persistente?: true
+  ultimaAtividadeEm?: true
+  userAgent?: true
   criadoEm?: true
   _all?: true
 }
@@ -152,6 +170,9 @@ export type SessaoGroupByOutputType = {
   tokenHash: string
   usuarioId: string
   expiraEm: Date
+  persistente: boolean
+  ultimaAtividadeEm: Date
+  userAgent: string | null
   criadoEm: Date
   _count: SessaoCountAggregateOutputType | null
   _min: SessaoMinAggregateOutputType | null
@@ -181,6 +202,9 @@ export type SessaoWhereInput = {
   tokenHash?: Prisma.StringFilter<"Sessao"> | string
   usuarioId?: Prisma.StringFilter<"Sessao"> | string
   expiraEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
+  persistente?: Prisma.BoolFilter<"Sessao"> | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
+  userAgent?: Prisma.StringNullableFilter<"Sessao"> | string | null
   criadoEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
   usuario?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
 }
@@ -190,6 +214,9 @@ export type SessaoOrderByWithRelationInput = {
   tokenHash?: Prisma.SortOrder
   usuarioId?: Prisma.SortOrder
   expiraEm?: Prisma.SortOrder
+  persistente?: Prisma.SortOrder
+  ultimaAtividadeEm?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   usuario?: Prisma.UsuarioOrderByWithRelationInput
 }
@@ -202,6 +229,9 @@ export type SessaoWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.SessaoWhereInput | Prisma.SessaoWhereInput[]
   usuarioId?: Prisma.StringFilter<"Sessao"> | string
   expiraEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
+  persistente?: Prisma.BoolFilter<"Sessao"> | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
+  userAgent?: Prisma.StringNullableFilter<"Sessao"> | string | null
   criadoEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
   usuario?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
 }, "id" | "tokenHash">
@@ -211,6 +241,9 @@ export type SessaoOrderByWithAggregationInput = {
   tokenHash?: Prisma.SortOrder
   usuarioId?: Prisma.SortOrder
   expiraEm?: Prisma.SortOrder
+  persistente?: Prisma.SortOrder
+  ultimaAtividadeEm?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   _count?: Prisma.SessaoCountOrderByAggregateInput
   _max?: Prisma.SessaoMaxOrderByAggregateInput
@@ -225,6 +258,9 @@ export type SessaoScalarWhereWithAggregatesInput = {
   tokenHash?: Prisma.StringWithAggregatesFilter<"Sessao"> | string
   usuarioId?: Prisma.StringWithAggregatesFilter<"Sessao"> | string
   expiraEm?: Prisma.DateTimeWithAggregatesFilter<"Sessao"> | Date | string
+  persistente?: Prisma.BoolWithAggregatesFilter<"Sessao"> | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeWithAggregatesFilter<"Sessao"> | Date | string
+  userAgent?: Prisma.StringNullableWithAggregatesFilter<"Sessao"> | string | null
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"Sessao"> | Date | string
 }
 
@@ -232,6 +268,9 @@ export type SessaoCreateInput = {
   id?: string
   tokenHash: string
   expiraEm: Date | string
+  persistente?: boolean
+  ultimaAtividadeEm?: Date | string
+  userAgent?: string | null
   criadoEm?: Date | string
   usuario: Prisma.UsuarioCreateNestedOneWithoutSessoesInput
 }
@@ -241,6 +280,9 @@ export type SessaoUncheckedCreateInput = {
   tokenHash: string
   usuarioId: string
   expiraEm: Date | string
+  persistente?: boolean
+  ultimaAtividadeEm?: Date | string
+  userAgent?: string | null
   criadoEm?: Date | string
 }
 
@@ -248,6 +290,9 @@ export type SessaoUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  persistente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usuario?: Prisma.UsuarioUpdateOneRequiredWithoutSessoesNestedInput
 }
@@ -257,6 +302,9 @@ export type SessaoUncheckedUpdateInput = {
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   usuarioId?: Prisma.StringFieldUpdateOperationsInput | string
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  persistente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -265,6 +313,9 @@ export type SessaoCreateManyInput = {
   tokenHash: string
   usuarioId: string
   expiraEm: Date | string
+  persistente?: boolean
+  ultimaAtividadeEm?: Date | string
+  userAgent?: string | null
   criadoEm?: Date | string
 }
 
@@ -272,6 +323,9 @@ export type SessaoUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  persistente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -280,6 +334,9 @@ export type SessaoUncheckedUpdateManyInput = {
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   usuarioId?: Prisma.StringFieldUpdateOperationsInput | string
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  persistente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -298,6 +355,9 @@ export type SessaoCountOrderByAggregateInput = {
   tokenHash?: Prisma.SortOrder
   usuarioId?: Prisma.SortOrder
   expiraEm?: Prisma.SortOrder
+  persistente?: Prisma.SortOrder
+  ultimaAtividadeEm?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
@@ -306,6 +366,9 @@ export type SessaoMaxOrderByAggregateInput = {
   tokenHash?: Prisma.SortOrder
   usuarioId?: Prisma.SortOrder
   expiraEm?: Prisma.SortOrder
+  persistente?: Prisma.SortOrder
+  ultimaAtividadeEm?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
@@ -314,6 +377,9 @@ export type SessaoMinOrderByAggregateInput = {
   tokenHash?: Prisma.SortOrder
   usuarioId?: Prisma.SortOrder
   expiraEm?: Prisma.SortOrder
+  persistente?: Prisma.SortOrder
+  ultimaAtividadeEm?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
@@ -363,6 +429,9 @@ export type SessaoCreateWithoutUsuarioInput = {
   id?: string
   tokenHash: string
   expiraEm: Date | string
+  persistente?: boolean
+  ultimaAtividadeEm?: Date | string
+  userAgent?: string | null
   criadoEm?: Date | string
 }
 
@@ -370,6 +439,9 @@ export type SessaoUncheckedCreateWithoutUsuarioInput = {
   id?: string
   tokenHash: string
   expiraEm: Date | string
+  persistente?: boolean
+  ultimaAtividadeEm?: Date | string
+  userAgent?: string | null
   criadoEm?: Date | string
 }
 
@@ -407,6 +479,9 @@ export type SessaoScalarWhereInput = {
   tokenHash?: Prisma.StringFilter<"Sessao"> | string
   usuarioId?: Prisma.StringFilter<"Sessao"> | string
   expiraEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
+  persistente?: Prisma.BoolFilter<"Sessao"> | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
+  userAgent?: Prisma.StringNullableFilter<"Sessao"> | string | null
   criadoEm?: Prisma.DateTimeFilter<"Sessao"> | Date | string
 }
 
@@ -414,6 +489,9 @@ export type SessaoCreateManyUsuarioInput = {
   id?: string
   tokenHash: string
   expiraEm: Date | string
+  persistente?: boolean
+  ultimaAtividadeEm?: Date | string
+  userAgent?: string | null
   criadoEm?: Date | string
 }
 
@@ -421,6 +499,9 @@ export type SessaoUpdateWithoutUsuarioInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  persistente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -428,6 +509,9 @@ export type SessaoUncheckedUpdateWithoutUsuarioInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  persistente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -435,6 +519,9 @@ export type SessaoUncheckedUpdateManyWithoutUsuarioInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  persistente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ultimaAtividadeEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -445,6 +532,9 @@ export type SessaoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   tokenHash?: boolean
   usuarioId?: boolean
   expiraEm?: boolean
+  persistente?: boolean
+  ultimaAtividadeEm?: boolean
+  userAgent?: boolean
   criadoEm?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessao"]>
@@ -454,6 +544,9 @@ export type SessaoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   tokenHash?: boolean
   usuarioId?: boolean
   expiraEm?: boolean
+  persistente?: boolean
+  ultimaAtividadeEm?: boolean
+  userAgent?: boolean
   criadoEm?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessao"]>
@@ -463,6 +556,9 @@ export type SessaoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   tokenHash?: boolean
   usuarioId?: boolean
   expiraEm?: boolean
+  persistente?: boolean
+  ultimaAtividadeEm?: boolean
+  userAgent?: boolean
   criadoEm?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessao"]>
@@ -472,10 +568,13 @@ export type SessaoSelectScalar = {
   tokenHash?: boolean
   usuarioId?: boolean
   expiraEm?: boolean
+  persistente?: boolean
+  ultimaAtividadeEm?: boolean
+  userAgent?: boolean
   criadoEm?: boolean
 }
 
-export type SessaoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tokenHash" | "usuarioId" | "expiraEm" | "criadoEm", ExtArgs["result"]["sessao"]>
+export type SessaoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tokenHash" | "usuarioId" | "expiraEm" | "persistente" | "ultimaAtividadeEm" | "userAgent" | "criadoEm", ExtArgs["result"]["sessao"]>
 export type SessaoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }
@@ -496,6 +595,9 @@ export type $SessaoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     tokenHash: string
     usuarioId: string
     expiraEm: Date
+    persistente: boolean
+    ultimaAtividadeEm: Date
+    userAgent: string | null
     criadoEm: Date
   }, ExtArgs["result"]["sessao"]>
   composites: {}
@@ -925,6 +1027,9 @@ export interface SessaoFieldRefs {
   readonly tokenHash: Prisma.FieldRef<"Sessao", 'String'>
   readonly usuarioId: Prisma.FieldRef<"Sessao", 'String'>
   readonly expiraEm: Prisma.FieldRef<"Sessao", 'DateTime'>
+  readonly persistente: Prisma.FieldRef<"Sessao", 'Boolean'>
+  readonly ultimaAtividadeEm: Prisma.FieldRef<"Sessao", 'DateTime'>
+  readonly userAgent: Prisma.FieldRef<"Sessao", 'String'>
   readonly criadoEm: Prisma.FieldRef<"Sessao", 'DateTime'>
 }
     

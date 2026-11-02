@@ -5,6 +5,11 @@ import type { PapelUsuario } from "../../generated/prisma/client";
 import { gerarHashSenha, verificarSenha } from "../auth.server";
 import { prisma } from "../prisma.server";
 import {
+  registrarEventoSeguranca,
+  verificarRateLimit,
+} from "../security.server";
+import { TERMOS_USO_VERSAO } from "../legal.constants";
+import {
   criarSessao,
   encerrarSessaoAtual,
   obterUsuarioAtual as obterUsuarioAtualDaSessao,
@@ -61,6 +66,10 @@ const cadastroSchema = z.object({
     .string()
     .min(8, "A senha precisa ter pelo menos 8 caracteres.")
     .max(72, "A senha é muito grande."),
+
+  aceitarTermos: z.boolean().refine((valor) => valor, {
+    message: "Você precisa aceitar os Termos de Uso.",
+  }),
 });
 
 const loginSchema = z.object({
@@ -156,7 +165,20 @@ export const cadastrarCliente = createServerFn({
 })
   .validator(cadastroSchema)
   .handler(async ({ data }) => {
-    const email = data.email.trim().toLowerCase();
+        const limiteCadastro = await verificarRateLimit({
+      acao: "CADASTRO",
+      identificador: data.email,
+      rota: "/cadastro",
+    });
+
+    if (!limiteCadastro.permitido) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Muitas tentativas foram realizadas. Aguarde um pouco e tente novamente.",
+      };
+    }
+const email = data.email.trim().toLowerCase();
 
     const telefoneNormalizado =
       data.telefone?.replace(/\D/g, "") || null;
@@ -203,6 +225,8 @@ export const cadastrarCliente = createServerFn({
         email,
         telefone: telefoneNormalizado,
         senhaHash,
+        termosVersaoAceita: TERMOS_USO_VERSAO,
+        termosAceitosEm: new Date(),
 
         // O Prisma aplica automaticamente CLIENTE,
         // conforme o valor padrão definido no schema.
@@ -217,6 +241,13 @@ export const cadastrarCliente = createServerFn({
       },
     });
 
+    await registrarEventoSeguranca({
+      tipo: "CADASTRO_SUCESSO",
+      sucesso: true,
+      rota: "/cadastro",
+      identificador: email,
+    });
+
     return {
       sucesso: true,
       mensagem: "Cadastro realizado com sucesso.",
@@ -229,7 +260,20 @@ export const entrar = createServerFn({
 })
   .validator(loginSchema)
   .handler(async ({ data }) => {
-    const email = data.email.trim().toLowerCase();
+        const limiteLogin = await verificarRateLimit({
+      acao: "LOGIN_SENHA",
+      identificador: data.email,
+      rota: "/login",
+    });
+
+    if (!limiteLogin.permitido) {
+      return {
+        sucesso: false,
+        mensagem:
+          "Muitas tentativas foram realizadas. Aguarde um pouco e tente novamente.",
+      };
+    }
+const email = data.email.trim().toLowerCase();
 
     const usuario = await prisma.usuario.findFirst({
       where: {
@@ -256,6 +300,27 @@ export const entrar = createServerFn({
      * estão cadastrados no sistema.
      */
     if (!usuario || !usuario.ativo) {
+      await registrarEventoSeguranca({
+        tipo: "LOGIN_FALHA",
+        sucesso: false,
+        rota: "/login",
+        identificador: email,
+      });
+
+      return {
+        sucesso: false,
+        mensagem: "E-mail ou senha inválidos.",
+      };
+    }
+
+    if (!usuario.senhaHash) {
+      await registrarEventoSeguranca({
+        tipo: "LOGIN_FALHA",
+        sucesso: false,
+        rota: "/login",
+        identificador: email,
+      });
+
       return {
         sucesso: false,
         mensagem: "E-mail ou senha inválidos.",
@@ -268,6 +333,13 @@ export const entrar = createServerFn({
     );
 
     if (!senhaValida) {
+      await registrarEventoSeguranca({
+        tipo: "LOGIN_FALHA",
+        sucesso: false,
+        rota: "/login",
+        identificador: email,
+      });
+
       return {
         sucesso: false,
         mensagem: "E-mail ou senha inválidos.",
@@ -283,6 +355,13 @@ export const entrar = createServerFn({
       usuario.papel,
       data.redirect,
     );
+
+    await registrarEventoSeguranca({
+      tipo: "LOGIN_SUCESSO",
+      sucesso: true,
+      rota: "/login",
+      identificador: email,
+    });
 
     return {
       sucesso: true,

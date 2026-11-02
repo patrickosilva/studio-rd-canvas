@@ -42,19 +42,22 @@ model Usuario {
   nome      String
   email     String       @unique
   telefone  String?      @unique
-  senhaHash String
+  senhaHash String?
   papel     PapelUsuario @default(CLIENTE)
 
   ativo        Boolean  @default(true)
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
+  termosVersaoAceita String?
+  termosAceitosEm DateTime?
   sessoes                Sessao[]
   profissional           Profissional?
   assinaturas            AssinaturaCliente[]     @relation("AssinaturasCliente")
   agendamentos           Agendamento[]           @relation("AgendamentosCliente")
   notificacoes           Notificacao[]
   tokensRedefinicaoSenha TokenRedefinicaoSenha[]
+  contasOAuth             ContaOAuth[]
 }
 
 model Servico {
@@ -88,12 +91,37 @@ model Profissional {
   @@index([ativo])
 }
 
+enum ProvedorOAuth {
+  GOOGLE
+}
+
+model ContaOAuth {
+  id String @id @default(cuid())
+
+  usuarioId String
+  provedor ProvedorOAuth
+  providerUserId String
+  emailNoVinculo String?
+  ultimoLoginEm DateTime?
+
+  criadoEm DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([provedor, providerUserId])
+  @@unique([usuarioId, provedor])
+  @@index([usuarioId])
+}
 model Sessao {
   id        String   @id @default(cuid())
   tokenHash String   @unique
   usuarioId String
   expiraEm  DateTime
-  criadoEm  DateTime @default(now())
+  persistente Boolean @default(false)
+  ultimaAtividadeEm DateTime @default(now())
+  userAgent String?
+  criadoEm DateTime @default(now())
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
@@ -303,4 +331,37 @@ model TokenRedefinicaoSenha {
   @@index([usuarioId])
   @@index([expiraEm])
   @@index([usado])
+  resendEmailId String? @unique
+  resendMessageId String?
+  emailStatus String?
+  emailStatusAtualizadoEm DateTime?
+}
+
+model EventoSeguranca {
+  id String @id @default(cuid())
+
+  tipo      String
+  chaveHash String?
+  sucesso   Boolean?
+  rota      String?
+
+  criadoEm DateTime @default(now())
+
+  @@index([tipo, chaveHash, criadoEm])
+  @@index([tipo, criadoEm])
+  @@index([criadoEm])
+}
+
+model EventoWebhookResend {
+  id String @id @default(cuid())
+
+  eventoId String @unique
+  tipo String
+  resendEmailId String?
+
+  recebidoEm DateTime @default(now())
+
+  @@index([resendEmailId])
+  @@index([tipo, recebidoEm])
+  @@index([recebidoEm])
 }

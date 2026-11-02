@@ -388,6 +388,7 @@ export const ModelName = {
   Usuario: 'Usuario',
   Servico: 'Servico',
   Profissional: 'Profissional',
+  ContaOAuth: 'ContaOAuth',
   Sessao: 'Sessao',
   Agendamento: 'Agendamento',
   BloqueioAgenda: 'BloqueioAgenda',
@@ -396,7 +397,9 @@ export const ModelName = {
   UsoAssinatura: 'UsoAssinatura',
   PagamentoAssinatura: 'PagamentoAssinatura',
   Notificacao: 'Notificacao',
-  TokenRedefinicaoSenha: 'TokenRedefinicaoSenha'
+  TokenRedefinicaoSenha: 'TokenRedefinicaoSenha',
+  EventoSeguranca: 'EventoSeguranca',
+  EventoWebhookResend: 'EventoWebhookResend'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -412,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "cliente" | "usuario" | "servico" | "profissional" | "sessao" | "agendamento" | "bloqueioAgenda" | "planoAssinatura" | "assinaturaCliente" | "usoAssinatura" | "pagamentoAssinatura" | "notificacao" | "tokenRedefinicaoSenha"
+    modelProps: "cliente" | "usuario" | "servico" | "profissional" | "contaOAuth" | "sessao" | "agendamento" | "bloqueioAgenda" | "planoAssinatura" | "assinaturaCliente" | "usoAssinatura" | "pagamentoAssinatura" | "notificacao" | "tokenRedefinicaoSenha" | "eventoSeguranca" | "eventoWebhookResend"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -709,6 +712,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProfissionalCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProfissionalCountAggregateOutputType> | number
+        }
+      }
+    }
+    ContaOAuth: {
+      payload: Prisma.$ContaOAuthPayload<ExtArgs>
+      fields: Prisma.ContaOAuthFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContaOAuthFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContaOAuthFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>
+        }
+        findFirst: {
+          args: Prisma.ContaOAuthFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContaOAuthFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>
+        }
+        findMany: {
+          args: Prisma.ContaOAuthFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>[]
+        }
+        create: {
+          args: Prisma.ContaOAuthCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>
+        }
+        createMany: {
+          args: Prisma.ContaOAuthCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ContaOAuthCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>[]
+        }
+        delete: {
+          args: Prisma.ContaOAuthDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>
+        }
+        update: {
+          args: Prisma.ContaOAuthUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>
+        }
+        deleteMany: {
+          args: Prisma.ContaOAuthDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContaOAuthUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ContaOAuthUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>[]
+        }
+        upsert: {
+          args: Prisma.ContaOAuthUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaOAuthPayload>
+        }
+        aggregate: {
+          args: Prisma.ContaOAuthAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContaOAuth>
+        }
+        groupBy: {
+          args: Prisma.ContaOAuthGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContaOAuthGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContaOAuthCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContaOAuthCountAggregateOutputType> | number
         }
       }
     }
@@ -1378,6 +1455,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EventoSeguranca: {
+      payload: Prisma.$EventoSegurancaPayload<ExtArgs>
+      fields: Prisma.EventoSegurancaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventoSegurancaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventoSegurancaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>
+        }
+        findFirst: {
+          args: Prisma.EventoSegurancaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventoSegurancaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>
+        }
+        findMany: {
+          args: Prisma.EventoSegurancaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>[]
+        }
+        create: {
+          args: Prisma.EventoSegurancaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>
+        }
+        createMany: {
+          args: Prisma.EventoSegurancaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventoSegurancaCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>[]
+        }
+        delete: {
+          args: Prisma.EventoSegurancaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>
+        }
+        update: {
+          args: Prisma.EventoSegurancaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>
+        }
+        deleteMany: {
+          args: Prisma.EventoSegurancaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventoSegurancaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventoSegurancaUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>[]
+        }
+        upsert: {
+          args: Prisma.EventoSegurancaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoSegurancaPayload>
+        }
+        aggregate: {
+          args: Prisma.EventoSegurancaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventoSeguranca>
+        }
+        groupBy: {
+          args: Prisma.EventoSegurancaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventoSegurancaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventoSegurancaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventoSegurancaCountAggregateOutputType> | number
+        }
+      }
+    }
+    EventoWebhookResend: {
+      payload: Prisma.$EventoWebhookResendPayload<ExtArgs>
+      fields: Prisma.EventoWebhookResendFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventoWebhookResendFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventoWebhookResendFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>
+        }
+        findFirst: {
+          args: Prisma.EventoWebhookResendFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventoWebhookResendFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>
+        }
+        findMany: {
+          args: Prisma.EventoWebhookResendFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>[]
+        }
+        create: {
+          args: Prisma.EventoWebhookResendCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>
+        }
+        createMany: {
+          args: Prisma.EventoWebhookResendCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventoWebhookResendCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>[]
+        }
+        delete: {
+          args: Prisma.EventoWebhookResendDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>
+        }
+        update: {
+          args: Prisma.EventoWebhookResendUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>
+        }
+        deleteMany: {
+          args: Prisma.EventoWebhookResendDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventoWebhookResendUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventoWebhookResendUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>[]
+        }
+        upsert: {
+          args: Prisma.EventoWebhookResendUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookResendPayload>
+        }
+        aggregate: {
+          args: Prisma.EventoWebhookResendAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventoWebhookResend>
+        }
+        groupBy: {
+          args: Prisma.EventoWebhookResendGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventoWebhookResendGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventoWebhookResendCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventoWebhookResendCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1438,7 +1663,9 @@ export const UsuarioScalarFieldEnum = {
   papel: 'papel',
   ativo: 'ativo',
   criadoEm: 'criadoEm',
-  atualizadoEm: 'atualizadoEm'
+  atualizadoEm: 'atualizadoEm',
+  termosVersaoAceita: 'termosVersaoAceita',
+  termosAceitosEm: 'termosAceitosEm'
 } as const
 
 export type UsuarioScalarFieldEnum = (typeof UsuarioScalarFieldEnum)[keyof typeof UsuarioScalarFieldEnum]
@@ -1472,11 +1699,28 @@ export const ProfissionalScalarFieldEnum = {
 export type ProfissionalScalarFieldEnum = (typeof ProfissionalScalarFieldEnum)[keyof typeof ProfissionalScalarFieldEnum]
 
 
+export const ContaOAuthScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  provedor: 'provedor',
+  providerUserId: 'providerUserId',
+  emailNoVinculo: 'emailNoVinculo',
+  ultimoLoginEm: 'ultimoLoginEm',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type ContaOAuthScalarFieldEnum = (typeof ContaOAuthScalarFieldEnum)[keyof typeof ContaOAuthScalarFieldEnum]
+
+
 export const SessaoScalarFieldEnum = {
   id: 'id',
   tokenHash: 'tokenHash',
   usuarioId: 'usuarioId',
   expiraEm: 'expiraEm',
+  persistente: 'persistente',
+  ultimaAtividadeEm: 'ultimaAtividadeEm',
+  userAgent: 'userAgent',
   criadoEm: 'criadoEm'
 } as const
 
@@ -1601,10 +1845,37 @@ export const TokenRedefinicaoSenhaScalarFieldEnum = {
   usado: 'usado',
   expiraEm: 'expiraEm',
   criadoEm: 'criadoEm',
-  atualizadoEm: 'atualizadoEm'
+  atualizadoEm: 'atualizadoEm',
+  resendEmailId: 'resendEmailId',
+  resendMessageId: 'resendMessageId',
+  emailStatus: 'emailStatus',
+  emailStatusAtualizadoEm: 'emailStatusAtualizadoEm'
 } as const
 
 export type TokenRedefinicaoSenhaScalarFieldEnum = (typeof TokenRedefinicaoSenhaScalarFieldEnum)[keyof typeof TokenRedefinicaoSenhaScalarFieldEnum]
+
+
+export const EventoSegurancaScalarFieldEnum = {
+  id: 'id',
+  tipo: 'tipo',
+  chaveHash: 'chaveHash',
+  sucesso: 'sucesso',
+  rota: 'rota',
+  criadoEm: 'criadoEm'
+} as const
+
+export type EventoSegurancaScalarFieldEnum = (typeof EventoSegurancaScalarFieldEnum)[keyof typeof EventoSegurancaScalarFieldEnum]
+
+
+export const EventoWebhookResendScalarFieldEnum = {
+  id: 'id',
+  eventoId: 'eventoId',
+  tipo: 'tipo',
+  resendEmailId: 'resendEmailId',
+  recebidoEm: 'recebidoEm'
+} as const
+
+export type EventoWebhookResendScalarFieldEnum = (typeof EventoWebhookResendScalarFieldEnum)[keyof typeof EventoWebhookResendScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1697,6 +1968,20 @@ export type ListEnumPapelUsuarioFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'ProvedorOAuth'
+ */
+export type EnumProvedorOAuthFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProvedorOAuth'>
+    
+
+
+/**
+ * Reference to a field of type 'ProvedorOAuth[]'
+ */
+export type ListEnumProvedorOAuthFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProvedorOAuth[]'>
     
 
 
@@ -1869,6 +2154,7 @@ export type GlobalOmitConfig = {
   usuario?: Prisma.UsuarioOmit
   servico?: Prisma.ServicoOmit
   profissional?: Prisma.ProfissionalOmit
+  contaOAuth?: Prisma.ContaOAuthOmit
   sessao?: Prisma.SessaoOmit
   agendamento?: Prisma.AgendamentoOmit
   bloqueioAgenda?: Prisma.BloqueioAgendaOmit
@@ -1878,6 +2164,8 @@ export type GlobalOmitConfig = {
   pagamentoAssinatura?: Prisma.PagamentoAssinaturaOmit
   notificacao?: Prisma.NotificacaoOmit
   tokenRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaOmit
+  eventoSeguranca?: Prisma.EventoSegurancaOmit
+  eventoWebhookResend?: Prisma.EventoWebhookResendOmit
 }
 
 /* Types for Logging */

@@ -31,6 +31,13 @@ export const StatusAgendamento = {
 export type StatusAgendamento = (typeof StatusAgendamento)[keyof typeof StatusAgendamento]
 
 
+export const ProvedorOAuth = {
+  GOOGLE: 'GOOGLE'
+} as const
+
+export type ProvedorOAuth = (typeof ProvedorOAuth)[keyof typeof ProvedorOAuth]
+
+
 export const FormaPagamento = {
   PIX: 'PIX',
   DINHEIRO: 'DINHEIRO',

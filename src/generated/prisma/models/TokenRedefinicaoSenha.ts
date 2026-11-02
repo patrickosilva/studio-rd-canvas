@@ -32,6 +32,10 @@ export type TokenRedefinicaoSenhaMinAggregateOutputType = {
   expiraEm: Date | null
   criadoEm: Date | null
   atualizadoEm: Date | null
+  resendEmailId: string | null
+  resendMessageId: string | null
+  emailStatus: string | null
+  emailStatusAtualizadoEm: Date | null
 }
 
 export type TokenRedefinicaoSenhaMaxAggregateOutputType = {
@@ -42,6 +46,10 @@ export type TokenRedefinicaoSenhaMaxAggregateOutputType = {
   expiraEm: Date | null
   criadoEm: Date | null
   atualizadoEm: Date | null
+  resendEmailId: string | null
+  resendMessageId: string | null
+  emailStatus: string | null
+  emailStatusAtualizadoEm: Date | null
 }
 
 export type TokenRedefinicaoSenhaCountAggregateOutputType = {
@@ -52,6 +60,10 @@ export type TokenRedefinicaoSenhaCountAggregateOutputType = {
   expiraEm: number
   criadoEm: number
   atualizadoEm: number
+  resendEmailId: number
+  resendMessageId: number
+  emailStatus: number
+  emailStatusAtualizadoEm: number
   _all: number
 }
 
@@ -64,6 +76,10 @@ export type TokenRedefinicaoSenhaMinAggregateInputType = {
   expiraEm?: true
   criadoEm?: true
   atualizadoEm?: true
+  resendEmailId?: true
+  resendMessageId?: true
+  emailStatus?: true
+  emailStatusAtualizadoEm?: true
 }
 
 export type TokenRedefinicaoSenhaMaxAggregateInputType = {
@@ -74,6 +90,10 @@ export type TokenRedefinicaoSenhaMaxAggregateInputType = {
   expiraEm?: true
   criadoEm?: true
   atualizadoEm?: true
+  resendEmailId?: true
+  resendMessageId?: true
+  emailStatus?: true
+  emailStatusAtualizadoEm?: true
 }
 
 export type TokenRedefinicaoSenhaCountAggregateInputType = {
@@ -84,6 +104,10 @@ export type TokenRedefinicaoSenhaCountAggregateInputType = {
   expiraEm?: true
   criadoEm?: true
   atualizadoEm?: true
+  resendEmailId?: true
+  resendMessageId?: true
+  emailStatus?: true
+  emailStatusAtualizadoEm?: true
   _all?: true
 }
 
@@ -167,6 +191,10 @@ export type TokenRedefinicaoSenhaGroupByOutputType = {
   expiraEm: Date
   criadoEm: Date
   atualizadoEm: Date
+  resendEmailId: string | null
+  resendMessageId: string | null
+  emailStatus: string | null
+  emailStatusAtualizadoEm: Date | null
   _count: TokenRedefinicaoSenhaCountAggregateOutputType | null
   _min: TokenRedefinicaoSenhaMinAggregateOutputType | null
   _max: TokenRedefinicaoSenhaMaxAggregateOutputType | null
@@ -198,6 +226,10 @@ export type TokenRedefinicaoSenhaWhereInput = {
   expiraEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
   criadoEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
+  resendEmailId?: Prisma.StringNullableFilter<"TokenRedefinicaoSenha"> | string | null
+  resendMessageId?: Prisma.StringNullableFilter<"TokenRedefinicaoSenha"> | string | null
+  emailStatus?: Prisma.StringNullableFilter<"TokenRedefinicaoSenha"> | string | null
+  emailStatusAtualizadoEm?: Prisma.DateTimeNullableFilter<"TokenRedefinicaoSenha"> | Date | string | null
   usuario?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
 }
 
@@ -209,12 +241,17 @@ export type TokenRedefinicaoSenhaOrderByWithRelationInput = {
   expiraEm?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  resendEmailId?: Prisma.SortOrderInput | Prisma.SortOrder
+  resendMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailStatusAtualizadoEm?: Prisma.SortOrderInput | Prisma.SortOrder
   usuario?: Prisma.UsuarioOrderByWithRelationInput
 }
 
 export type TokenRedefinicaoSenhaWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tokenHash?: string
+  resendEmailId?: string
   AND?: Prisma.TokenRedefinicaoSenhaWhereInput | Prisma.TokenRedefinicaoSenhaWhereInput[]
   OR?: Prisma.TokenRedefinicaoSenhaWhereInput[]
   NOT?: Prisma.TokenRedefinicaoSenhaWhereInput | Prisma.TokenRedefinicaoSenhaWhereInput[]
@@ -223,8 +260,11 @@ export type TokenRedefinicaoSenhaWhereUniqueInput = Prisma.AtLeast<{
   expiraEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
   criadoEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
+  resendMessageId?: Prisma.StringNullableFilter<"TokenRedefinicaoSenha"> | string | null
+  emailStatus?: Prisma.StringNullableFilter<"TokenRedefinicaoSenha"> | string | null
+  emailStatusAtualizadoEm?: Prisma.DateTimeNullableFilter<"TokenRedefinicaoSenha"> | Date | string | null
   usuario?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
-}, "id" | "tokenHash">
+}, "id" | "tokenHash" | "resendEmailId">
 
 export type TokenRedefinicaoSenhaOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -234,6 +274,10 @@ export type TokenRedefinicaoSenhaOrderByWithAggregationInput = {
   expiraEm?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  resendEmailId?: Prisma.SortOrderInput | Prisma.SortOrder
+  resendMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailStatusAtualizadoEm?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TokenRedefinicaoSenhaCountOrderByAggregateInput
   _max?: Prisma.TokenRedefinicaoSenhaMaxOrderByAggregateInput
   _min?: Prisma.TokenRedefinicaoSenhaMinOrderByAggregateInput
@@ -250,6 +294,10 @@ export type TokenRedefinicaoSenhaScalarWhereWithAggregatesInput = {
   expiraEm?: Prisma.DateTimeWithAggregatesFilter<"TokenRedefinicaoSenha"> | Date | string
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"TokenRedefinicaoSenha"> | Date | string
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"TokenRedefinicaoSenha"> | Date | string
+  resendEmailId?: Prisma.StringNullableWithAggregatesFilter<"TokenRedefinicaoSenha"> | string | null
+  resendMessageId?: Prisma.StringNullableWithAggregatesFilter<"TokenRedefinicaoSenha"> | string | null
+  emailStatus?: Prisma.StringNullableWithAggregatesFilter<"TokenRedefinicaoSenha"> | string | null
+  emailStatusAtualizadoEm?: Prisma.DateTimeNullableWithAggregatesFilter<"TokenRedefinicaoSenha"> | Date | string | null
 }
 
 export type TokenRedefinicaoSenhaCreateInput = {
@@ -259,6 +307,10 @@ export type TokenRedefinicaoSenhaCreateInput = {
   expiraEm: Date | string
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  resendEmailId?: string | null
+  resendMessageId?: string | null
+  emailStatus?: string | null
+  emailStatusAtualizadoEm?: Date | string | null
   usuario: Prisma.UsuarioCreateNestedOneWithoutTokensRedefinicaoSenhaInput
 }
 
@@ -270,6 +322,10 @@ export type TokenRedefinicaoSenhaUncheckedCreateInput = {
   expiraEm: Date | string
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  resendEmailId?: string | null
+  resendMessageId?: string | null
+  emailStatus?: string | null
+  emailStatusAtualizadoEm?: Date | string | null
 }
 
 export type TokenRedefinicaoSenhaUpdateInput = {
@@ -279,6 +335,10 @@ export type TokenRedefinicaoSenhaUpdateInput = {
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resendEmailId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resendMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatusAtualizadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   usuario?: Prisma.UsuarioUpdateOneRequiredWithoutTokensRedefinicaoSenhaNestedInput
 }
 
@@ -290,6 +350,10 @@ export type TokenRedefinicaoSenhaUncheckedUpdateInput = {
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resendEmailId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resendMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatusAtualizadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TokenRedefinicaoSenhaCreateManyInput = {
@@ -300,6 +364,10 @@ export type TokenRedefinicaoSenhaCreateManyInput = {
   expiraEm: Date | string
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  resendEmailId?: string | null
+  resendMessageId?: string | null
+  emailStatus?: string | null
+  emailStatusAtualizadoEm?: Date | string | null
 }
 
 export type TokenRedefinicaoSenhaUpdateManyMutationInput = {
@@ -309,6 +377,10 @@ export type TokenRedefinicaoSenhaUpdateManyMutationInput = {
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resendEmailId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resendMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatusAtualizadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TokenRedefinicaoSenhaUncheckedUpdateManyInput = {
@@ -319,6 +391,10 @@ export type TokenRedefinicaoSenhaUncheckedUpdateManyInput = {
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resendEmailId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resendMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatusAtualizadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TokenRedefinicaoSenhaListRelationFilter = {
@@ -339,6 +415,10 @@ export type TokenRedefinicaoSenhaCountOrderByAggregateInput = {
   expiraEm?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  resendEmailId?: Prisma.SortOrder
+  resendMessageId?: Prisma.SortOrder
+  emailStatus?: Prisma.SortOrder
+  emailStatusAtualizadoEm?: Prisma.SortOrder
 }
 
 export type TokenRedefinicaoSenhaMaxOrderByAggregateInput = {
@@ -349,6 +429,10 @@ export type TokenRedefinicaoSenhaMaxOrderByAggregateInput = {
   expiraEm?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  resendEmailId?: Prisma.SortOrder
+  resendMessageId?: Prisma.SortOrder
+  emailStatus?: Prisma.SortOrder
+  emailStatusAtualizadoEm?: Prisma.SortOrder
 }
 
 export type TokenRedefinicaoSenhaMinOrderByAggregateInput = {
@@ -359,6 +443,10 @@ export type TokenRedefinicaoSenhaMinOrderByAggregateInput = {
   expiraEm?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  resendEmailId?: Prisma.SortOrder
+  resendMessageId?: Prisma.SortOrder
+  emailStatus?: Prisma.SortOrder
+  emailStatusAtualizadoEm?: Prisma.SortOrder
 }
 
 export type TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput = {
@@ -410,6 +498,10 @@ export type TokenRedefinicaoSenhaCreateWithoutUsuarioInput = {
   expiraEm: Date | string
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  resendEmailId?: string | null
+  resendMessageId?: string | null
+  emailStatus?: string | null
+  emailStatusAtualizadoEm?: Date | string | null
 }
 
 export type TokenRedefinicaoSenhaUncheckedCreateWithoutUsuarioInput = {
@@ -419,6 +511,10 @@ export type TokenRedefinicaoSenhaUncheckedCreateWithoutUsuarioInput = {
   expiraEm: Date | string
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  resendEmailId?: string | null
+  resendMessageId?: string | null
+  emailStatus?: string | null
+  emailStatusAtualizadoEm?: Date | string | null
 }
 
 export type TokenRedefinicaoSenhaCreateOrConnectWithoutUsuarioInput = {
@@ -458,6 +554,10 @@ export type TokenRedefinicaoSenhaScalarWhereInput = {
   expiraEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
   criadoEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"TokenRedefinicaoSenha"> | Date | string
+  resendEmailId?: Prisma.StringNullableFilter<"TokenRedefinicaoSenha"> | string | null
+  resendMessageId?: Prisma.StringNullableFilter<"TokenRedefinicaoSenha"> | string | null
+  emailStatus?: Prisma.StringNullableFilter<"TokenRedefinicaoSenha"> | string | null
+  emailStatusAtualizadoEm?: Prisma.DateTimeNullableFilter<"TokenRedefinicaoSenha"> | Date | string | null
 }
 
 export type TokenRedefinicaoSenhaCreateManyUsuarioInput = {
@@ -467,6 +567,10 @@ export type TokenRedefinicaoSenhaCreateManyUsuarioInput = {
   expiraEm: Date | string
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  resendEmailId?: string | null
+  resendMessageId?: string | null
+  emailStatus?: string | null
+  emailStatusAtualizadoEm?: Date | string | null
 }
 
 export type TokenRedefinicaoSenhaUpdateWithoutUsuarioInput = {
@@ -476,6 +580,10 @@ export type TokenRedefinicaoSenhaUpdateWithoutUsuarioInput = {
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resendEmailId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resendMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatusAtualizadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TokenRedefinicaoSenhaUncheckedUpdateWithoutUsuarioInput = {
@@ -485,6 +593,10 @@ export type TokenRedefinicaoSenhaUncheckedUpdateWithoutUsuarioInput = {
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resendEmailId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resendMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatusAtualizadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioInput = {
@@ -494,6 +606,10 @@ export type TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioInput = {
   expiraEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resendEmailId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resendMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailStatusAtualizadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -506,6 +622,10 @@ export type TokenRedefinicaoSenhaSelect<ExtArgs extends runtime.Types.Extensions
   expiraEm?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  resendEmailId?: boolean
+  resendMessageId?: boolean
+  emailStatus?: boolean
+  emailStatusAtualizadoEm?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tokenRedefinicaoSenha"]>
 
@@ -517,6 +637,10 @@ export type TokenRedefinicaoSenhaSelectCreateManyAndReturn<ExtArgs extends runti
   expiraEm?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  resendEmailId?: boolean
+  resendMessageId?: boolean
+  emailStatus?: boolean
+  emailStatusAtualizadoEm?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tokenRedefinicaoSenha"]>
 
@@ -528,6 +652,10 @@ export type TokenRedefinicaoSenhaSelectUpdateManyAndReturn<ExtArgs extends runti
   expiraEm?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  resendEmailId?: boolean
+  resendMessageId?: boolean
+  emailStatus?: boolean
+  emailStatusAtualizadoEm?: boolean
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tokenRedefinicaoSenha"]>
 
@@ -539,9 +667,13 @@ export type TokenRedefinicaoSenhaSelectScalar = {
   expiraEm?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  resendEmailId?: boolean
+  resendMessageId?: boolean
+  emailStatus?: boolean
+  emailStatusAtualizadoEm?: boolean
 }
 
-export type TokenRedefinicaoSenhaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "usuarioId" | "tokenHash" | "usado" | "expiraEm" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["tokenRedefinicaoSenha"]>
+export type TokenRedefinicaoSenhaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "usuarioId" | "tokenHash" | "usado" | "expiraEm" | "criadoEm" | "atualizadoEm" | "resendEmailId" | "resendMessageId" | "emailStatus" | "emailStatusAtualizadoEm", ExtArgs["result"]["tokenRedefinicaoSenha"]>
 export type TokenRedefinicaoSenhaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }
@@ -565,6 +697,10 @@ export type $TokenRedefinicaoSenhaPayload<ExtArgs extends runtime.Types.Extensio
     expiraEm: Date
     criadoEm: Date
     atualizadoEm: Date
+    resendEmailId: string | null
+    resendMessageId: string | null
+    emailStatus: string | null
+    emailStatusAtualizadoEm: Date | null
   }, ExtArgs["result"]["tokenRedefinicaoSenha"]>
   composites: {}
 }
@@ -996,6 +1132,10 @@ export interface TokenRedefinicaoSenhaFieldRefs {
   readonly expiraEm: Prisma.FieldRef<"TokenRedefinicaoSenha", 'DateTime'>
   readonly criadoEm: Prisma.FieldRef<"TokenRedefinicaoSenha", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"TokenRedefinicaoSenha", 'DateTime'>
+  readonly resendEmailId: Prisma.FieldRef<"TokenRedefinicaoSenha", 'String'>
+  readonly resendMessageId: Prisma.FieldRef<"TokenRedefinicaoSenha", 'String'>
+  readonly emailStatus: Prisma.FieldRef<"TokenRedefinicaoSenha", 'String'>
+  readonly emailStatusAtualizadoEm: Prisma.FieldRef<"TokenRedefinicaoSenha", 'DateTime'>
 }
     
 

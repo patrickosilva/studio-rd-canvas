@@ -34,6 +34,8 @@ export type UsuarioMinAggregateOutputType = {
   ativo: boolean | null
   criadoEm: Date | null
   atualizadoEm: Date | null
+  termosVersaoAceita: string | null
+  termosAceitosEm: Date | null
 }
 
 export type UsuarioMaxAggregateOutputType = {
@@ -46,6 +48,8 @@ export type UsuarioMaxAggregateOutputType = {
   ativo: boolean | null
   criadoEm: Date | null
   atualizadoEm: Date | null
+  termosVersaoAceita: string | null
+  termosAceitosEm: Date | null
 }
 
 export type UsuarioCountAggregateOutputType = {
@@ -58,6 +62,8 @@ export type UsuarioCountAggregateOutputType = {
   ativo: number
   criadoEm: number
   atualizadoEm: number
+  termosVersaoAceita: number
+  termosAceitosEm: number
   _all: number
 }
 
@@ -72,6 +78,8 @@ export type UsuarioMinAggregateInputType = {
   ativo?: true
   criadoEm?: true
   atualizadoEm?: true
+  termosVersaoAceita?: true
+  termosAceitosEm?: true
 }
 
 export type UsuarioMaxAggregateInputType = {
@@ -84,6 +92,8 @@ export type UsuarioMaxAggregateInputType = {
   ativo?: true
   criadoEm?: true
   atualizadoEm?: true
+  termosVersaoAceita?: true
+  termosAceitosEm?: true
 }
 
 export type UsuarioCountAggregateInputType = {
@@ -96,6 +106,8 @@ export type UsuarioCountAggregateInputType = {
   ativo?: true
   criadoEm?: true
   atualizadoEm?: true
+  termosVersaoAceita?: true
+  termosAceitosEm?: true
   _all?: true
 }
 
@@ -176,11 +188,13 @@ export type UsuarioGroupByOutputType = {
   nome: string
   email: string
   telefone: string | null
-  senhaHash: string
+  senhaHash: string | null
   papel: $Enums.PapelUsuario
   ativo: boolean
   criadoEm: Date
   atualizadoEm: Date
+  termosVersaoAceita: string | null
+  termosAceitosEm: Date | null
   _count: UsuarioCountAggregateOutputType | null
   _min: UsuarioMinAggregateOutputType | null
   _max: UsuarioMaxAggregateOutputType | null
@@ -209,17 +223,20 @@ export type UsuarioWhereInput = {
   nome?: Prisma.StringFilter<"Usuario"> | string
   email?: Prisma.StringFilter<"Usuario"> | string
   telefone?: Prisma.StringNullableFilter<"Usuario"> | string | null
-  senhaHash?: Prisma.StringFilter<"Usuario"> | string
+  senhaHash?: Prisma.StringNullableFilter<"Usuario"> | string | null
   papel?: Prisma.EnumPapelUsuarioFilter<"Usuario"> | $Enums.PapelUsuario
   ativo?: Prisma.BoolFilter<"Usuario"> | boolean
   criadoEm?: Prisma.DateTimeFilter<"Usuario"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Usuario"> | Date | string
+  termosVersaoAceita?: Prisma.StringNullableFilter<"Usuario"> | string | null
+  termosAceitosEm?: Prisma.DateTimeNullableFilter<"Usuario"> | Date | string | null
   sessoes?: Prisma.SessaoListRelationFilter
   profissional?: Prisma.XOR<Prisma.ProfissionalNullableScalarRelationFilter, Prisma.ProfissionalWhereInput> | null
   assinaturas?: Prisma.AssinaturaClienteListRelationFilter
   agendamentos?: Prisma.AgendamentoListRelationFilter
   notificacoes?: Prisma.NotificacaoListRelationFilter
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaListRelationFilter
+  contasOAuth?: Prisma.ContaOAuthListRelationFilter
 }
 
 export type UsuarioOrderByWithRelationInput = {
@@ -227,17 +244,20 @@ export type UsuarioOrderByWithRelationInput = {
   nome?: Prisma.SortOrder
   email?: Prisma.SortOrder
   telefone?: Prisma.SortOrderInput | Prisma.SortOrder
-  senhaHash?: Prisma.SortOrder
+  senhaHash?: Prisma.SortOrderInput | Prisma.SortOrder
   papel?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  termosVersaoAceita?: Prisma.SortOrderInput | Prisma.SortOrder
+  termosAceitosEm?: Prisma.SortOrderInput | Prisma.SortOrder
   sessoes?: Prisma.SessaoOrderByRelationAggregateInput
   profissional?: Prisma.ProfissionalOrderByWithRelationInput
   assinaturas?: Prisma.AssinaturaClienteOrderByRelationAggregateInput
   agendamentos?: Prisma.AgendamentoOrderByRelationAggregateInput
   notificacoes?: Prisma.NotificacaoOrderByRelationAggregateInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaOrderByRelationAggregateInput
+  contasOAuth?: Prisma.ContaOAuthOrderByRelationAggregateInput
 }
 
 export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
@@ -248,17 +268,20 @@ export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.UsuarioWhereInput[]
   NOT?: Prisma.UsuarioWhereInput | Prisma.UsuarioWhereInput[]
   nome?: Prisma.StringFilter<"Usuario"> | string
-  senhaHash?: Prisma.StringFilter<"Usuario"> | string
+  senhaHash?: Prisma.StringNullableFilter<"Usuario"> | string | null
   papel?: Prisma.EnumPapelUsuarioFilter<"Usuario"> | $Enums.PapelUsuario
   ativo?: Prisma.BoolFilter<"Usuario"> | boolean
   criadoEm?: Prisma.DateTimeFilter<"Usuario"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Usuario"> | Date | string
+  termosVersaoAceita?: Prisma.StringNullableFilter<"Usuario"> | string | null
+  termosAceitosEm?: Prisma.DateTimeNullableFilter<"Usuario"> | Date | string | null
   sessoes?: Prisma.SessaoListRelationFilter
   profissional?: Prisma.XOR<Prisma.ProfissionalNullableScalarRelationFilter, Prisma.ProfissionalWhereInput> | null
   assinaturas?: Prisma.AssinaturaClienteListRelationFilter
   agendamentos?: Prisma.AgendamentoListRelationFilter
   notificacoes?: Prisma.NotificacaoListRelationFilter
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaListRelationFilter
+  contasOAuth?: Prisma.ContaOAuthListRelationFilter
 }, "id" | "email" | "telefone">
 
 export type UsuarioOrderByWithAggregationInput = {
@@ -266,11 +289,13 @@ export type UsuarioOrderByWithAggregationInput = {
   nome?: Prisma.SortOrder
   email?: Prisma.SortOrder
   telefone?: Prisma.SortOrderInput | Prisma.SortOrder
-  senhaHash?: Prisma.SortOrder
+  senhaHash?: Prisma.SortOrderInput | Prisma.SortOrder
   papel?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  termosVersaoAceita?: Prisma.SortOrderInput | Prisma.SortOrder
+  termosAceitosEm?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UsuarioCountOrderByAggregateInput
   _max?: Prisma.UsuarioMaxOrderByAggregateInput
   _min?: Prisma.UsuarioMinOrderByAggregateInput
@@ -284,11 +309,13 @@ export type UsuarioScalarWhereWithAggregatesInput = {
   nome?: Prisma.StringWithAggregatesFilter<"Usuario"> | string
   email?: Prisma.StringWithAggregatesFilter<"Usuario"> | string
   telefone?: Prisma.StringNullableWithAggregatesFilter<"Usuario"> | string | null
-  senhaHash?: Prisma.StringWithAggregatesFilter<"Usuario"> | string
+  senhaHash?: Prisma.StringNullableWithAggregatesFilter<"Usuario"> | string | null
   papel?: Prisma.EnumPapelUsuarioWithAggregatesFilter<"Usuario"> | $Enums.PapelUsuario
   ativo?: Prisma.BoolWithAggregatesFilter<"Usuario"> | boolean
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"Usuario"> | Date | string
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"Usuario"> | Date | string
+  termosVersaoAceita?: Prisma.StringNullableWithAggregatesFilter<"Usuario"> | string | null
+  termosAceitosEm?: Prisma.DateTimeNullableWithAggregatesFilter<"Usuario"> | Date | string | null
 }
 
 export type UsuarioCreateInput = {
@@ -296,17 +323,20 @@ export type UsuarioCreateInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateInput = {
@@ -314,17 +344,20 @@ export type UsuarioUncheckedCreateInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUpdateInput = {
@@ -332,17 +365,20 @@ export type UsuarioUpdateInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateInput = {
@@ -350,17 +386,20 @@ export type UsuarioUncheckedUpdateInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateManyInput = {
@@ -368,11 +407,13 @@ export type UsuarioCreateManyInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
 }
 
 export type UsuarioUpdateManyMutationInput = {
@@ -380,11 +421,13 @@ export type UsuarioUpdateManyMutationInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UsuarioUncheckedUpdateManyInput = {
@@ -392,11 +435,13 @@ export type UsuarioUncheckedUpdateManyInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UsuarioCountOrderByAggregateInput = {
@@ -409,6 +454,8 @@ export type UsuarioCountOrderByAggregateInput = {
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  termosVersaoAceita?: Prisma.SortOrder
+  termosAceitosEm?: Prisma.SortOrder
 }
 
 export type UsuarioMaxOrderByAggregateInput = {
@@ -421,6 +468,8 @@ export type UsuarioMaxOrderByAggregateInput = {
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  termosVersaoAceita?: Prisma.SortOrder
+  termosAceitosEm?: Prisma.SortOrder
 }
 
 export type UsuarioMinOrderByAggregateInput = {
@@ -433,6 +482,8 @@ export type UsuarioMinOrderByAggregateInput = {
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  termosVersaoAceita?: Prisma.SortOrder
+  termosAceitosEm?: Prisma.SortOrder
 }
 
 export type UsuarioNullableScalarRelationFilter = {
@@ -453,6 +504,10 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
 export type UsuarioCreateNestedOneWithoutProfissionalInput = {
   create?: Prisma.XOR<Prisma.UsuarioCreateWithoutProfissionalInput, Prisma.UsuarioUncheckedCreateWithoutProfissionalInput>
   connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutProfissionalInput
@@ -467,6 +522,20 @@ export type UsuarioUpdateOneWithoutProfissionalNestedInput = {
   delete?: Prisma.UsuarioWhereInput | boolean
   connect?: Prisma.UsuarioWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutProfissionalInput, Prisma.UsuarioUpdateWithoutProfissionalInput>, Prisma.UsuarioUncheckedUpdateWithoutProfissionalInput>
+}
+
+export type UsuarioCreateNestedOneWithoutContasOAuthInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutContasOAuthInput, Prisma.UsuarioUncheckedCreateWithoutContasOAuthInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutContasOAuthInput
+  connect?: Prisma.UsuarioWhereUniqueInput
+}
+
+export type UsuarioUpdateOneRequiredWithoutContasOAuthNestedInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutContasOAuthInput, Prisma.UsuarioUncheckedCreateWithoutContasOAuthInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutContasOAuthInput
+  upsert?: Prisma.UsuarioUpsertWithoutContasOAuthInput
+  connect?: Prisma.UsuarioWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutContasOAuthInput, Prisma.UsuarioUpdateWithoutContasOAuthInput>, Prisma.UsuarioUncheckedUpdateWithoutContasOAuthInput>
 }
 
 export type UsuarioCreateNestedOneWithoutSessoesInput = {
@@ -544,16 +613,19 @@ export type UsuarioCreateWithoutProfissionalInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutProfissionalInput = {
@@ -561,16 +633,19 @@ export type UsuarioUncheckedCreateWithoutProfissionalInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutProfissionalInput = {
@@ -594,16 +669,19 @@ export type UsuarioUpdateWithoutProfissionalInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutProfissionalInput = {
@@ -611,12 +689,111 @@ export type UsuarioUncheckedUpdateWithoutProfissionalInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
+  agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
+  notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
+}
+
+export type UsuarioCreateWithoutContasOAuthInput = {
+  id?: string
+  nome: string
+  email: string
+  telefone?: string | null
+  senhaHash?: string | null
+  papel?: $Enums.PapelUsuario
+  ativo?: boolean
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
+  sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
+  profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
+  assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
+  agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
+  notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+}
+
+export type UsuarioUncheckedCreateWithoutContasOAuthInput = {
+  id?: string
+  nome: string
+  email: string
+  telefone?: string | null
+  senhaHash?: string | null
+  papel?: $Enums.PapelUsuario
+  ativo?: boolean
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
+  sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
+  profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
+  assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
+  agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
+  notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+}
+
+export type UsuarioCreateOrConnectWithoutContasOAuthInput = {
+  where: Prisma.UsuarioWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutContasOAuthInput, Prisma.UsuarioUncheckedCreateWithoutContasOAuthInput>
+}
+
+export type UsuarioUpsertWithoutContasOAuthInput = {
+  update: Prisma.XOR<Prisma.UsuarioUpdateWithoutContasOAuthInput, Prisma.UsuarioUncheckedUpdateWithoutContasOAuthInput>
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutContasOAuthInput, Prisma.UsuarioUncheckedCreateWithoutContasOAuthInput>
+  where?: Prisma.UsuarioWhereInput
+}
+
+export type UsuarioUpdateToOneWithWhereWithoutContasOAuthInput = {
+  where?: Prisma.UsuarioWhereInput
+  data: Prisma.XOR<Prisma.UsuarioUpdateWithoutContasOAuthInput, Prisma.UsuarioUncheckedUpdateWithoutContasOAuthInput>
+}
+
+export type UsuarioUpdateWithoutContasOAuthInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
+  profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
+  assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
+  agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
+  notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+}
+
+export type UsuarioUncheckedUpdateWithoutContasOAuthInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
@@ -628,16 +805,19 @@ export type UsuarioCreateWithoutSessoesInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutSessoesInput = {
@@ -645,16 +825,19 @@ export type UsuarioUncheckedCreateWithoutSessoesInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutSessoesInput = {
@@ -678,16 +861,19 @@ export type UsuarioUpdateWithoutSessoesInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutSessoesInput = {
@@ -695,16 +881,19 @@ export type UsuarioUncheckedUpdateWithoutSessoesInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateWithoutAgendamentosInput = {
@@ -712,16 +901,19 @@ export type UsuarioCreateWithoutAgendamentosInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutAgendamentosInput = {
@@ -729,16 +921,19 @@ export type UsuarioUncheckedCreateWithoutAgendamentosInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutAgendamentosInput = {
@@ -762,16 +957,19 @@ export type UsuarioUpdateWithoutAgendamentosInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutAgendamentosInput = {
@@ -779,16 +977,19 @@ export type UsuarioUncheckedUpdateWithoutAgendamentosInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateWithoutAssinaturasInput = {
@@ -796,16 +997,19 @@ export type UsuarioCreateWithoutAssinaturasInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutAssinaturasInput = {
@@ -813,16 +1017,19 @@ export type UsuarioUncheckedCreateWithoutAssinaturasInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutAssinaturasInput = {
@@ -846,16 +1053,19 @@ export type UsuarioUpdateWithoutAssinaturasInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutAssinaturasInput = {
@@ -863,16 +1073,19 @@ export type UsuarioUncheckedUpdateWithoutAssinaturasInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateWithoutNotificacoesInput = {
@@ -880,16 +1093,19 @@ export type UsuarioCreateWithoutNotificacoesInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutNotificacoesInput = {
@@ -897,16 +1113,19 @@ export type UsuarioUncheckedCreateWithoutNotificacoesInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutNotificacoesInput = {
@@ -930,16 +1149,19 @@ export type UsuarioUpdateWithoutNotificacoesInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutNotificacoesInput = {
@@ -947,16 +1169,19 @@ export type UsuarioUncheckedUpdateWithoutNotificacoesInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioCreateWithoutTokensRedefinicaoSenhaInput = {
@@ -964,16 +1189,19 @@ export type UsuarioCreateWithoutTokensRedefinicaoSenhaInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput = {
@@ -981,16 +1209,19 @@ export type UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput = {
   nome: string
   email: string
   telefone?: string | null
-  senhaHash: string
+  senhaHash?: string | null
   papel?: $Enums.PapelUsuario
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
   sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
   profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
 }
 
 export type UsuarioCreateOrConnectWithoutTokensRedefinicaoSenhaInput = {
@@ -1014,16 +1245,19 @@ export type UsuarioUpdateWithoutTokensRedefinicaoSenhaInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput = {
@@ -1031,16 +1265,19 @@ export type UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
   profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 
@@ -1054,6 +1291,7 @@ export type UsuarioCountOutputType = {
   agendamentos: number
   notificacoes: number
   tokensRedefinicaoSenha: number
+  contasOAuth: number
 }
 
 export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1062,6 +1300,7 @@ export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   agendamentos?: boolean | UsuarioCountOutputTypeCountAgendamentosArgs
   notificacoes?: boolean | UsuarioCountOutputTypeCountNotificacoesArgs
   tokensRedefinicaoSenha?: boolean | UsuarioCountOutputTypeCountTokensRedefinicaoSenhaArgs
+  contasOAuth?: boolean | UsuarioCountOutputTypeCountContasOAuthArgs
 }
 
 /**
@@ -1109,6 +1348,13 @@ export type UsuarioCountOutputTypeCountTokensRedefinicaoSenhaArgs<ExtArgs extend
   where?: Prisma.TokenRedefinicaoSenhaWhereInput
 }
 
+/**
+ * UsuarioCountOutputType without action
+ */
+export type UsuarioCountOutputTypeCountContasOAuthArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContaOAuthWhereInput
+}
+
 
 export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1120,12 +1366,15 @@ export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   ativo?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  termosVersaoAceita?: boolean
+  termosAceitosEm?: boolean
   sessoes?: boolean | Prisma.Usuario$sessoesArgs<ExtArgs>
   profissional?: boolean | Prisma.Usuario$profissionalArgs<ExtArgs>
   assinaturas?: boolean | Prisma.Usuario$assinaturasArgs<ExtArgs>
   agendamentos?: boolean | Prisma.Usuario$agendamentosArgs<ExtArgs>
   notificacoes?: boolean | Prisma.Usuario$notificacoesArgs<ExtArgs>
   tokensRedefinicaoSenha?: boolean | Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>
+  contasOAuth?: boolean | Prisma.Usuario$contasOAuthArgs<ExtArgs>
   _count?: boolean | Prisma.UsuarioCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["usuario"]>
 
@@ -1139,6 +1388,8 @@ export type UsuarioSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   ativo?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  termosVersaoAceita?: boolean
+  termosAceitosEm?: boolean
 }, ExtArgs["result"]["usuario"]>
 
 export type UsuarioSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1151,6 +1402,8 @@ export type UsuarioSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   ativo?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  termosVersaoAceita?: boolean
+  termosAceitosEm?: boolean
 }, ExtArgs["result"]["usuario"]>
 
 export type UsuarioSelectScalar = {
@@ -1163,9 +1416,11 @@ export type UsuarioSelectScalar = {
   ativo?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  termosVersaoAceita?: boolean
+  termosAceitosEm?: boolean
 }
 
-export type UsuarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "email" | "telefone" | "senhaHash" | "papel" | "ativo" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["usuario"]>
+export type UsuarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "email" | "telefone" | "senhaHash" | "papel" | "ativo" | "criadoEm" | "atualizadoEm" | "termosVersaoAceita" | "termosAceitosEm", ExtArgs["result"]["usuario"]>
 export type UsuarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessoes?: boolean | Prisma.Usuario$sessoesArgs<ExtArgs>
   profissional?: boolean | Prisma.Usuario$profissionalArgs<ExtArgs>
@@ -1173,6 +1428,7 @@ export type UsuarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   agendamentos?: boolean | Prisma.Usuario$agendamentosArgs<ExtArgs>
   notificacoes?: boolean | Prisma.Usuario$notificacoesArgs<ExtArgs>
   tokensRedefinicaoSenha?: boolean | Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>
+  contasOAuth?: boolean | Prisma.Usuario$contasOAuthArgs<ExtArgs>
   _count?: boolean | Prisma.UsuarioCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UsuarioIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1187,17 +1443,20 @@ export type $UsuarioPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     agendamentos: Prisma.$AgendamentoPayload<ExtArgs>[]
     notificacoes: Prisma.$NotificacaoPayload<ExtArgs>[]
     tokensRedefinicaoSenha: Prisma.$TokenRedefinicaoSenhaPayload<ExtArgs>[]
+    contasOAuth: Prisma.$ContaOAuthPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     nome: string
     email: string
     telefone: string | null
-    senhaHash: string
+    senhaHash: string | null
     papel: $Enums.PapelUsuario
     ativo: boolean
     criadoEm: Date
     atualizadoEm: Date
+    termosVersaoAceita: string | null
+    termosAceitosEm: Date | null
   }, ExtArgs["result"]["usuario"]>
   composites: {}
 }
@@ -1598,6 +1857,7 @@ export interface Prisma__UsuarioClient<T, Null = never, ExtArgs extends runtime.
   agendamentos<T extends Prisma.Usuario$agendamentosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$agendamentosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgendamentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notificacoes<T extends Prisma.Usuario$notificacoesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$notificacoesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificacaoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tokensRedefinicaoSenha<T extends Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TokenRedefinicaoSenhaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  contasOAuth<T extends Prisma.Usuario$contasOAuthArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$contasOAuthArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContaOAuthPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1636,6 +1896,8 @@ export interface UsuarioFieldRefs {
   readonly ativo: Prisma.FieldRef<"Usuario", 'Boolean'>
   readonly criadoEm: Prisma.FieldRef<"Usuario", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"Usuario", 'DateTime'>
+  readonly termosVersaoAceita: Prisma.FieldRef<"Usuario", 'String'>
+  readonly termosAceitosEm: Prisma.FieldRef<"Usuario", 'DateTime'>
 }
     
 
@@ -2165,6 +2427,30 @@ export type Usuario$tokensRedefinicaoSenhaArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   distinct?: Prisma.TokenRedefinicaoSenhaScalarFieldEnum | Prisma.TokenRedefinicaoSenhaScalarFieldEnum[]
+}
+
+/**
+ * Usuario.contasOAuth
+ */
+export type Usuario$contasOAuthArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContaOAuth
+   */
+  select?: Prisma.ContaOAuthSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ContaOAuth
+   */
+  omit?: Prisma.ContaOAuthOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContaOAuthInclude<ExtArgs> | null
+  where?: Prisma.ContaOAuthWhereInput
+  orderBy?: Prisma.ContaOAuthOrderByWithRelationInput | Prisma.ContaOAuthOrderByWithRelationInput[]
+  cursor?: Prisma.ContaOAuthWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContaOAuthScalarFieldEnum | Prisma.ContaOAuthScalarFieldEnum[]
 }
 
 /**

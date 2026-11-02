@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { entrar } from "@/lib/api/auth.functions";
+import { GoogleLoginButton } from "@/components/auth/GoogleAuth";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -31,6 +32,7 @@ function LoginPage() {
   const [carregando, setCarregando] = useState(false);
   const [mensagem, setMensagem] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [manterConectado, setManterConectado] = useState(true);
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
@@ -135,7 +137,15 @@ function LoginPage() {
               </div>
             </div>
 
-            <label
+                      <div className="flex justify-end">
+            <Link
+              to="/esqueci-senha"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Esqueceu sua senha?
+            </Link>
+          </div>
+<label
               htmlFor="manterConectado"
               className="flex cursor-pointer items-center gap-2 text-sm"
             >
@@ -143,10 +153,14 @@ function LoginPage() {
                 id="manterConectado"
                 name="manterConectado"
                 type="checkbox"
+                checked={manterConectado}
+                onChange={(event) =>
+                  setManterConectado(event.target.checked)
+                }
                 className="h-4 w-4 rounded border-input accent-primary"
               />
 
-              Manter conectado
+              Manter conectado por até 30 dias de inatividade
             </label>
 
             {mensagem && (
@@ -167,6 +181,22 @@ function LoginPage() {
                 ? "Entrando..."
                 : "Entrar"}
             </Button>
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  ou
+                </span>
+              </div>
+            </div>
+
+            <GoogleLoginButton
+              manterConectado={manterConectado}
+              redirect={redirect}
+              onErro={setMensagem}
+            />
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
@@ -187,6 +217,17 @@ function LoginPage() {
               Voltar ao início
             </Link>
           </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+            <Link to="/termos" className="hover:text-foreground">
+              Termos
+            </Link>
+            <Link to="/privacidade" className="hover:text-foreground">
+              Privacidade
+            </Link>
+            <Link to="/cookies" className="hover:text-foreground">
+              Cookies
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </main>

@@ -13,15 +13,21 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as ClienteRouteImport } from './routes/cliente'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as FuncionarioRouteImport } from './routes/funcionario'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LogoutRouteImport } from './routes/logout'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAgendaRouteImport } from './routes/admin.agenda'
 import { Route as AdminAssinaturasRouteImport } from './routes/admin.assinaturas'
 import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminContaRouteImport } from './routes/admin.conta'
 import { Route as AdminCorrecoesRouteImport } from './routes/admin.correcoes'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
@@ -37,6 +43,7 @@ import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
 import { Route as FuncionarioAgendarClienteRouteImport } from './routes/funcionario.agendar-cliente'
 import { Route as FuncionarioBloqueiosRouteImport } from './routes/funcionario.bloqueios'
+import { Route as FuncionarioContaRouteImport } from './routes/funcionario.conta'
 import { Route as FuncionarioCorrecoesRouteImport } from './routes/funcionario.correcoes'
 import { Route as FuncionarioSolicitacoesRouteImport } from './routes/funcionario.solicitacoes'
 
@@ -60,6 +67,16 @@ const ClienteRoute = ClienteRouteImport.update({
   path: '/cliente',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FuncionarioRoute = FuncionarioRouteImport.update({
   id: '/funcionario',
   path: '/funcionario',
@@ -73,6 +90,21 @@ const LoginRoute = LoginRouteImport.update({
 const LogoutRoute = LogoutRouteImport.update({
   id: '/logout',
   path: '/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -103,6 +135,11 @@ const AdminClientesRoute = AdminClientesRouteImport.update({
 const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContaRoute = AdminContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCorrecoesRoute = AdminCorrecoesRouteImport.update({
@@ -181,6 +218,11 @@ const FuncionarioBloqueiosRoute = FuncionarioBloqueiosRouteImport.update({
   path: '/bloqueios',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const FuncionarioContaRoute = FuncionarioContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
 const FuncionarioCorrecoesRoute = FuncionarioCorrecoesRouteImport.update({
   id: '/correcoes',
   path: '/correcoes',
@@ -197,14 +239,20 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/cliente': typeof ClienteRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/esqueci-senha': typeof EsqueciSenhaRoute
   '/funcionario': typeof FuncionarioRouteWithChildren
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/termos': typeof TermosRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
@@ -218,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/cliente/perfil': typeof ClientePerfilRoute
   '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
+  '/funcionario/conta': typeof FuncionarioContaRoute
   '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
@@ -227,13 +276,19 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
+  '/cookies': typeof CookiesRoute
+  '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/termos': typeof TermosRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
@@ -247,6 +302,7 @@ export interface FileRoutesByTo {
   '/cliente/perfil': typeof ClientePerfilRoute
   '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
+  '/funcionario/conta': typeof FuncionarioContaRoute
   '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin': typeof AdminIndexRoute
@@ -259,14 +315,20 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/cliente': typeof ClienteRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/esqueci-senha': typeof EsqueciSenhaRoute
   '/funcionario': typeof FuncionarioRouteWithChildren
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/termos': typeof TermosRoute
   '/admin/agenda': typeof AdminAgendaRoute
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
+  '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
@@ -280,6 +342,7 @@ export interface FileRoutesById {
   '/cliente/perfil': typeof ClientePerfilRoute
   '/funcionario/agendar-cliente': typeof FuncionarioAgendarClienteRoute
   '/funcionario/bloqueios': typeof FuncionarioBloqueiosRoute
+  '/funcionario/conta': typeof FuncionarioContaRoute
   '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
   '/admin/': typeof AdminIndexRoute
@@ -293,14 +356,20 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cadastro'
     | '/cliente'
+    | '/cookies'
+    | '/esqueci-senha'
     | '/funcionario'
     | '/login'
     | '/logout'
+    | '/privacidade'
+    | '/redefinir-senha'
+    | '/termos'
     | '/admin/agenda'
     | '/admin/assinaturas'
     | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/conta'
     | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
@@ -314,6 +383,7 @@ export interface FileRouteTypes {
     | '/cliente/perfil'
     | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
+    | '/funcionario/conta'
     | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
     | '/admin/'
@@ -323,13 +393,19 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/cadastro'
+    | '/cookies'
+    | '/esqueci-senha'
     | '/login'
     | '/logout'
+    | '/privacidade'
+    | '/redefinir-senha'
+    | '/termos'
     | '/admin/agenda'
     | '/admin/assinaturas'
     | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/conta'
     | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
@@ -343,6 +419,7 @@ export interface FileRouteTypes {
     | '/cliente/perfil'
     | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
+    | '/funcionario/conta'
     | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
     | '/admin'
@@ -354,14 +431,20 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cadastro'
     | '/cliente'
+    | '/cookies'
+    | '/esqueci-senha'
     | '/funcionario'
     | '/login'
     | '/logout'
+    | '/privacidade'
+    | '/redefinir-senha'
+    | '/termos'
     | '/admin/agenda'
     | '/admin/assinaturas'
     | '/admin/bloqueios'
     | '/admin/clientes'
     | '/admin/configuracoes'
+    | '/admin/conta'
     | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
@@ -375,6 +458,7 @@ export interface FileRouteTypes {
     | '/cliente/perfil'
     | '/funcionario/agendar-cliente'
     | '/funcionario/bloqueios'
+    | '/funcionario/conta'
     | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
     | '/admin/'
@@ -387,9 +471,14 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   ClienteRoute: typeof ClienteRouteWithChildren
+  CookiesRoute: typeof CookiesRoute
+  EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   FuncionarioRoute: typeof FuncionarioRouteWithChildren
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  TermosRoute: typeof TermosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -422,6 +511,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/esqueci-senha': {
+      id: '/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/esqueci-senha'
+      preLoaderRoute: typeof EsqueciSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/funcionario': {
       id: '/funcionario'
       path: '/funcionario'
@@ -441,6 +544,27 @@ declare module '@tanstack/react-router' {
       path: '/logout'
       fullPath: '/logout'
       preLoaderRoute: typeof LogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -483,6 +607,13 @@ declare module '@tanstack/react-router' {
       path: '/configuracoes'
       fullPath: '/admin/configuracoes'
       preLoaderRoute: typeof AdminConfiguracoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/conta': {
+      id: '/admin/conta'
+      path: '/conta'
+      fullPath: '/admin/conta'
+      preLoaderRoute: typeof AdminContaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/correcoes': {
@@ -590,6 +721,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioBloqueiosRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/funcionario/conta': {
+      id: '/funcionario/conta'
+      path: '/conta'
+      fullPath: '/funcionario/conta'
+      preLoaderRoute: typeof FuncionarioContaRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/funcionario/correcoes': {
       id: '/funcionario/correcoes'
       path: '/correcoes'
@@ -613,6 +751,7 @@ interface AdminRouteChildren {
   AdminBloqueiosRoute: typeof AdminBloqueiosRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
+  AdminContaRoute: typeof AdminContaRoute
   AdminCorrecoesRoute: typeof AdminCorrecoesRoute
   AdminFinanceiroRoute: typeof AdminFinanceiroRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
@@ -627,6 +766,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBloqueiosRoute: AdminBloqueiosRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
+  AdminContaRoute: AdminContaRoute,
   AdminCorrecoesRoute: AdminCorrecoesRoute,
   AdminFinanceiroRoute: AdminFinanceiroRoute,
   AdminMarketingRoute: AdminMarketingRoute,
@@ -663,6 +803,7 @@ const ClienteRouteWithChildren =
 interface FuncionarioRouteChildren {
   FuncionarioAgendarClienteRoute: typeof FuncionarioAgendarClienteRoute
   FuncionarioBloqueiosRoute: typeof FuncionarioBloqueiosRoute
+  FuncionarioContaRoute: typeof FuncionarioContaRoute
   FuncionarioCorrecoesRoute: typeof FuncionarioCorrecoesRoute
   FuncionarioSolicitacoesRoute: typeof FuncionarioSolicitacoesRoute
   FuncionarioIndexRoute: typeof FuncionarioIndexRoute
@@ -671,6 +812,7 @@ interface FuncionarioRouteChildren {
 const FuncionarioRouteChildren: FuncionarioRouteChildren = {
   FuncionarioAgendarClienteRoute: FuncionarioAgendarClienteRoute,
   FuncionarioBloqueiosRoute: FuncionarioBloqueiosRoute,
+  FuncionarioContaRoute: FuncionarioContaRoute,
   FuncionarioCorrecoesRoute: FuncionarioCorrecoesRoute,
   FuncionarioSolicitacoesRoute: FuncionarioSolicitacoesRoute,
   FuncionarioIndexRoute: FuncionarioIndexRoute,
@@ -685,9 +827,14 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
   ClienteRoute: ClienteRouteWithChildren,
+  CookiesRoute: CookiesRoute,
+  EsqueciSenhaRoute: EsqueciSenhaRoute,
   FuncionarioRoute: FuncionarioRouteWithChildren,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
+  TermosRoute: TermosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

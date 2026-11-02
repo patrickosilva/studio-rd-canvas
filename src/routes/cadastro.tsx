@@ -32,6 +32,7 @@ function CadastroPage() {
           email: String(formData.get("email") ?? ""),
           telefone: String(formData.get("telefone") ?? ""),
           senha: String(formData.get("senha") ?? ""),
+          aceitarTermos: formData.get("aceitarTermos") === "on",
         },
       });
 
@@ -117,6 +118,42 @@ function CadastroPage() {
             />
           </div>
 
+          <label className="flex items-start gap-3 text-sm leading-6 text-muted-foreground">
+            <input
+              name="aceitarTermos"
+              type="checkbox"
+              required
+              className="mt-1 h-4 w-4 shrink-0 rounded border-input accent-primary"
+            />
+
+            <span>
+              Li e aceito os{" "}
+              <Link
+                to="/termos"
+                target="_blank"
+                className="font-medium text-foreground underline"
+              >
+                Termos de Uso
+              </Link>
+              . Consulte também nossa{" "}
+              <Link
+                to="/privacidade"
+                target="_blank"
+                className="font-medium text-foreground underline"
+              >
+                Política de Privacidade
+              </Link>{" "}
+              e{" "}
+              <Link
+                to="/cookies"
+                target="_blank"
+                className="font-medium text-foreground underline"
+              >
+                Política de Cookies
+              </Link>
+              .
+            </span>
+          </label>
           {mensagem && (
             <p
               className={

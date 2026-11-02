@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Sessao" ADD COLUMN     "persistente" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "ultimaAtividadeEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

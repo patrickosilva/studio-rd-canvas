@@ -62,6 +62,11 @@ export type Servico = Prisma.ServicoModel
  */
 export type Profissional = Prisma.ProfissionalModel
 /**
+ * Model ContaOAuth
+ * 
+ */
+export type ContaOAuth = Prisma.ContaOAuthModel
+/**
  * Model Sessao
  * 
  */
@@ -106,3 +111,13 @@ export type Notificacao = Prisma.NotificacaoModel
  * 
  */
 export type TokenRedefinicaoSenha = Prisma.TokenRedefinicaoSenhaModel
+/**
+ * Model EventoSeguranca
+ * 
+ */
+export type EventoSeguranca = Prisma.EventoSegurancaModel
+/**
+ * Model EventoWebhookResend
+ * 
+ */
+export type EventoWebhookResend = Prisma.EventoWebhookResendModel
