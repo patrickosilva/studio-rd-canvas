@@ -263,11 +263,11 @@ export type UsuarioOrderByWithRelationInput = {
 export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
-  telefone?: string
   AND?: Prisma.UsuarioWhereInput | Prisma.UsuarioWhereInput[]
   OR?: Prisma.UsuarioWhereInput[]
   NOT?: Prisma.UsuarioWhereInput | Prisma.UsuarioWhereInput[]
   nome?: Prisma.StringFilter<"Usuario"> | string
+  telefone?: Prisma.StringNullableFilter<"Usuario"> | string | null
   senhaHash?: Prisma.StringNullableFilter<"Usuario"> | string | null
   papel?: Prisma.EnumPapelUsuarioFilter<"Usuario"> | $Enums.PapelUsuario
   ativo?: Prisma.BoolFilter<"Usuario"> | boolean
@@ -282,7 +282,7 @@ export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
   notificacoes?: Prisma.NotificacaoListRelationFilter
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaListRelationFilter
   contasOAuth?: Prisma.ContaOAuthListRelationFilter
-}, "id" | "email" | "telefone">
+}, "id" | "email">
 
 export type UsuarioOrderByWithAggregationInput = {
   id?: Prisma.SortOrder

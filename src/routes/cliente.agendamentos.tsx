@@ -816,7 +816,7 @@ function AgendamentosPage() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-border bg-surface p-6">
+        <section className="self-start rounded-2xl border border-border bg-surface p-6">
           <div className="mb-6 flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-gold-soft">
               <Clock className="h-5 w-5 text-gold" />
@@ -850,11 +850,11 @@ function AgendamentosPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="max-h-[34rem] space-y-2 overflow-y-auto pr-1">
               {agendamentos.map((agendamento) => (
                 <article
                   key={agendamento.id}
-                  className="rounded-xl border border-border bg-background/40 p-4"
+                  className="rounded-xl border border-border bg-background/40 p-3"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -903,7 +903,7 @@ function AgendamentosPage() {
                       type="button"
                       disabled={cancelandoId === agendamento.id}
                       onClick={() => abrirModalCancelamento(agendamento.id)}
-                      className="mt-4 inline-flex h-9 items-center rounded-full border border-destructive/40 px-4 text-sm text-destructive transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="mt-3 inline-flex h-8 items-center rounded-full border border-destructive/40 px-3 text-xs text-destructive transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {cancelandoId === agendamento.id
                         ? "Cancelando..."

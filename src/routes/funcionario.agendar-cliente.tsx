@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  MessageCircle,
   RefreshCw,
   Scissors,
   UserRound,
@@ -124,6 +125,79 @@ function formatarContatoCliente(cliente: Cliente): string {
   return cliente.email;
 }
 
+function normalizarTelefoneWhatsApp(
+  telefone: string | null,
+): string | null {
+  if (!telefone) {
+    return null;
+  }
+
+  const numeros = telefone.replace(/\D/g, "");
+
+  if (
+    numeros.startsWith("55") &&
+    (numeros.length === 12 || numeros.length === 13)
+  ) {
+    return numeros;
+  }
+
+  if (numeros.length === 10 || numeros.length === 11) {
+    return `55${numeros}`;
+  }
+
+  return null;
+}
+
+function criarUrlWhatsAppAgendamentoManual({
+  telefone,
+  clienteNome,
+  inicio,
+  servicoNome,
+  profissionalNome,
+}: {
+  telefone: string | null;
+  clienteNome: string;
+  inicio: string | Date;
+  servicoNome: string;
+  profissionalNome: string;
+}): string | null {
+  const numero = normalizarTelefoneWhatsApp(telefone);
+
+  if (!numero) {
+    return null;
+  }
+
+  const primeiroNome =
+    clienteNome.trim().split(/\s+/)[0] || "cliente";
+
+  const data = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(inicio));
+
+  const horario = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(inicio));
+
+  const mensagem = [
+    `Olá, ${primeiroNome}! 👋`,
+    "",
+    `Seu horário no Studio RD Black está confirmado para ${data} às ${horario}.`,
+    `Serviço: ${servicoNome}.`,
+    `Profissional: ${profissionalNome}.`,
+    "",
+    "Te esperamos! ✂️",
+  ].join("\n");
+
+  return `https://wa.me/${numero}?text=${encodeURIComponent(
+    mensagem,
+  )}`;
+}
 function formatarDataInput(data: Date): string {
   const ano = data.getFullYear();
   const mes = String(data.getMonth() + 1).padStart(2, "0");
@@ -457,6 +531,8 @@ function FuncionarioAgendarClientePage() {
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
+  const [whatsappUltimoAgendamento, setWhatsappUltimoAgendamento] =
+    useState<string | null>(null);
 
   async function buscarDados() {
     setCarregando(true);
@@ -699,6 +775,7 @@ function FuncionarioAgendarClientePage() {
 
     setMensagem("");
     setErro("");
+    setWhatsappUltimoAgendamento(null);
 
     if (
       !clienteSelecionadoId ||
@@ -752,6 +829,16 @@ function FuncionarioAgendarClientePage() {
 
       setMensagem(resultado.mensagem);
 
+      setWhatsappUltimoAgendamento(
+        criarUrlWhatsAppAgendamentoManual({
+          telefone: resultado.agendamento.cliente.telefone,
+          clienteNome: resultado.agendamento.cliente.nome,
+          inicio: resultado.agendamento.inicio,
+          servicoNome: resultado.agendamento.servico.nome,
+          profissionalNome:
+            resultado.agendamento.profissional.nome,
+        }),
+      );
       setClienteBusca("");
       setClienteSelecionadoId("");
       setServicoId("");
@@ -814,8 +901,28 @@ function FuncionarioAgendarClientePage() {
         )}
 
         {mensagem && (
-          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600">
-            {mensagem}
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-600">
+            <p>{mensagem}</p>
+
+            {whatsappUltimoAgendamento ? (
+              <Button
+                asChild
+                className="mt-4 h-14 w-full rounded-xl bg-emerald-600 text-base font-semibold text-white shadow-md transition hover:bg-emerald-500 sm:w-auto sm:px-6"
+              >
+                <a
+                  href={whatsappUltimoAgendamento}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="mr-3 h-6 w-6" />
+                  Enviar confirmação no WhatsApp
+                </a>
+              </Button>
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground">
+                O cliente não possui um telefone válido para abrir o WhatsApp.
+              </p>
+            )}
           </div>
         )}
 

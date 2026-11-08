@@ -183,37 +183,23 @@ const email = data.email.trim().toLowerCase();
     const telefoneNormalizado =
       data.telefone?.replace(/\D/g, "") || null;
 
+
     const usuarioExistente = await prisma.usuario.findFirst({
       where: {
-        OR: [
-          {
-            email: {
-              equals: email,
-              mode: "insensitive",
-            },
-          },
-          ...(telefoneNormalizado
-            ? [
-              {
-                telefone: telefoneNormalizado,
-              },
-            ]
-            : []),
-        ],
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
       },
       select: {
-        email: true,
-        telefone: true,
+        id: true,
       },
     });
 
     if (usuarioExistente) {
       return {
         sucesso: false,
-        mensagem:
-          usuarioExistente.email === email
-            ? "Já existe uma conta com esse e-mail."
-            : "Já existe uma conta com esse telefone.",
+        mensagem: "Já existe uma conta com esse e-mail.",
       };
     }
 

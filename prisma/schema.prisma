@@ -41,7 +41,7 @@ model Usuario {
   id        String       @id @default(cuid())
   nome      String
   email     String       @unique
-  telefone  String?      @unique
+  telefone  String?
   senhaHash String?
   papel     PapelUsuario @default(CLIENTE)
 
@@ -58,6 +58,8 @@ model Usuario {
   notificacoes           Notificacao[]
   tokensRedefinicaoSenha TokenRedefinicaoSenha[]
   contasOAuth             ContaOAuth[]
+
+  @@index([telefone])
 }
 
 model Servico {
@@ -178,7 +180,9 @@ model Agendamento {
   profissional Profissional @relation(fields: [profissionalId], references: [id], onDelete: Restrict)
   servico      Servico      @relation(fields: [servicoId], references: [id], onDelete: Restrict)
 
-  @@index([clienteId])
+  @@index([clienteId])
+
+  @@index([clienteId, inicio])
   @@index([profissionalId])
   @@index([servicoId])
   @@index([status])

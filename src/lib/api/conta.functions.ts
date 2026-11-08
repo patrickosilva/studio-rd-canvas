@@ -157,29 +157,6 @@ export const atualizarMeuPerfil = createServerFn({
       };
     }
 
-    if (telefone) {
-      const telefoneEmUso =
-        await prisma.usuario.findFirst({
-          where: {
-            id: {
-              not: sessao.usuario.id,
-            },
-            telefone,
-          },
-          select: {
-            id: true,
-          },
-        });
-
-      if (telefoneEmUso) {
-        return {
-          sucesso: false,
-          mensagem:
-            "Esse telefone já está vinculado a outra conta.",
-        };
-      }
-    }
-
     const usuario =
       await prisma.usuario.update({
         where: {

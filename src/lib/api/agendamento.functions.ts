@@ -1562,6 +1562,60 @@ export const funcionarioCancelarAgendamento =
       };
     });
 
+const listarMeuHistoricoAtendimentosSchema = z.object({
+  offset: z.number().int().min(0).max(100_000).default(0),
+  limite: z.number().int().min(1).max(50).default(20),
+});
+
+export const listarMeuHistoricoAtendimentos = createServerFn({
+  method: "GET",
+})
+  .validator(listarMeuHistoricoAtendimentosSchema)
+  .handler(async ({ data }) => {
+    const usuario = await exigirCliente();
+
+    const where = {
+      clienteId: usuario.id,
+      status: "CONCLUIDO" as const,
+    };
+
+    const [registros, total] = await Promise.all([
+      prisma.agendamento.findMany({
+        where,
+        orderBy: [{ inicio: "desc" }, { id: "desc" }],
+        skip: data.offset,
+        take: data.limite + 1,
+        select: {
+          id: true,
+          inicio: true,
+          fim: true,
+          formaPagamento: true,
+          valorPagoCentavos: true,
+          pagoEm: true,
+          profissional: { select: { nome: true } },
+          servico: {
+            select: {
+              nome: true,
+              duracaoMinutos: true,
+              precoCentavos: true,
+            },
+          },
+        },
+      }),
+      prisma.agendamento.count({ where }),
+    ]);
+
+    const temMais = registros.length > data.limite;
+    const itens = temMais ? registros.slice(0, data.limite) : registros;
+
+    return {
+      itens,
+      total,
+      proximoOffset: temMais ? data.offset + data.limite : null,
+    };
+  });
+
+
 export const listarMeusAgendamentos = createServerFn({
   method: "GET",
 }).handler(async () => {

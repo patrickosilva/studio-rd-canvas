@@ -157,7 +157,7 @@ export function DashboardShell({
         </div>
       )}
 
-      <aside className="hidden w-64 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+      <aside className="hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:sticky lg:top-0 lg:flex">
         <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
           <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-gold">
             <Scissors className="h-4 w-4 text-primary-foreground" />
@@ -172,7 +172,7 @@ export function DashboardShell({
           </span>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-6">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-6">
           {items.map((item) => {
             const active = isActive(item.to);
             const Icon = item.icon;

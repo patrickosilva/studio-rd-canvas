@@ -17,6 +17,7 @@ import {
   Clock,
   Loader2,
   Mail,
+  MessageCircle,
   Phone,
   RefreshCw,
   Scissors,
@@ -177,6 +178,93 @@ const funcionamentoPorDia: Record<
   },
 };
 
+function normalizarTelefoneWhatsAppRemarcacao(
+  telefone: string | null,
+): string | null {
+  if (!telefone) {
+    return null;
+  }
+
+  const numeros = telefone.replace(/\D/g, "");
+
+  if (
+    numeros.startsWith("55") &&
+    (numeros.length === 12 || numeros.length === 13)
+  ) {
+    return numeros;
+  }
+
+  if (numeros.length === 10 || numeros.length === 11) {
+    return `55${numeros}`;
+  }
+
+  return null;
+}
+
+function criarUrlWhatsAppRemarcacao({
+  anterior,
+  atual,
+}: {
+  anterior: Solicitacao;
+  atual: {
+    inicio: string | Date;
+    fim: string | Date;
+    cliente: {
+      nome: string;
+      telefone: string | null;
+    };
+    servico: {
+      id: string;
+      nome: string;
+    };
+    profissional: {
+      nome: string;
+    };
+  };
+}): string | null {
+  const numero = normalizarTelefoneWhatsAppRemarcacao(
+    atual.cliente.telefone,
+  );
+
+  if (!numero) {
+    return null;
+  }
+
+  const primeiroNome =
+    atual.cliente.nome.trim().split(/\s+/)[0] || "cliente";
+
+  const dataAnterior = formatarDataCompleta(anterior.inicio);
+  const horaAnterior = formatarHora(anterior.inicio);
+  const dataNova = formatarDataCompleta(atual.inicio);
+  const horaNova = formatarHora(atual.inicio);
+
+  const servicoMudou =
+    anterior.servico.id !== atual.servico.id;
+
+  const linhasServico = servicoMudou
+    ? [
+        `Serviço anterior: ${anterior.servico.nome}.`,
+        `Novo serviço: ${atual.servico.nome}.`,
+      ]
+    : [`Serviço: ${atual.servico.nome}.`];
+
+  const mensagem = [
+    `Olá, ${primeiroNome}! 👋`,
+    "",
+    "Seu agendamento no Studio RD Black foi remarcado.",
+    "",
+    `Horário anterior: ${dataAnterior} às ${horaAnterior}.`,
+    `Novo horário: ${dataNova} às ${horaNova}.`,
+    ...linhasServico,
+    `Profissional: ${atual.profissional.nome}.`,
+    "",
+    "Te esperamos! ✂️",
+  ].join("\n");
+
+  return `https://wa.me/${numero}?text=${encodeURIComponent(
+    mensagem,
+  )}`;
+}
 function SolicitacoesPage() {
   const carregarSolicitacoes = useServerFn(
     funcionarioListarSolicitacoes,
@@ -213,6 +301,10 @@ function SolicitacoesPage() {
   const [processandoId, setProcessandoId] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
+  const [whatsappRemarcacao, setWhatsappRemarcacao] = useState<{
+    url: string;
+    clienteNome: string;
+  } | null>(null);
 
   const [dataSelecionada, setDataSelecionada] = useState<Date>(
     () => obterInicioDoDia(new Date()),
@@ -548,6 +640,7 @@ function SolicitacoesPage() {
     limparFocoEFecharDetalhes();
     setMensagem("");
     setErro("");
+    setWhatsappRemarcacao(null);
     setAgendamentoAbertoId(null);
     setAgendamentoRemarcacao(agendamento);
 
@@ -785,7 +878,22 @@ function SolicitacoesPage() {
       }
 
       setMensagem(resultado.mensagem);
-      fecharModalRemarcacao();
+
+      const urlWhatsAppRemarcacao =
+        criarUrlWhatsAppRemarcacao({
+          anterior: agendamentoRemarcacao,
+          atual: resultado.agendamento,
+        });
+
+      setWhatsappRemarcacao(
+        urlWhatsAppRemarcacao
+          ? {
+              url: urlWhatsAppRemarcacao,
+              clienteNome:
+                resultado.agendamento.cliente.nome,
+            }
+          : null,
+      );      fecharModalRemarcacao();
 
       await carregarAgendamentos();
     } catch (error) {
@@ -943,6 +1051,33 @@ function SolicitacoesPage() {
           </div>
         )}
 
+        {whatsappRemarcacao && (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+            <p className="text-sm font-medium text-emerald-500">
+              Remarcação concluída.
+            </p>
+
+            <p className="mt-1 text-xs text-muted-foreground">
+              Avise {whatsappRemarcacao.clienteNome} sobre o novo horário
+              e, se houver mudança, sobre o novo serviço.
+            </p>
+
+            <Button
+              asChild
+              className="mt-4 h-14 w-full rounded-xl bg-emerald-600 text-base font-semibold text-white shadow-md transition hover:bg-emerald-500 sm:w-auto sm:px-6"
+            >
+              <a
+                href={whatsappRemarcacao.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Enviar remarcação de ${whatsappRemarcacao.clienteNome} pelo WhatsApp`}
+              >
+                <MessageCircle className="mr-3 h-6 w-6" />
+                Enviar remarcação no WhatsApp
+              </a>
+            </Button>
+          </div>
+        )}
         <SeletorDeDias
           dias={diasDaSemana}
           dataSelecionada={dataSelecionada}
@@ -1986,6 +2121,10 @@ function ConteudoDetalhes({
   onAbrirCancelamento: () => void;
 }) {
   const processando = processandoId === agendamento.id;
+  const whatsappUrl =
+    agendamento.status === "CONFIRMADO"
+      ? criarUrlWhatsAppConfirmacao(agendamento)
+      : null;
   const podeRemarcar =
     agendamento.status === "SOLICITADO" ||
     agendamento.status === "CONFIRMADO";
@@ -2030,6 +2169,24 @@ function ConteudoDetalhes({
           value={formatarTelefone(agendamento.cliente.telefone)}
         />
       </div>
+      {whatsappUrl && (
+        <Button
+          asChild
+          type="button"
+          variant="outline"
+          className="h-14 w-full rounded-xl border-emerald-500/50 bg-emerald-500/10 text-base font-semibold text-emerald-500 shadow-sm transition hover:bg-emerald-500/20 hover:text-emerald-400"
+        >
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Enviar confirmação de ${agendamento.cliente.nome} pelo WhatsApp`}
+          >
+            <MessageCircle className="mr-3 h-6 w-6" />
+            Enviar confirmação no WhatsApp
+          </a>
+        </Button>
+      )}
 
       {agendamento.observacaoCliente && (
         <div className="rounded-2xl border border-border bg-background/40 p-4">
@@ -2341,6 +2498,66 @@ function chaveDia(data: Date): string {
   return `${data.getFullYear()}-${data.getMonth()}-${data.getDate()}`;
 }
 
+function normalizarTelefoneWhatsApp(
+  telefone: string | null,
+): string | null {
+  if (!telefone) {
+    return null;
+  }
+
+  const numeros = telefone.replace(/\D/g, "");
+
+  if (
+    numeros.startsWith("55") &&
+    (numeros.length === 12 || numeros.length === 13)
+  ) {
+    return numeros;
+  }
+
+  if (numeros.length === 10 || numeros.length === 11) {
+    return `55${numeros}`;
+  }
+
+  return null;
+}
+
+function criarUrlWhatsAppConfirmacao(
+  agendamento: Solicitacao,
+): string | null {
+  const telefone = normalizarTelefoneWhatsApp(
+    agendamento.cliente.telefone,
+  );
+
+  if (!telefone) {
+    return null;
+  }
+
+  const primeiroNome =
+    agendamento.cliente.nome.trim().split(/\s+/)[0] || "cliente";
+
+  const data = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: TIMEZONE_PADRAO,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(agendamento.inicio));
+
+  const horario = formatarHora(agendamento.inicio);
+
+  const mensagem = [
+    `Olá, ${primeiroNome}! 👋`,
+    "",
+    `Seu horário no Studio RD Black está confirmado para ${data} às ${horario}.`,
+    `Serviço: ${agendamento.servico.nome}.`,
+    `Profissional: ${agendamento.profissional.nome}.`,
+    "",
+    "Te esperamos! ✂️",
+  ].join("\n");
+
+  return `https://wa.me/${telefone}?text=${encodeURIComponent(
+    mensagem,
+  )}`;
+}
 function formatarTelefone(telefone: string | null): string {
   if (!telefone) {
     return "Não informado";
