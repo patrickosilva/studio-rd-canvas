@@ -410,7 +410,7 @@ export function MinhaContaPage() {
           return;
         }
 
-        setErroSeguranca(resultado.mensagem);
+        setErroSeguranca("Não foi possível encerrar as outras sessões.");
         return;
       }
 

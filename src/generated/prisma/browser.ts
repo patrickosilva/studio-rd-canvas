@@ -78,6 +78,21 @@ export type UsoAssinatura = Prisma.UsoAssinaturaModel
  */
 export type PagamentoAssinatura = Prisma.PagamentoAssinaturaModel
 /**
+ * Model ContaRecebedoraPagamento
+ * 
+ */
+export type ContaRecebedoraPagamento = Prisma.ContaRecebedoraPagamentoModel
+/**
+ * Model IntegracaoExterna
+ * 
+ */
+export type IntegracaoExterna = Prisma.IntegracaoExternaModel
+/**
+ * Model EventoWebhookPagamento
+ * 
+ */
+export type EventoWebhookPagamento = Prisma.EventoWebhookPagamentoModel
+/**
  * Model Notificacao
  * 
  */
@@ -97,3 +112,18 @@ export type EventoSeguranca = Prisma.EventoSegurancaModel
  * 
  */
 export type EventoWebhookResend = Prisma.EventoWebhookResendModel
+/**
+ * Model Cupom
+ * 
+ */
+export type Cupom = Prisma.CupomModel
+/**
+ * Model CupomServico
+ * 
+ */
+export type CupomServico = Prisma.CupomServicoModel
+/**
+ * Model UsoCupom
+ * 
+ */
+export type UsoCupom = Prisma.UsoCupomModel

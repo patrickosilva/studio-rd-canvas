@@ -49,29 +49,31 @@ model Usuario {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  termosVersaoAceita String?
-  termosAceitosEm DateTime?
+  termosVersaoAceita     String?
+  termosAceitosEm        DateTime?
   sessoes                Sessao[]
   profissional           Profissional?
   assinaturas            AssinaturaCliente[]     @relation("AssinaturasCliente")
   agendamentos           Agendamento[]           @relation("AgendamentosCliente")
   notificacoes           Notificacao[]
   tokensRedefinicaoSenha TokenRedefinicaoSenha[]
-  contasOAuth             ContaOAuth[]
+  contasOAuth            ContaOAuth[]
+  usosCupons             UsoCupom[]
 
   @@index([telefone])
 }
 
 model Servico {
-  id             String        @id @default(cuid())
-  nome           String        @unique
+  id             String         @id @default(cuid())
+  nome           String         @unique
   descricao      String?
   duracaoMinutos Int
   precoCentavos  Int
-  ativo          Boolean       @default(true)
-  criadoEm       DateTime      @default(now())
-  atualizadoEm   DateTime      @updatedAt
+  ativo          Boolean        @default(true)
+  criadoEm       DateTime       @default(now())
+  atualizadoEm   DateTime       @updatedAt
   agendamentos   Agendamento[]
+  cupons         CupomServico[]
 
   @@index([ativo])
 }
@@ -100,13 +102,13 @@ enum ProvedorOAuth {
 model ContaOAuth {
   id String @id @default(cuid())
 
-  usuarioId String
-  provedor ProvedorOAuth
+  usuarioId      String
+  provedor       ProvedorOAuth
   providerUserId String
   emailNoVinculo String?
-  ultimoLoginEm DateTime?
+  ultimoLoginEm  DateTime?
 
-  criadoEm DateTime @default(now())
+  criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
@@ -115,15 +117,16 @@ model ContaOAuth {
   @@unique([usuarioId, provedor])
   @@index([usuarioId])
 }
+
 model Sessao {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
-  usuarioId String
-  expiraEm  DateTime
-  persistente Boolean @default(false)
+  id                String   @id @default(cuid())
+  tokenHash         String   @unique
+  usuarioId         String
+  expiraEm          DateTime
+  persistente       Boolean  @default(false)
   ultimaAtividadeEm DateTime @default(now())
-  userAgent String?
-  criadoEm DateTime @default(now())
+  userAgent         String?
+  criadoEm          DateTime @default(now())
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
@@ -141,11 +144,41 @@ enum FormaPagamento {
   OUTRO
 }
 
+enum ProvedorIntegracao {
+  INTER
+  META
+}
+
+enum StatusIntegracao {
+  DESCONECTADA
+  CONFIGURANDO
+  CONECTADA
+  ERRO
+}
+
+enum ProvedorPagamento {
+  INTER
+  MANUAL
+  MERCADO_PAGO
+}
+
+enum StatusConexaoPagamento {
+  DESCONECTADA
+  PENDENTE
+  CONECTADA
+  ERRO
+}
+
 enum StatusAssinatura {
   ATIVA
   PAUSADA
   CANCELADA
   EXPIRADA
+}
+
+enum TipoDescontoCupom {
+  PERCENTUAL
+  VALOR_FIXO
 }
 
 model Agendamento {
@@ -179,9 +212,14 @@ model Agendamento {
   cliente      Usuario      @relation("AgendamentosCliente", fields: [clienteId], references: [id], onDelete: Cascade)
   profissional Profissional @relation(fields: [profissionalId], references: [id], onDelete: Restrict)
   servico      Servico      @relation(fields: [servicoId], references: [id], onDelete: Restrict)
+  usoCupom     UsoCupom?
 
-  @@index([clienteId])
+  precoOriginalCentavos Int?
+  descontoCupomCentavos Int?
+  valorFinalCentavos    Int?
+  cupomCodigo           String?
 
+  @@index([clienteId])
   @@index([clienteId, inicio])
   @@index([profissionalId])
   @@index([servicoId])
@@ -190,6 +228,7 @@ model Agendamento {
   @@index([inicio])
   @@index([profissionalId, inicio])
   @@index([status, reminderSentAt, inicio])
+  @@index([cupomCodigo])
 }
 
 model BloqueioAgenda {
@@ -223,6 +262,9 @@ model PlanoAssinatura {
   duracaoDias    Int     @default(30)
   ativo          Boolean @default(true)
 
+  // ID equivalente no gateway, caso um plano remoto seja criado no futuro.
+  providerPlanId String?
+
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
@@ -245,6 +287,17 @@ model AssinaturaCliente {
 
   saldoCortes           Int
   renovaAutomaticamente Boolean @default(false)
+
+  // A assinatura continua sendo dominio do Studio RD.
+  // Estes campos apenas ligam o registro ao provedor financeiro.
+  provedorPagamento      ProvedorPagamento @default(MANUAL)
+  providerCustomerId     String?
+  providerSubscriptionId String?           @unique
+  proximaCobrancaEm      DateTime?
+  cancelarAoFimDoCiclo   Boolean           @default(false)
+
+  // Basis points: 1000 = 10%. Fica zerado enquanto a comissao estiver desligada.
+  percentualComissaoBps Int @default(0)
 
   observacao String?
 
@@ -288,6 +341,14 @@ model PagamentoAssinatura {
   pagoEm         DateTime       @default(now())
   observacao     String?
 
+  provedorPagamento ProvedorPagamento @default(MANUAL)
+  providerPaymentId String?           @unique
+  providerStatus    String?
+
+  taxaGatewayCentavos           Int?
+  comissaoPlataformaCentavos    Int  @default(0)
+  valorLiquidoBarbeariaCentavos Int?
+
   criadoEm DateTime @default(now())
 
   assinatura AssinaturaCliente @relation(fields: [assinaturaId], references: [id], onDelete: Cascade)
@@ -295,6 +356,80 @@ model PagamentoAssinatura {
   @@index([assinaturaId])
   @@index([formaPagamento])
   @@index([pagoEm])
+}
+
+model ContaRecebedoraPagamento {
+  id String @id @default(cuid())
+
+  // A aplicacao atual possui uma unica barbearia.
+  // A chave permite evoluir depois para multiplas unidades sem acoplar o gateway.
+  chave String @unique @default("STUDIO_RD")
+
+  provedor ProvedorPagamento      @default(MERCADO_PAGO)
+  status   StatusConexaoPagamento @default(DESCONECTADA)
+
+  // Identificadores recebidos do Mercado Pago/OAuth.
+  providerUserId    String? @unique
+  providerAccountId String?
+
+  // Nunca salvar tokens OAuth em texto puro.
+  accessTokenCriptografado  String?   @db.Text
+  refreshTokenCriptografado String?   @db.Text
+  tokenExpiraEm             DateTime?
+
+  conectadoEm    DateTime?
+  desconectadoEm DateTime?
+  ultimoErro     String?   @db.Text
+
+  // Comissao preparada, mas DESLIGADA por padrao.
+  comissaoAtiva         Boolean @default(false)
+  percentualComissaoBps Int     @default(0)
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([provedor, status])
+}
+
+model IntegracaoExterna {
+  id       String             @id @default(cuid())
+  provedor ProvedorIntegracao @unique
+  status   StatusIntegracao   @default(DESCONECTADA)
+
+  nomeConta            String?
+  identificadorExterno String?
+  configuracaoPublica  Json?
+  segredoCriptografado String? @db.Text
+
+  conectadoEm  DateTime?
+  verificadoEm DateTime?
+  ultimoErro   String?   @db.Text
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([status])
+}
+
+model EventoWebhookPagamento {
+  id String @id @default(cuid())
+
+  provedor           ProvedorPagamento
+  providerEventId    String
+  tipo               String
+  providerResourceId String?
+
+  // Hash para auditoria sem precisar duplicar payload sensivel.
+  payloadHash String?
+
+  status       String    @default("RECEBIDO")
+  recebidoEm   DateTime  @default(now())
+  processadoEm DateTime?
+  erro         String?   @db.Text
+
+  @@unique([provedor, providerEventId])
+  @@index([provedor, tipo, recebidoEm])
+  @@index([status, recebidoEm])
 }
 
 model Notificacao {
@@ -330,15 +465,15 @@ model TokenRedefinicaoSenha {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuario                 Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  resendEmailId           String?   @unique
+  resendMessageId         String?
+  emailStatus             String?
+  emailStatusAtualizadoEm DateTime?
 
   @@index([usuarioId])
   @@index([expiraEm])
   @@index([usado])
-  resendEmailId String? @unique
-  resendMessageId String?
-  emailStatus String?
-  emailStatusAtualizadoEm DateTime?
 }
 
 model EventoSeguranca {
@@ -359,8 +494,8 @@ model EventoSeguranca {
 model EventoWebhookResend {
   id String @id @default(cuid())
 
-  eventoId String @unique
-  tipo String
+  eventoId      String  @unique
+  tipo          String
   resendEmailId String?
 
   recebidoEm DateTime @default(now())
@@ -368,4 +503,91 @@ model EventoWebhookResend {
   @@index([resendEmailId])
   @@index([tipo, recebidoEm])
   @@index([recebidoEm])
+}
+
+model Cupom {
+  id String @id @default(cuid())
+
+  codigo    String  @unique
+  descricao String?
+  campanha  String?
+
+  tipo                   TipoDescontoCupom
+  percentualDesconto     Int?
+  valorDescontoCentavos  Int?
+  limiteDescontoCentavos Int?
+  valorMinimoCentavos    Int?
+
+  inicioEm DateTime?
+  fimEm    DateTime?
+
+  limiteUsos       Int?
+  limitePorCliente Int?
+
+  publico                PublicoCupom @default(TODOS)
+  quantidadeAtendimentos Int?
+  diasSemAtendimento     Int?
+
+  aplicaTodosServicos     Boolean @default(true)
+  visivelParaClientes     Boolean @default(true)
+  destaque                Boolean @default(false)
+  combinavelComAssinatura Boolean @default(false)
+  ativo                   Boolean @default(true)
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  servicos CupomServico[]
+  usos     UsoCupom[]
+
+  @@index([ativo])
+  @@index([inicioEm])
+  @@index([fimEm])
+  @@index([ativo, fimEm])
+  @@index([visivelParaClientes, ativo])
+  @@index([publico])
+}
+
+model CupomServico {
+  cupomId   String
+  servicoId String
+
+  cupom   Cupom   @relation(fields: [cupomId], references: [id], onDelete: Cascade)
+  servico Servico @relation(fields: [servicoId], references: [id], onDelete: Restrict)
+
+  @@id([cupomId, servicoId])
+  @@index([servicoId])
+}
+
+enum PublicoCupom {
+  TODOS
+  PRIMEIRO_ATENDIMENTO
+  ATE_X_ATENDIMENTOS
+  MINIMO_X_ATENDIMENTOS
+  SEM_ATENDIMENTO_HA_X_DIAS
+  ASSINANTE_ATIVO
+}
+
+model UsoCupom {
+  id String @id @default(cuid())
+
+  cupomId       String
+  clienteId     String
+  agendamentoId String? @unique
+
+  codigoAplicado   String
+  descontoCentavos Int
+  criadoEm         DateTime @default(now())
+
+  cupom       Cupom        @relation(fields: [cupomId], references: [id], onDelete: Restrict)
+  cliente     Usuario      @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  agendamento Agendamento? @relation(fields: [agendamentoId], references: [id], onDelete: SetNull)
+
+  precoOriginalCentavos Int?
+  valorFinalCentavos    Int?
+
+  @@index([cupomId])
+  @@index([clienteId])
+  @@index([cupomId, clienteId])
+  @@index([criadoEm])
 }

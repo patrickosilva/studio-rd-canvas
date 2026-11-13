@@ -12,7 +12,9 @@ import {
   DollarSign,
   History,
   LayoutDashboard,
+  PlugZap,
   Settings,
+  TicketPercent,
   UsersRound,
   UserRound,
 } from "lucide-react";
@@ -103,6 +105,11 @@ const items = [
     icon: Crown,
   },
   {
+    label: "Comercial",
+    to: "/admin/comercial",
+    icon: TicketPercent,
+  },
+  {
     label: "Relatórios",
     to: "/admin/relatorios",
     icon: BarChart3,
@@ -111,6 +118,11 @@ const items = [
     label: "Usuários",
     to: "/admin/usuarios",
     icon: UsersRound,
+  },
+  {
+    label: "Conexoes",
+    to: "/admin/conexoes",
+    icon: PlugZap,
   },
   {
     label: "Minha conta",

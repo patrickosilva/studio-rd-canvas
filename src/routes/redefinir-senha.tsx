@@ -126,7 +126,7 @@ function RedefinirSenhaPage() {
               className="mt-6 w-full"
             >
               <Link to="/login"
-            search={{}}>
+            search={{ redirect: undefined }}>
                 Ir para o login
               </Link>
             </Button>
@@ -198,7 +198,7 @@ function RedefinirSenhaPage() {
         <div className="mt-6 text-center text-sm">
           <Link
             to="/login"
-            search={{}}
+            search={{ redirect: undefined }}
             className="text-muted-foreground hover:text-foreground"
           >
             Voltar para o login

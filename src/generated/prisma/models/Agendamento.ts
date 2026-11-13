@@ -28,10 +28,16 @@ export type AggregateAgendamento = {
 
 export type AgendamentoAvgAggregateOutputType = {
   valorPagoCentavos: number | null
+  precoOriginalCentavos: number | null
+  descontoCupomCentavos: number | null
+  valorFinalCentavos: number | null
 }
 
 export type AgendamentoSumAggregateOutputType = {
   valorPagoCentavos: number | null
+  precoOriginalCentavos: number | null
+  descontoCupomCentavos: number | null
+  valorFinalCentavos: number | null
 }
 
 export type AgendamentoMinAggregateOutputType = {
@@ -54,6 +60,10 @@ export type AgendamentoMinAggregateOutputType = {
   reminderSentAt: Date | null
   criadoEm: Date | null
   atualizadoEm: Date | null
+  precoOriginalCentavos: number | null
+  descontoCupomCentavos: number | null
+  valorFinalCentavos: number | null
+  cupomCodigo: string | null
 }
 
 export type AgendamentoMaxAggregateOutputType = {
@@ -76,6 +86,10 @@ export type AgendamentoMaxAggregateOutputType = {
   reminderSentAt: Date | null
   criadoEm: Date | null
   atualizadoEm: Date | null
+  precoOriginalCentavos: number | null
+  descontoCupomCentavos: number | null
+  valorFinalCentavos: number | null
+  cupomCodigo: string | null
 }
 
 export type AgendamentoCountAggregateOutputType = {
@@ -98,16 +112,26 @@ export type AgendamentoCountAggregateOutputType = {
   reminderSentAt: number
   criadoEm: number
   atualizadoEm: number
+  precoOriginalCentavos: number
+  descontoCupomCentavos: number
+  valorFinalCentavos: number
+  cupomCodigo: number
   _all: number
 }
 
 
 export type AgendamentoAvgAggregateInputType = {
   valorPagoCentavos?: true
+  precoOriginalCentavos?: true
+  descontoCupomCentavos?: true
+  valorFinalCentavos?: true
 }
 
 export type AgendamentoSumAggregateInputType = {
   valorPagoCentavos?: true
+  precoOriginalCentavos?: true
+  descontoCupomCentavos?: true
+  valorFinalCentavos?: true
 }
 
 export type AgendamentoMinAggregateInputType = {
@@ -130,6 +154,10 @@ export type AgendamentoMinAggregateInputType = {
   reminderSentAt?: true
   criadoEm?: true
   atualizadoEm?: true
+  precoOriginalCentavos?: true
+  descontoCupomCentavos?: true
+  valorFinalCentavos?: true
+  cupomCodigo?: true
 }
 
 export type AgendamentoMaxAggregateInputType = {
@@ -152,6 +180,10 @@ export type AgendamentoMaxAggregateInputType = {
   reminderSentAt?: true
   criadoEm?: true
   atualizadoEm?: true
+  precoOriginalCentavos?: true
+  descontoCupomCentavos?: true
+  valorFinalCentavos?: true
+  cupomCodigo?: true
 }
 
 export type AgendamentoCountAggregateInputType = {
@@ -174,6 +206,10 @@ export type AgendamentoCountAggregateInputType = {
   reminderSentAt?: true
   criadoEm?: true
   atualizadoEm?: true
+  precoOriginalCentavos?: true
+  descontoCupomCentavos?: true
+  valorFinalCentavos?: true
+  cupomCodigo?: true
   _all?: true
 }
 
@@ -283,6 +319,10 @@ export type AgendamentoGroupByOutputType = {
   reminderSentAt: Date | null
   criadoEm: Date
   atualizadoEm: Date
+  precoOriginalCentavos: number | null
+  descontoCupomCentavos: number | null
+  valorFinalCentavos: number | null
+  cupomCodigo: string | null
   _count: AgendamentoCountAggregateOutputType | null
   _avg: AgendamentoAvgAggregateOutputType | null
   _sum: AgendamentoSumAggregateOutputType | null
@@ -328,10 +368,15 @@ export type AgendamentoWhereInput = {
   reminderSentAt?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   criadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
+  precoOriginalCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  descontoCupomCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  valorFinalCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  cupomCodigo?: Prisma.StringNullableFilter<"Agendamento"> | string | null
   usoAssinatura?: Prisma.XOR<Prisma.UsoAssinaturaNullableScalarRelationFilter, Prisma.UsoAssinaturaWhereInput> | null
   cliente?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
   profissional?: Prisma.XOR<Prisma.ProfissionalScalarRelationFilter, Prisma.ProfissionalWhereInput>
   servico?: Prisma.XOR<Prisma.ServicoScalarRelationFilter, Prisma.ServicoWhereInput>
+  usoCupom?: Prisma.XOR<Prisma.UsoCupomNullableScalarRelationFilter, Prisma.UsoCupomWhereInput> | null
 }
 
 export type AgendamentoOrderByWithRelationInput = {
@@ -354,10 +399,15 @@ export type AgendamentoOrderByWithRelationInput = {
   reminderSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  precoOriginalCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  descontoCupomCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  valorFinalCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  cupomCodigo?: Prisma.SortOrderInput | Prisma.SortOrder
   usoAssinatura?: Prisma.UsoAssinaturaOrderByWithRelationInput
   cliente?: Prisma.UsuarioOrderByWithRelationInput
   profissional?: Prisma.ProfissionalOrderByWithRelationInput
   servico?: Prisma.ServicoOrderByWithRelationInput
+  usoCupom?: Prisma.UsoCupomOrderByWithRelationInput
 }
 
 export type AgendamentoWhereUniqueInput = Prisma.AtLeast<{
@@ -383,10 +433,15 @@ export type AgendamentoWhereUniqueInput = Prisma.AtLeast<{
   reminderSentAt?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   criadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
+  precoOriginalCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  descontoCupomCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  valorFinalCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  cupomCodigo?: Prisma.StringNullableFilter<"Agendamento"> | string | null
   usoAssinatura?: Prisma.XOR<Prisma.UsoAssinaturaNullableScalarRelationFilter, Prisma.UsoAssinaturaWhereInput> | null
   cliente?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
   profissional?: Prisma.XOR<Prisma.ProfissionalScalarRelationFilter, Prisma.ProfissionalWhereInput>
   servico?: Prisma.XOR<Prisma.ServicoScalarRelationFilter, Prisma.ServicoWhereInput>
+  usoCupom?: Prisma.XOR<Prisma.UsoCupomNullableScalarRelationFilter, Prisma.UsoCupomWhereInput> | null
 }, "id">
 
 export type AgendamentoOrderByWithAggregationInput = {
@@ -409,6 +464,10 @@ export type AgendamentoOrderByWithAggregationInput = {
   reminderSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  precoOriginalCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  descontoCupomCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  valorFinalCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  cupomCodigo?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AgendamentoCountOrderByAggregateInput
   _avg?: Prisma.AgendamentoAvgOrderByAggregateInput
   _max?: Prisma.AgendamentoMaxOrderByAggregateInput
@@ -439,6 +498,10 @@ export type AgendamentoScalarWhereWithAggregatesInput = {
   reminderSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Agendamento"> | Date | string | null
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"Agendamento"> | Date | string
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"Agendamento"> | Date | string
+  precoOriginalCentavos?: Prisma.IntNullableWithAggregatesFilter<"Agendamento"> | number | null
+  descontoCupomCentavos?: Prisma.IntNullableWithAggregatesFilter<"Agendamento"> | number | null
+  valorFinalCentavos?: Prisma.IntNullableWithAggregatesFilter<"Agendamento"> | number | null
+  cupomCodigo?: Prisma.StringNullableWithAggregatesFilter<"Agendamento"> | string | null
 }
 
 export type AgendamentoCreateInput = {
@@ -458,10 +521,15 @@ export type AgendamentoCreateInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
   cliente: Prisma.UsuarioCreateNestedOneWithoutAgendamentosInput
   profissional: Prisma.ProfissionalCreateNestedOneWithoutAgendamentosInput
   servico: Prisma.ServicoCreateNestedOneWithoutAgendamentosInput
+  usoCupom?: Prisma.UsoCupomCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoUncheckedCreateInput = {
@@ -484,7 +552,12 @@ export type AgendamentoUncheckedCreateInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
+  usoCupom?: Prisma.UsoCupomUncheckedCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoUpdateInput = {
@@ -504,10 +577,15 @@ export type AgendamentoUpdateInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
   cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAgendamentosNestedInput
   profissional?: Prisma.ProfissionalUpdateOneRequiredWithoutAgendamentosNestedInput
   servico?: Prisma.ServicoUpdateOneRequiredWithoutAgendamentosNestedInput
+  usoCupom?: Prisma.UsoCupomUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoUncheckedUpdateInput = {
@@ -530,7 +608,12 @@ export type AgendamentoUncheckedUpdateInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
+  usoCupom?: Prisma.UsoCupomUncheckedUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoCreateManyInput = {
@@ -553,6 +636,10 @@ export type AgendamentoCreateManyInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
 }
 
 export type AgendamentoUpdateManyMutationInput = {
@@ -572,6 +659,10 @@ export type AgendamentoUpdateManyMutationInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AgendamentoUncheckedUpdateManyInput = {
@@ -594,6 +685,10 @@ export type AgendamentoUncheckedUpdateManyInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AgendamentoListRelationFilter = {
@@ -626,10 +721,17 @@ export type AgendamentoCountOrderByAggregateInput = {
   reminderSentAt?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  precoOriginalCentavos?: Prisma.SortOrder
+  descontoCupomCentavos?: Prisma.SortOrder
+  valorFinalCentavos?: Prisma.SortOrder
+  cupomCodigo?: Prisma.SortOrder
 }
 
 export type AgendamentoAvgOrderByAggregateInput = {
   valorPagoCentavos?: Prisma.SortOrder
+  precoOriginalCentavos?: Prisma.SortOrder
+  descontoCupomCentavos?: Prisma.SortOrder
+  valorFinalCentavos?: Prisma.SortOrder
 }
 
 export type AgendamentoMaxOrderByAggregateInput = {
@@ -652,6 +754,10 @@ export type AgendamentoMaxOrderByAggregateInput = {
   reminderSentAt?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  precoOriginalCentavos?: Prisma.SortOrder
+  descontoCupomCentavos?: Prisma.SortOrder
+  valorFinalCentavos?: Prisma.SortOrder
+  cupomCodigo?: Prisma.SortOrder
 }
 
 export type AgendamentoMinOrderByAggregateInput = {
@@ -674,15 +780,27 @@ export type AgendamentoMinOrderByAggregateInput = {
   reminderSentAt?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
+  precoOriginalCentavos?: Prisma.SortOrder
+  descontoCupomCentavos?: Prisma.SortOrder
+  valorFinalCentavos?: Prisma.SortOrder
+  cupomCodigo?: Prisma.SortOrder
 }
 
 export type AgendamentoSumOrderByAggregateInput = {
   valorPagoCentavos?: Prisma.SortOrder
+  precoOriginalCentavos?: Prisma.SortOrder
+  descontoCupomCentavos?: Prisma.SortOrder
+  valorFinalCentavos?: Prisma.SortOrder
 }
 
 export type AgendamentoScalarRelationFilter = {
   is?: Prisma.AgendamentoWhereInput
   isNot?: Prisma.AgendamentoWhereInput
+}
+
+export type AgendamentoNullableScalarRelationFilter = {
+  is?: Prisma.AgendamentoWhereInput | null
+  isNot?: Prisma.AgendamentoWhereInput | null
 }
 
 export type AgendamentoCreateNestedManyWithoutClienteInput = {
@@ -841,6 +959,22 @@ export type AgendamentoUpdateOneRequiredWithoutUsoAssinaturaNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AgendamentoUpdateToOneWithWhereWithoutUsoAssinaturaInput, Prisma.AgendamentoUpdateWithoutUsoAssinaturaInput>, Prisma.AgendamentoUncheckedUpdateWithoutUsoAssinaturaInput>
 }
 
+export type AgendamentoCreateNestedOneWithoutUsoCupomInput = {
+  create?: Prisma.XOR<Prisma.AgendamentoCreateWithoutUsoCupomInput, Prisma.AgendamentoUncheckedCreateWithoutUsoCupomInput>
+  connectOrCreate?: Prisma.AgendamentoCreateOrConnectWithoutUsoCupomInput
+  connect?: Prisma.AgendamentoWhereUniqueInput
+}
+
+export type AgendamentoUpdateOneWithoutUsoCupomNestedInput = {
+  create?: Prisma.XOR<Prisma.AgendamentoCreateWithoutUsoCupomInput, Prisma.AgendamentoUncheckedCreateWithoutUsoCupomInput>
+  connectOrCreate?: Prisma.AgendamentoCreateOrConnectWithoutUsoCupomInput
+  upsert?: Prisma.AgendamentoUpsertWithoutUsoCupomInput
+  disconnect?: Prisma.AgendamentoWhereInput | boolean
+  delete?: Prisma.AgendamentoWhereInput | boolean
+  connect?: Prisma.AgendamentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AgendamentoUpdateToOneWithWhereWithoutUsoCupomInput, Prisma.AgendamentoUpdateWithoutUsoCupomInput>, Prisma.AgendamentoUncheckedUpdateWithoutUsoCupomInput>
+}
+
 export type AgendamentoCreateWithoutClienteInput = {
   id?: string
   inicio: Date | string
@@ -858,9 +992,14 @@ export type AgendamentoCreateWithoutClienteInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
   profissional: Prisma.ProfissionalCreateNestedOneWithoutAgendamentosInput
   servico: Prisma.ServicoCreateNestedOneWithoutAgendamentosInput
+  usoCupom?: Prisma.UsoCupomCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoUncheckedCreateWithoutClienteInput = {
@@ -882,7 +1021,12 @@ export type AgendamentoUncheckedCreateWithoutClienteInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
+  usoCupom?: Prisma.UsoCupomUncheckedCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoCreateOrConnectWithoutClienteInput = {
@@ -934,6 +1078,10 @@ export type AgendamentoScalarWhereInput = {
   reminderSentAt?: Prisma.DateTimeNullableFilter<"Agendamento"> | Date | string | null
   criadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
+  precoOriginalCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  descontoCupomCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  valorFinalCentavos?: Prisma.IntNullableFilter<"Agendamento"> | number | null
+  cupomCodigo?: Prisma.StringNullableFilter<"Agendamento"> | string | null
 }
 
 export type AgendamentoCreateWithoutServicoInput = {
@@ -953,9 +1101,14 @@ export type AgendamentoCreateWithoutServicoInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
   cliente: Prisma.UsuarioCreateNestedOneWithoutAgendamentosInput
   profissional: Prisma.ProfissionalCreateNestedOneWithoutAgendamentosInput
+  usoCupom?: Prisma.UsoCupomCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoUncheckedCreateWithoutServicoInput = {
@@ -977,7 +1130,12 @@ export type AgendamentoUncheckedCreateWithoutServicoInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
+  usoCupom?: Prisma.UsoCupomUncheckedCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoCreateOrConnectWithoutServicoInput = {
@@ -1023,9 +1181,14 @@ export type AgendamentoCreateWithoutProfissionalInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
   cliente: Prisma.UsuarioCreateNestedOneWithoutAgendamentosInput
   servico: Prisma.ServicoCreateNestedOneWithoutAgendamentosInput
+  usoCupom?: Prisma.UsoCupomCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoUncheckedCreateWithoutProfissionalInput = {
@@ -1047,7 +1210,12 @@ export type AgendamentoUncheckedCreateWithoutProfissionalInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
+  usoCupom?: Prisma.UsoCupomUncheckedCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoCreateOrConnectWithoutProfissionalInput = {
@@ -1093,9 +1261,14 @@ export type AgendamentoCreateWithoutUsoAssinaturaInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
   cliente: Prisma.UsuarioCreateNestedOneWithoutAgendamentosInput
   profissional: Prisma.ProfissionalCreateNestedOneWithoutAgendamentosInput
   servico: Prisma.ServicoCreateNestedOneWithoutAgendamentosInput
+  usoCupom?: Prisma.UsoCupomCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoUncheckedCreateWithoutUsoAssinaturaInput = {
@@ -1118,6 +1291,11 @@ export type AgendamentoUncheckedCreateWithoutUsoAssinaturaInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
+  usoCupom?: Prisma.UsoCupomUncheckedCreateNestedOneWithoutAgendamentoInput
 }
 
 export type AgendamentoCreateOrConnectWithoutUsoAssinaturaInput = {
@@ -1153,9 +1331,14 @@ export type AgendamentoUpdateWithoutUsoAssinaturaInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAgendamentosNestedInput
   profissional?: Prisma.ProfissionalUpdateOneRequiredWithoutAgendamentosNestedInput
   servico?: Prisma.ServicoUpdateOneRequiredWithoutAgendamentosNestedInput
+  usoCupom?: Prisma.UsoCupomUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoUncheckedUpdateWithoutUsoAssinaturaInput = {
@@ -1178,6 +1361,135 @@ export type AgendamentoUncheckedUpdateWithoutUsoAssinaturaInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  usoCupom?: Prisma.UsoCupomUncheckedUpdateOneWithoutAgendamentoNestedInput
+}
+
+export type AgendamentoCreateWithoutUsoCupomInput = {
+  id?: string
+  inicio: Date | string
+  fim: Date | string
+  status?: $Enums.StatusAgendamento
+  observacaoCliente?: string | null
+  observacaoInterna?: string | null
+  motivoRecusa?: string | null
+  motivoCancelamento?: string | null
+  canceladoEm?: Date | string | null
+  formaPagamento?: $Enums.FormaPagamento | null
+  valorPagoCentavos?: number | null
+  pagoEm?: Date | string | null
+  observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
+  usoAssinatura?: Prisma.UsoAssinaturaCreateNestedOneWithoutAgendamentoInput
+  cliente: Prisma.UsuarioCreateNestedOneWithoutAgendamentosInput
+  profissional: Prisma.ProfissionalCreateNestedOneWithoutAgendamentosInput
+  servico: Prisma.ServicoCreateNestedOneWithoutAgendamentosInput
+}
+
+export type AgendamentoUncheckedCreateWithoutUsoCupomInput = {
+  id?: string
+  clienteId: string
+  profissionalId: string
+  servicoId: string
+  inicio: Date | string
+  fim: Date | string
+  status?: $Enums.StatusAgendamento
+  observacaoCliente?: string | null
+  observacaoInterna?: string | null
+  motivoRecusa?: string | null
+  motivoCancelamento?: string | null
+  canceladoEm?: Date | string | null
+  formaPagamento?: $Enums.FormaPagamento | null
+  valorPagoCentavos?: number | null
+  pagoEm?: Date | string | null
+  observacaoPagamento?: string | null
+  reminderSentAt?: Date | string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
+  usoAssinatura?: Prisma.UsoAssinaturaUncheckedCreateNestedOneWithoutAgendamentoInput
+}
+
+export type AgendamentoCreateOrConnectWithoutUsoCupomInput = {
+  where: Prisma.AgendamentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.AgendamentoCreateWithoutUsoCupomInput, Prisma.AgendamentoUncheckedCreateWithoutUsoCupomInput>
+}
+
+export type AgendamentoUpsertWithoutUsoCupomInput = {
+  update: Prisma.XOR<Prisma.AgendamentoUpdateWithoutUsoCupomInput, Prisma.AgendamentoUncheckedUpdateWithoutUsoCupomInput>
+  create: Prisma.XOR<Prisma.AgendamentoCreateWithoutUsoCupomInput, Prisma.AgendamentoUncheckedCreateWithoutUsoCupomInput>
+  where?: Prisma.AgendamentoWhereInput
+}
+
+export type AgendamentoUpdateToOneWithWhereWithoutUsoCupomInput = {
+  where?: Prisma.AgendamentoWhereInput
+  data: Prisma.XOR<Prisma.AgendamentoUpdateWithoutUsoCupomInput, Prisma.AgendamentoUncheckedUpdateWithoutUsoCupomInput>
+}
+
+export type AgendamentoUpdateWithoutUsoCupomInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivoCancelamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canceladoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  formaPagamento?: Prisma.NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
+  valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
+  cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAgendamentosNestedInput
+  profissional?: Prisma.ProfissionalUpdateOneRequiredWithoutAgendamentosNestedInput
+  servico?: Prisma.ServicoUpdateOneRequiredWithoutAgendamentosNestedInput
+}
+
+export type AgendamentoUncheckedUpdateWithoutUsoCupomInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
+  profissionalId?: Prisma.StringFieldUpdateOperationsInput | string
+  servicoId?: Prisma.StringFieldUpdateOperationsInput | string
+  inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivoCancelamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canceladoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  formaPagamento?: Prisma.NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
+  valorPagoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  pagoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  observacaoPagamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoCreateManyClienteInput = {
@@ -1199,6 +1511,10 @@ export type AgendamentoCreateManyClienteInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
 }
 
 export type AgendamentoUpdateWithoutClienteInput = {
@@ -1218,9 +1534,14 @@ export type AgendamentoUpdateWithoutClienteInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
   profissional?: Prisma.ProfissionalUpdateOneRequiredWithoutAgendamentosNestedInput
   servico?: Prisma.ServicoUpdateOneRequiredWithoutAgendamentosNestedInput
+  usoCupom?: Prisma.UsoCupomUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoUncheckedUpdateWithoutClienteInput = {
@@ -1242,7 +1563,12 @@ export type AgendamentoUncheckedUpdateWithoutClienteInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
+  usoCupom?: Prisma.UsoCupomUncheckedUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoUncheckedUpdateManyWithoutClienteInput = {
@@ -1264,6 +1590,10 @@ export type AgendamentoUncheckedUpdateManyWithoutClienteInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AgendamentoCreateManyServicoInput = {
@@ -1285,6 +1615,10 @@ export type AgendamentoCreateManyServicoInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
 }
 
 export type AgendamentoUpdateWithoutServicoInput = {
@@ -1304,9 +1638,14 @@ export type AgendamentoUpdateWithoutServicoInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
   cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAgendamentosNestedInput
   profissional?: Prisma.ProfissionalUpdateOneRequiredWithoutAgendamentosNestedInput
+  usoCupom?: Prisma.UsoCupomUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoUncheckedUpdateWithoutServicoInput = {
@@ -1328,7 +1667,12 @@ export type AgendamentoUncheckedUpdateWithoutServicoInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
+  usoCupom?: Prisma.UsoCupomUncheckedUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoUncheckedUpdateManyWithoutServicoInput = {
@@ -1350,6 +1694,10 @@ export type AgendamentoUncheckedUpdateManyWithoutServicoInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AgendamentoCreateManyProfissionalInput = {
@@ -1371,6 +1719,10 @@ export type AgendamentoCreateManyProfissionalInput = {
   reminderSentAt?: Date | string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  precoOriginalCentavos?: number | null
+  descontoCupomCentavos?: number | null
+  valorFinalCentavos?: number | null
+  cupomCodigo?: string | null
 }
 
 export type AgendamentoUpdateWithoutProfissionalInput = {
@@ -1390,9 +1742,14 @@ export type AgendamentoUpdateWithoutProfissionalInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usoAssinatura?: Prisma.UsoAssinaturaUpdateOneWithoutAgendamentoNestedInput
   cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAgendamentosNestedInput
   servico?: Prisma.ServicoUpdateOneRequiredWithoutAgendamentosNestedInput
+  usoCupom?: Prisma.UsoCupomUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoUncheckedUpdateWithoutProfissionalInput = {
@@ -1414,7 +1771,12 @@ export type AgendamentoUncheckedUpdateWithoutProfissionalInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   usoAssinatura?: Prisma.UsoAssinaturaUncheckedUpdateOneWithoutAgendamentoNestedInput
+  usoCupom?: Prisma.UsoCupomUncheckedUpdateOneWithoutAgendamentoNestedInput
 }
 
 export type AgendamentoUncheckedUpdateManyWithoutProfissionalInput = {
@@ -1436,6 +1798,10 @@ export type AgendamentoUncheckedUpdateManyWithoutProfissionalInput = {
   reminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  precoOriginalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  descontoCupomCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  valorFinalCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cupomCodigo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1460,10 +1826,15 @@ export type AgendamentoSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   reminderSentAt?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  precoOriginalCentavos?: boolean
+  descontoCupomCentavos?: boolean
+  valorFinalCentavos?: boolean
+  cupomCodigo?: boolean
   usoAssinatura?: boolean | Prisma.Agendamento$usoAssinaturaArgs<ExtArgs>
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   profissional?: boolean | Prisma.ProfissionalDefaultArgs<ExtArgs>
   servico?: boolean | Prisma.ServicoDefaultArgs<ExtArgs>
+  usoCupom?: boolean | Prisma.Agendamento$usoCupomArgs<ExtArgs>
 }, ExtArgs["result"]["agendamento"]>
 
 export type AgendamentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1486,6 +1857,10 @@ export type AgendamentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   reminderSentAt?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  precoOriginalCentavos?: boolean
+  descontoCupomCentavos?: boolean
+  valorFinalCentavos?: boolean
+  cupomCodigo?: boolean
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   profissional?: boolean | Prisma.ProfissionalDefaultArgs<ExtArgs>
   servico?: boolean | Prisma.ServicoDefaultArgs<ExtArgs>
@@ -1511,6 +1886,10 @@ export type AgendamentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   reminderSentAt?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  precoOriginalCentavos?: boolean
+  descontoCupomCentavos?: boolean
+  valorFinalCentavos?: boolean
+  cupomCodigo?: boolean
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   profissional?: boolean | Prisma.ProfissionalDefaultArgs<ExtArgs>
   servico?: boolean | Prisma.ServicoDefaultArgs<ExtArgs>
@@ -1536,14 +1915,19 @@ export type AgendamentoSelectScalar = {
   reminderSentAt?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
+  precoOriginalCentavos?: boolean
+  descontoCupomCentavos?: boolean
+  valorFinalCentavos?: boolean
+  cupomCodigo?: boolean
 }
 
-export type AgendamentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "profissionalId" | "servicoId" | "inicio" | "fim" | "status" | "observacaoCliente" | "observacaoInterna" | "motivoRecusa" | "motivoCancelamento" | "canceladoEm" | "formaPagamento" | "valorPagoCentavos" | "pagoEm" | "observacaoPagamento" | "reminderSentAt" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["agendamento"]>
+export type AgendamentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "profissionalId" | "servicoId" | "inicio" | "fim" | "status" | "observacaoCliente" | "observacaoInterna" | "motivoRecusa" | "motivoCancelamento" | "canceladoEm" | "formaPagamento" | "valorPagoCentavos" | "pagoEm" | "observacaoPagamento" | "reminderSentAt" | "criadoEm" | "atualizadoEm" | "precoOriginalCentavos" | "descontoCupomCentavos" | "valorFinalCentavos" | "cupomCodigo", ExtArgs["result"]["agendamento"]>
 export type AgendamentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   usoAssinatura?: boolean | Prisma.Agendamento$usoAssinaturaArgs<ExtArgs>
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   profissional?: boolean | Prisma.ProfissionalDefaultArgs<ExtArgs>
   servico?: boolean | Prisma.ServicoDefaultArgs<ExtArgs>
+  usoCupom?: boolean | Prisma.Agendamento$usoCupomArgs<ExtArgs>
 }
 export type AgendamentoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
@@ -1563,6 +1947,7 @@ export type $AgendamentoPayload<ExtArgs extends runtime.Types.Extensions.Interna
     cliente: Prisma.$UsuarioPayload<ExtArgs>
     profissional: Prisma.$ProfissionalPayload<ExtArgs>
     servico: Prisma.$ServicoPayload<ExtArgs>
+    usoCupom: Prisma.$UsoCupomPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1584,6 +1969,10 @@ export type $AgendamentoPayload<ExtArgs extends runtime.Types.Extensions.Interna
     reminderSentAt: Date | null
     criadoEm: Date
     atualizadoEm: Date
+    precoOriginalCentavos: number | null
+    descontoCupomCentavos: number | null
+    valorFinalCentavos: number | null
+    cupomCodigo: string | null
   }, ExtArgs["result"]["agendamento"]>
   composites: {}
 }
@@ -1982,6 +2371,7 @@ export interface Prisma__AgendamentoClient<T, Null = never, ExtArgs extends runt
   cliente<T extends Prisma.UsuarioDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UsuarioDefaultArgs<ExtArgs>>): Prisma.Prisma__UsuarioClient<runtime.Types.Result.GetResult<Prisma.$UsuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   profissional<T extends Prisma.ProfissionalDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProfissionalDefaultArgs<ExtArgs>>): Prisma.Prisma__ProfissionalClient<runtime.Types.Result.GetResult<Prisma.$ProfissionalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   servico<T extends Prisma.ServicoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ServicoDefaultArgs<ExtArgs>>): Prisma.Prisma__ServicoClient<runtime.Types.Result.GetResult<Prisma.$ServicoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  usoCupom<T extends Prisma.Agendamento$usoCupomArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Agendamento$usoCupomArgs<ExtArgs>>): Prisma.Prisma__UsoCupomClient<runtime.Types.Result.GetResult<Prisma.$UsoCupomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2030,6 +2420,10 @@ export interface AgendamentoFieldRefs {
   readonly reminderSentAt: Prisma.FieldRef<"Agendamento", 'DateTime'>
   readonly criadoEm: Prisma.FieldRef<"Agendamento", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"Agendamento", 'DateTime'>
+  readonly precoOriginalCentavos: Prisma.FieldRef<"Agendamento", 'Int'>
+  readonly descontoCupomCentavos: Prisma.FieldRef<"Agendamento", 'Int'>
+  readonly valorFinalCentavos: Prisma.FieldRef<"Agendamento", 'Int'>
+  readonly cupomCodigo: Prisma.FieldRef<"Agendamento", 'String'>
 }
     
 
@@ -2447,6 +2841,25 @@ export type Agendamento$usoAssinaturaArgs<ExtArgs extends runtime.Types.Extensio
    */
   include?: Prisma.UsoAssinaturaInclude<ExtArgs> | null
   where?: Prisma.UsoAssinaturaWhereInput
+}
+
+/**
+ * Agendamento.usoCupom
+ */
+export type Agendamento$usoCupomArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UsoCupom
+   */
+  select?: Prisma.UsoCupomSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UsoCupom
+   */
+  omit?: Prisma.UsoCupomOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UsoCupomInclude<ExtArgs> | null
+  where?: Prisma.UsoCupomWhereInput
 }
 
 /**

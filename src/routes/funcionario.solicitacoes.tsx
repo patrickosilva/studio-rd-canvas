@@ -21,6 +21,7 @@ import {
   Phone,
   RefreshCw,
   Scissors,
+  TicketPercent,
   UserRound,
   XCircle,
   type LucideIcon,
@@ -78,6 +79,10 @@ type Solicitacao = {
   inicio: string | Date;
   fim: string | Date;
   status: string;
+  precoOriginalCentavos: number | null;
+  descontoCupomCentavos: number | null;
+  valorFinalCentavos: number | null;
+  cupomCodigo: string | null;
   observacaoCliente: string | null;
   cliente: {
     id: string;
@@ -563,7 +568,8 @@ function SolicitacoesPage() {
       ? "0,00"
       : valoresPagosPorAgendamento[agendamentoSelecionado.id] ??
       String(
-        agendamentoSelecionado.servico.precoCentavos / 100,
+        (agendamentoSelecionado.valorFinalCentavos ??
+          agendamentoSelecionado.servico.precoCentavos) / 100,
       ).replace(".", ",")
     : "";
 
@@ -914,7 +920,10 @@ function SolicitacoesPage() {
 
     const valorDigitado =
       valoresPagosPorAgendamento[solicitacao.id] ??
-      String(solicitacao.servico.precoCentavos / 100).replace(
+      String(
+        (solicitacao.valorFinalCentavos ??
+          solicitacao.servico.precoCentavos) / 100,
+      ).replace(
         ".",
         ",",
       );
@@ -1931,6 +1940,16 @@ function BlocoAgendamento({
               <span className="hidden truncate text-muted-foreground sm:inline">
                 {agendamento.servico.nome}
               </span>
+
+              {agendamento.cupomCodigo && (
+                <span
+                  title={`Cupom ${agendamento.cupomCodigo}`}
+                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-400"
+                >
+                  <TicketPercent className="h-3 w-3" />
+                  Cupom
+                </span>
+              )}
             </>
           ) : (
             <>
@@ -1946,13 +1965,25 @@ function BlocoAgendamento({
                 </p>
               </div>
 
-              <span
+              <div
                 className={
-                  totalColunas > 1 ? "hidden lg:inline-flex" : "inline-flex"
+                  totalColunas > 1
+                    ? "hidden flex-col items-end gap-1 lg:flex"
+                    : "flex flex-col items-end gap-1"
                 }
               >
                 <StatusBadge status={agendamento.status} />
-              </span>
+
+                {agendamento.cupomCodigo && (
+                  <span
+                    title={`Cupom ${agendamento.cupomCodigo}`}
+                    className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-400"
+                  >
+                    <TicketPercent className="h-3 w-3" />
+                    Cupom
+                  </span>
+                )}
+              </div>
             </>
           )}
         </button>
@@ -2133,6 +2164,13 @@ function ConteudoDetalhes({
     <div className="space-y-4 pt-2">
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={agendamento.status} />
+
+        {agendamento.cupomCodigo && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400">
+            <TicketPercent className="h-3.5 w-3.5" />
+            Cupom {agendamento.cupomCodigo}
+          </span>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -2169,6 +2207,68 @@ function ConteudoDetalhes({
           value={formatarTelefone(agendamento.cliente.telefone)}
         />
       </div>
+
+      {agendamento.cupomCodigo && (
+        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+          <div className="flex items-start gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-500/15">
+              <TicketPercent className="h-5 w-5 text-emerald-400" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
+                Desconto aplicado
+              </p>
+
+              <p className="mt-1 font-mono text-base font-semibold text-foreground">
+                {agendamento.cupomCodigo}
+              </p>
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Preço original
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {formatarMoeda(
+                      agendamento.precoOriginalCentavos ??
+                        agendamento.servico.precoCentavos,
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Desconto
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-emerald-400">
+                    -{" "}
+                    {formatarMoeda(
+                      agendamento.descontoCupomCentavos ?? 0,
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Cobrar
+                  </p>
+                  <p className="mt-1 text-base font-semibold text-foreground">
+                    {formatarMoeda(
+                      agendamento.valorFinalCentavos ??
+                        agendamento.servico.precoCentavos,
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                O valor de conclusão do atendimento já considera este desconto.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       {whatsappUrl && (
         <Button
           asChild

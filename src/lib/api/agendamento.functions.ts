@@ -10,6 +10,10 @@ import {
 } from "../notificacao-agendamento.server";
 
 import { prisma } from "../prisma.server";
+import {
+  avaliarCupomParaAgendamento,
+  recalcularCupomReservado,
+} from "../cupom.server";
 import { obterUsuarioAtual } from "../session.server";
 
 async function exigirUsuarioLogado() {
@@ -77,6 +81,13 @@ const solicitarAgendamentoSchema = z.object({
     .max(500, "A observação é muito grande.")
     .optional()
     .or(z.literal("")),
+
+  cupomCodigo: z
+    .string()
+    .trim()
+    .max(30, "Cupom inválido.")
+    .optional()
+    .or(z.literal("")),
 });
 
 const DURACAO_PERSONALIZADA_MAXIMA_MINUTOS = 12 * 60;
@@ -122,6 +133,13 @@ const funcionarioCriarAgendamentoParaClienteSchema = z.object({
     .string()
     .trim()
     .max(500, "A observação é muito grande.")
+    .optional()
+    .or(z.literal("")),
+
+  cupomCodigo: z
+    .string()
+    .trim()
+    .max(30, "Cupom inválido.")
     .optional()
     .or(z.literal("")),
 
@@ -898,7 +916,14 @@ export const clienteCancelarAgendamento =
           },
         });
 
-      await criarNotificacaoCancelamentoCliente({
+            // LIBERAR_RESERVA_CUPOM
+      await prisma.usoCupom.deleteMany({
+        where: {
+          agendamentoId: agendamento.id,
+        },
+      });
+
+await criarNotificacaoCancelamentoCliente({
         clienteNome: usuario.nome,
         servicoNome: agendamento.servico.nome,
         inicio: agendamento.inicio,
@@ -1070,7 +1095,39 @@ export const solicitarAgendamento = createServerFn({
       };
     }
 
-    const agendamento = await prisma.agendamento.create({
+    const cupomCodigoAgendamento =
+      data.cupomCodigo?.trim() || "";
+
+    const resultadoCriacaoAgendamento =
+      await prisma.$transaction(async (tx) => {
+        const avaliacaoCupom = cupomCodigoAgendamento
+          ? await avaliarCupomParaAgendamento({
+              clienteId: usuario.id,
+              servicoId: servico.id,
+              precoOriginalCentavos:
+                servico.precoCentavos,
+              codigo: cupomCodigoAgendamento,
+              db: tx,
+            })
+          : null;
+
+        if (
+          avaliacaoCupom &&
+          !avaliacaoCupom.sucesso
+        ) {
+          return {
+            sucesso: false as const,
+            mensagem: avaliacaoCupom.mensagem,
+          };
+        }
+
+        const cupomConfirmado =
+          avaliacaoCupom?.sucesso
+            ? avaliacaoCupom
+            : null;
+
+        const criado =
+          await tx.agendamento.create({
       data: {
         clienteId: usuario.id,
         profissionalId: profissional.id,
@@ -1100,6 +1157,55 @@ export const solicitarAgendamento = createServerFn({
         },
       },
     });
+
+        await tx.agendamento.update({
+          where: {
+            id: criado.id,
+          },
+          data: {
+            precoOriginalCentavos:
+              servico.precoCentavos,
+            descontoCupomCentavos:
+              cupomConfirmado?.descontoCentavos ?? 0,
+            valorFinalCentavos:
+              cupomConfirmado?.valorFinalCentavos ??
+              servico.precoCentavos,
+            cupomCodigo:
+              cupomConfirmado?.codigo ?? null,
+          },
+        });
+
+        if (cupomConfirmado) {
+          // CUPOM_RESERVADO_NO_AGENDAMENTO
+          await tx.usoCupom.create({
+            data: {
+              cupomId: cupomConfirmado.cupomId,
+              clienteId: usuario.id,
+              agendamentoId: criado.id,
+              codigoAplicado:
+                cupomConfirmado.codigo,
+              descontoCentavos:
+                cupomConfirmado.descontoCentavos,
+              precoOriginalCentavos:
+                cupomConfirmado.precoOriginalCentavos,
+              valorFinalCentavos:
+                cupomConfirmado.valorFinalCentavos,
+            },
+          });
+        }
+
+        return {
+          sucesso: true as const,
+          agendamento: criado,
+        };
+      });
+
+    if (!resultadoCriacaoAgendamento.sucesso) {
+      return resultadoCriacaoAgendamento;
+    }
+
+    const agendamento =
+      resultadoCriacaoAgendamento.agendamento
 
     await criarNotificacaoNovoAgendamento({
       clienteNome: usuario.nome,
@@ -1389,7 +1495,39 @@ export const funcionarioCriarAgendamentoParaCliente =
         };
       }
 
-      const agendamento = await prisma.agendamento.create({
+      const cupomCodigoAgendamento =
+      data.cupomCodigo?.trim() || "";
+
+    const resultadoCriacaoAgendamento =
+      await prisma.$transaction(async (tx) => {
+        const avaliacaoCupom = cupomCodigoAgendamento
+          ? await avaliarCupomParaAgendamento({
+              clienteId: cliente.id,
+              servicoId: servico.id,
+              precoOriginalCentavos:
+                servico.precoCentavos,
+              codigo: cupomCodigoAgendamento,
+              db: tx,
+            })
+          : null;
+
+        if (
+          avaliacaoCupom &&
+          !avaliacaoCupom.sucesso
+        ) {
+          return {
+            sucesso: false as const,
+            mensagem: avaliacaoCupom.mensagem,
+          };
+        }
+
+        const cupomConfirmado =
+          avaliacaoCupom?.sucesso
+            ? avaliacaoCupom
+            : null;
+
+        const criado =
+          await tx.agendamento.create({
         data: {
           clienteId: cliente.id,
           profissionalId: profissional.id,
@@ -1433,6 +1571,55 @@ export const funcionarioCriarAgendamentoParaCliente =
           },
         },
       });
+
+        await tx.agendamento.update({
+          where: {
+            id: criado.id,
+          },
+          data: {
+            precoOriginalCentavos:
+              servico.precoCentavos,
+            descontoCupomCentavos:
+              cupomConfirmado?.descontoCentavos ?? 0,
+            valorFinalCentavos:
+              cupomConfirmado?.valorFinalCentavos ??
+              servico.precoCentavos,
+            cupomCodigo:
+              cupomConfirmado?.codigo ?? null,
+          },
+        });
+
+        if (cupomConfirmado) {
+          // CUPOM_RESERVADO_NO_AGENDAMENTO
+          await tx.usoCupom.create({
+            data: {
+              cupomId: cupomConfirmado.cupomId,
+              clienteId: cliente.id,
+              agendamentoId: criado.id,
+              codigoAplicado:
+                cupomConfirmado.codigo,
+              descontoCentavos:
+                cupomConfirmado.descontoCentavos,
+              precoOriginalCentavos:
+                cupomConfirmado.precoOriginalCentavos,
+              valorFinalCentavos:
+                cupomConfirmado.valorFinalCentavos,
+            },
+          });
+        }
+
+        return {
+          sucesso: true as const,
+          agendamento: criado,
+        };
+      });
+
+    if (!resultadoCriacaoAgendamento.sucesso) {
+      return resultadoCriacaoAgendamento;
+    }
+
+    const agendamento =
+      resultadoCriacaoAgendamento.agendamento
 
       await criarNotificacaoNovoAgendamento({
         clienteNome: agendamento.cliente.nome,
@@ -1537,7 +1724,14 @@ export const funcionarioCancelarAgendamento =
           },
         });
 
-      dispararEmailSemBloquear("AGENDAMENTO_CANCELADO_EQUIPE_CLIENTE", () =>
+            // LIBERAR_RESERVA_CUPOM
+      await prisma.usoCupom.deleteMany({
+        where: {
+          agendamentoId: agendamento.id,
+        },
+      });
+
+dispararEmailSemBloquear("AGENDAMENTO_CANCELADO_EQUIPE_CLIENTE", () =>
         enviarEmailCancelamentoEquipeCliente({
           agendamentoId: agendamento.id,
           cliente: {
@@ -1633,6 +1827,10 @@ export const listarMeusAgendamentos = createServerFn({
       inicio: true,
       fim: true,
       status: true,
+        precoOriginalCentavos: true,
+        descontoCupomCentavos: true,
+        valorFinalCentavos: true,
+        cupomCodigo: true,
       observacaoCliente: true,
       motivoRecusa: true,
       motivoCancelamento: true,
@@ -1711,6 +1909,10 @@ export const funcionarioListarSolicitacoes =
         inicio: true,
         fim: true,
         status: true,
+        precoOriginalCentavos: true,
+        descontoCupomCentavos: true,
+        valorFinalCentavos: true,
+        cupomCodigo: true,
         observacaoCliente: true,
         cliente: {
           select: {
@@ -1914,7 +2116,14 @@ export const funcionarioRecusarAgendamento =
           },
         });
 
-      dispararEmailSemBloquear("AGENDAMENTO_RECUSADO", () =>
+            // LIBERAR_RESERVA_CUPOM
+      await prisma.usoCupom.deleteMany({
+        where: {
+          agendamentoId: agendamento.id,
+        },
+      });
+
+dispararEmailSemBloquear("AGENDAMENTO_RECUSADO", () =>
         enviarEmailRecusaAgendamento({
           agendamentoId: agendamento.id,
           cliente: agendamento.cliente,
@@ -2828,10 +3037,26 @@ export const funcionarioConcluirAgendamento =
             id: true,
             clienteId: true,
             status: true,
+            precoOriginalCentavos: true,
+            descontoCupomCentavos: true,
+            valorFinalCentavos: true,
+            cupomCodigo: true,
 
             usoAssinatura: {
               select: {
                 id: true,
+              },
+            },
+
+            usoCupom: {
+              select: {
+                id: true,
+                cupom: {
+                  select: {
+                    codigo: true,
+                    combinavelComAssinatura: true,
+                  },
+                },
               },
             },
 
@@ -2911,8 +3136,23 @@ export const funcionarioConcluirAgendamento =
           };
         }
 
+        const cupomNaoAcumula =
+          Boolean(
+            agendamento.usoCupom &&
+              !agendamento.usoCupom.cupom
+                .combinavelComAssinatura,
+          );
+
         const agendamentoAtualizado =
           await prisma.$transaction(async (tx) => {
+            if (cupomNaoAcumula) {
+              await tx.usoCupom.deleteMany({
+                where: {
+                  agendamentoId: agendamento.id,
+                },
+              });
+            }
+
             await tx.assinaturaCliente.update({
               where: {
                 id: assinatura.id,
@@ -2944,6 +3184,15 @@ export const funcionarioConcluirAgendamento =
                 observacaoPagamento:
                   data.observacaoPagamento?.trim() ||
                   `Atendimento descontado da assinatura ${assinatura.plano.nome}.`,
+                ...(cupomNaoAcumula
+                  ? {
+                      cupomCodigo: null,
+                      descontoCupomCentavos: 0,
+                      valorFinalCentavos:
+                        agendamento.precoOriginalCentavos ??
+                        agendamento.servico.precoCentavos,
+                    }
+                  : {}),
               },
               select: {
                 id: true,
@@ -2957,14 +3206,16 @@ export const funcionarioConcluirAgendamento =
 
         return {
           sucesso: true,
-          mensagem:
-            "Atendimento concluído e 1 corte foi descontado da assinatura.",
+          mensagem: cupomNaoAcumula
+            ? `Atendimento concluído pela assinatura. O cupom ${agendamento.usoCupom?.cupom.codigo ?? ""} foi liberado porque não acumula com assinatura.`
+            : "Atendimento concluído e 1 corte foi descontado da assinatura.",
           agendamento: agendamentoAtualizado,
         };
       }
 
       const valorPagoCentavos =
         data.valorPagoCentavos ??
+        agendamento.valorFinalCentavos ??
         agendamento.servico.precoCentavos;
 
       const agendamentoAtualizado =
@@ -3025,201 +3276,27 @@ export const operacionalRemarcarAgendamento =
         };
       }
 
-      const agendamento = await prisma.agendamento.findUnique({
-        where: {
-          id: data.agendamentoId,
-        },
-        select: {
-          id: true,
-          status: true,
-          profissionalId: true,
-          inicio: true,
-
-          cliente: {
-            select: {
-              id: true,
-              nome: true,
-              email: true,
-              telefone: true,
-            },
-          },
-
-          profissional: {
-            select: {
-              id: true,
-              nome: true,
-            },
-          },
-
-          servico: {
-            select: {
-              id: true,
-              nome: true,
-              duracaoMinutos: true,
-              precoCentavos: true,
-            },
-          },
-        },
-      });
-
-      if (!agendamento) {
-        return {
-          sucesso: false,
-          mensagem: "Agendamento não encontrado.",
-        };
-      }
-
-      if (
-        agendamento.status !== "SOLICITADO" &&
-        agendamento.status !== "CONFIRMADO"
-      ) {
-        return {
-          sucesso: false,
-          mensagem:
-            "Apenas agendamentos solicitados ou confirmados podem ser remarcados.",
-        };
-      }
-
-      const novoServico = await prisma.servico.findFirst({
-        where: {
-          id: data.servicoId,
-          ativo: true,
-        },
-        select: {
-          id: true,
-          nome: true,
-          duracaoMinutos: true,
-          precoCentavos: true,
-        },
-      });
-
-      if (!novoServico) {
-        return {
-          sucesso: false,
-          mensagem: "Serviço não encontrado ou inativo.",
-        };
-      }
-
-      const mesmoInicio =
-        novoInicio.getTime() === agendamento.inicio.getTime();
-
-      // Manter o início permite ajustar só a duração de um
-      // atendimento que já começou.
-      if (
-        horarioPersonalizado &&
-        !mesmoInicio &&
-        novoInicio.getTime() <= new Date().getTime()
-      ) {
-        return {
-          sucesso: false,
-          mensagem: "Escolha um horário futuro.",
-        };
-      }
-
-      const duracaoMinutos = horarioPersonalizado
-        ? data.duracaoMinutos ?? novoServico.duracaoMinutos
-        : novoServico.duracaoMinutos;
-
-      const novoFim = calcularFim(novoInicio, duracaoMinutos);
-
-      if (horarioPersonalizado) {
-        const erroHorario = validarHorarioPersonalizado({
-          inicio: novoInicio,
-          duracaoMinutos,
-        });
-
-        if (erroHorario) {
-          return {
-            sucesso: false,
-            mensagem: erroHorario,
-          };
-        }
-
-        const conflito = await buscarAgendamentoConflitante({
-          profissionalId: agendamento.profissionalId,
-          inicio: novoInicio,
-          fim: novoFim,
-          ignorarAgendamentoId: agendamento.id,
-        });
-
-        if (conflito) {
-          return {
-            sucesso: false,
-            mensagem: descreverConflito(conflito),
-          };
-        }
-      } else {
-        const horarioNaGrade = validarHorarioNaGrade({
-          inicio: novoInicio,
-          duracaoMinutos: novoServico.duracaoMinutos,
-        });
-
-        if (!horarioNaGrade.valido) {
-          return {
-            sucesso: false,
-            mensagem:
-              horarioNaGrade.mensagem ||
-              "Escolha um horário válido na agenda da barbearia.",
-          };
-        }
-
-        const horarioBloqueado = await existeBloqueioAgenda({
-          profissionalId: agendamento.profissionalId,
-          inicio: novoInicio,
-          fim: novoFim,
-        });
-
-        if (horarioBloqueado) {
-          return {
-            sucesso: false,
-            mensagem:
-              "Esse horário está bloqueado na agenda da barbearia.",
-          };
-        }
-
-        const conflito = await existeConflitoDeHorario({
-          profissionalId: agendamento.profissionalId,
-          inicio: novoInicio,
-          fim: novoFim,
-          ignorarAgendamentoId: agendamento.id,
-        });
-
-        if (conflito) {
-          return {
-            sucesso: false,
-            mensagem:
-              "Já existe outro agendamento ocupando esse horário.",
-          };
-        }
-      }
-
-      const inicioAnterior = agendamento.inicio;
-
-      // Só a duração mudou: o lembrete já enviado continua válido e
-      // o cliente não precisa de aviso de reagendamento.
-      const apenasDuracaoAlterada =
-        horarioPersonalizado &&
-        mesmoInicio &&
-        novoServico.id === agendamento.servico.id;
-
-      const agendamentoAtualizado =
-        await prisma.agendamento.update({
+      const agendamento =
+        await prisma.agendamento.findUnique({
           where: {
-            id: agendamento.id,
+            id: data.agendamentoId,
           },
-
-          data: {
-            servicoId: novoServico.id,
-            inicio: novoInicio,
-            fim: novoFim,
-            reminderSentAt: apenasDuracaoAlterada ? undefined : null,
-          },
-
           select: {
             id: true,
-            inicio: true,
-            fim: true,
             status: true,
+            profissionalId: true,
+            inicio: true,
+            precoOriginalCentavos: true,
+            descontoCupomCentavos: true,
+            valorFinalCentavos: true,
+            cupomCodigo: true,
+
+            usoCupom: {
+              select: {
+                id: true,
+                cupomId: true,
+              },
+            },
 
             cliente: {
               select: {
@@ -3248,18 +3325,322 @@ export const operacionalRemarcarAgendamento =
           },
         });
 
+      if (!agendamento) {
+        return {
+          sucesso: false,
+          mensagem: "Agendamento não encontrado.",
+        };
+      }
+
+      if (
+        agendamento.status !== "SOLICITADO" &&
+        agendamento.status !== "CONFIRMADO"
+      ) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Apenas agendamentos solicitados ou confirmados podem ser remarcados.",
+        };
+      }
+
+      const novoServico =
+        await prisma.servico.findFirst({
+          where: {
+            id: data.servicoId,
+            ativo: true,
+          },
+          select: {
+            id: true,
+            nome: true,
+            duracaoMinutos: true,
+            precoCentavos: true,
+          },
+        });
+
+      if (!novoServico) {
+        return {
+          sucesso: false,
+          mensagem:
+            "Serviço não encontrado ou inativo.",
+        };
+      }
+
+      const mesmoInicio =
+        novoInicio.getTime() ===
+        agendamento.inicio.getTime();
+
+      if (
+        horarioPersonalizado &&
+        !mesmoInicio &&
+        novoInicio.getTime() <= new Date().getTime()
+      ) {
+        return {
+          sucesso: false,
+          mensagem: "Escolha um horário futuro.",
+        };
+      }
+
+      const duracaoMinutos = horarioPersonalizado
+        ? data.duracaoMinutos ??
+          novoServico.duracaoMinutos
+        : novoServico.duracaoMinutos;
+
+      const novoFim =
+        calcularFim(novoInicio, duracaoMinutos);
+
+      if (horarioPersonalizado) {
+        const erroHorario =
+          validarHorarioPersonalizado({
+            inicio: novoInicio,
+            duracaoMinutos,
+          });
+
+        if (erroHorario) {
+          return {
+            sucesso: false,
+            mensagem: erroHorario,
+          };
+        }
+
+        const conflito =
+          await buscarAgendamentoConflitante({
+            profissionalId:
+              agendamento.profissionalId,
+            inicio: novoInicio,
+            fim: novoFim,
+            ignorarAgendamentoId:
+              agendamento.id,
+          });
+
+        if (conflito) {
+          return {
+            sucesso: false,
+            mensagem:
+              descreverConflito(conflito),
+          };
+        }
+      } else {
+        const horarioNaGrade =
+          validarHorarioNaGrade({
+            inicio: novoInicio,
+            duracaoMinutos:
+              novoServico.duracaoMinutos,
+          });
+
+        if (!horarioNaGrade.valido) {
+          return {
+            sucesso: false,
+            mensagem:
+              horarioNaGrade.mensagem ||
+              "Escolha um horário válido na agenda da barbearia.",
+          };
+        }
+
+        const horarioBloqueado =
+          await existeBloqueioAgenda({
+            profissionalId:
+              agendamento.profissionalId,
+            inicio: novoInicio,
+            fim: novoFim,
+          });
+
+        if (horarioBloqueado) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Esse horário está bloqueado na agenda da barbearia.",
+          };
+        }
+
+        const conflito =
+          await existeConflitoDeHorario({
+            profissionalId:
+              agendamento.profissionalId,
+            inicio: novoInicio,
+            fim: novoFim,
+            ignorarAgendamentoId:
+              agendamento.id,
+          });
+
+        if (conflito) {
+          return {
+            sucesso: false,
+            mensagem:
+              "Já existe outro agendamento ocupando esse horário.",
+          };
+        }
+      }
+
+      const inicioAnterior =
+        agendamento.inicio;
+
+      const servicoMudou =
+        novoServico.id !==
+        agendamento.servico.id;
+
+      const ajusteCupom =
+        servicoMudou &&
+        agendamento.usoCupom
+          ? await recalcularCupomReservado({
+              cupomId:
+                agendamento.usoCupom.cupomId,
+              servicoId: novoServico.id,
+              precoOriginalCentavos:
+                novoServico.precoCentavos,
+            })
+          : null;
+
+      const cupomFoiRemovido =
+        Boolean(
+          ajusteCupom &&
+            !ajusteCupom.mantem,
+        );
+
+      const precoOriginalNovo =
+        servicoMudou
+          ? novoServico.precoCentavos
+          : agendamento.precoOriginalCentavos ??
+            agendamento.servico.precoCentavos;
+
+      const descontoNovo =
+        ajusteCupom?.mantem
+          ? ajusteCupom.descontoCentavos
+          : cupomFoiRemovido
+            ? 0
+            : agendamento.descontoCupomCentavos ??
+              0;
+
+      const valorFinalNovo =
+        ajusteCupom?.mantem
+          ? ajusteCupom.valorFinalCentavos
+          : cupomFoiRemovido
+            ? precoOriginalNovo
+            : servicoMudou &&
+                !agendamento.usoCupom
+              ? novoServico.precoCentavos
+              : agendamento.valorFinalCentavos ??
+                precoOriginalNovo;
+
+      const cupomCodigoNovo =
+        cupomFoiRemovido
+          ? null
+          : ajusteCupom?.mantem
+            ? ajusteCupom.codigo
+            : agendamento.cupomCodigo;
+
+      const apenasDuracaoAlterada =
+        horarioPersonalizado &&
+        mesmoInicio &&
+        !servicoMudou;
+
+      const agendamentoAtualizado =
+        await prisma.$transaction(async (tx) => {
+          if (
+            agendamento.usoCupom &&
+            ajusteCupom?.mantem
+          ) {
+            await tx.usoCupom.update({
+              where: {
+                id: agendamento.usoCupom.id,
+              },
+              data: {
+                descontoCentavos:
+                  ajusteCupom.descontoCentavos,
+                precoOriginalCentavos:
+                  ajusteCupom.precoOriginalCentavos,
+                valorFinalCentavos:
+                  ajusteCupom.valorFinalCentavos,
+              },
+            });
+          }
+
+          if (
+            agendamento.usoCupom &&
+            cupomFoiRemovido
+          ) {
+            await tx.usoCupom.delete({
+              where: {
+                id: agendamento.usoCupom.id,
+              },
+            });
+          }
+
+          return tx.agendamento.update({
+            where: {
+              id: agendamento.id,
+            },
+            data: {
+              servicoId: novoServico.id,
+              inicio: novoInicio,
+              fim: novoFim,
+              reminderSentAt:
+                apenasDuracaoAlterada
+                  ? undefined
+                  : null,
+              precoOriginalCentavos:
+                precoOriginalNovo,
+              descontoCupomCentavos:
+                descontoNovo,
+              valorFinalCentavos:
+                valorFinalNovo,
+              cupomCodigo:
+                cupomCodigoNovo,
+            },
+            select: {
+              id: true,
+              inicio: true,
+              fim: true,
+              status: true,
+              precoOriginalCentavos: true,
+              descontoCupomCentavos: true,
+              valorFinalCentavos: true,
+              cupomCodigo: true,
+
+              cliente: {
+                select: {
+                  id: true,
+                  nome: true,
+                  email: true,
+                  telefone: true,
+                },
+              },
+
+              profissional: {
+                select: {
+                  id: true,
+                  nome: true,
+                },
+              },
+
+              servico: {
+                select: {
+                  id: true,
+                  nome: true,
+                  duracaoMinutos: true,
+                  precoCentavos: true,
+                },
+              },
+            },
+          });
+        });
+
       if (apenasDuracaoAlterada) {
         return {
           sucesso: true,
-          mensagem: "Agendamento atualizado com sucesso.",
-          agendamento: agendamentoAtualizado,
+          mensagem:
+            "Agendamento atualizado com sucesso.",
+          agendamento:
+            agendamentoAtualizado,
         };
       }
 
       await criarNotificacaoNovoAgendamento({
-        clienteNome: agendamento.cliente.nome,
-        servicoNome: agendamentoAtualizado.servico.nome,
-        inicio: agendamentoAtualizado.inicio,
+        clienteNome:
+          agendamento.cliente.nome,
+        servicoNome:
+          agendamentoAtualizado.servico.nome,
+        inicio:
+          agendamentoAtualizado.inicio,
         acao: "agendou",
       });
 
@@ -3267,24 +3648,30 @@ export const operacionalRemarcarAgendamento =
         "AGENDAMENTO_REAGENDADO_BARBEARIA",
         () =>
           enviarNotificacaoAgendamento({
-            tipo: "AGENDAMENTO_REAGENDADO",
-            agendamentoId: agendamento.id,
-
+            tipo:
+              "AGENDAMENTO_REAGENDADO",
+            agendamentoId:
+              agendamento.id,
             cliente: {
-              nome: agendamento.cliente.nome,
-              telefone: agendamento.cliente.telefone,
-              email: agendamento.cliente.email,
+              nome:
+                agendamento.cliente.nome,
+              telefone:
+                agendamento.cliente.telefone,
+              email:
+                agendamento.cliente.email,
             },
-
             servico: {
-              nome: agendamentoAtualizado.servico.nome,
+              nome:
+                agendamentoAtualizado
+                  .servico.nome,
             },
-
             profissional: {
-              nome: agendamentoAtualizado.profissional.nome,
+              nome:
+                agendamentoAtualizado
+                  .profissional.nome,
             },
-
-            inicio: agendamentoAtualizado.inicio,
+            inicio:
+              agendamentoAtualizado.inicio,
             inicioAnterior,
           }),
       );
@@ -3293,33 +3680,39 @@ export const operacionalRemarcarAgendamento =
         "AGENDAMENTO_REAGENDADO_CLIENTE",
         () =>
           enviarEmailReagendamentoCliente({
-            agendamentoId: agendamento.id,
-
+            agendamentoId:
+              agendamento.id,
             cliente: {
-              nome: agendamento.cliente.nome,
-              email: agendamento.cliente.email,
+              nome:
+                agendamento.cliente.nome,
+              email:
+                agendamento.cliente.email,
             },
-
             servico: {
-              nome: agendamentoAtualizado.servico.nome,
+              nome:
+                agendamentoAtualizado
+                  .servico.nome,
             },
-
             profissional: {
-              nome: agendamentoAtualizado.profissional.nome,
+              nome:
+                agendamentoAtualizado
+                  .profissional.nome,
             },
-
-            inicio: agendamentoAtualizado.inicio,
+            inicio:
+              agendamentoAtualizado.inicio,
             inicioAnterior,
           }),
       );
 
       return {
         sucesso: true,
-        mensagem: "Agendamento atualizado com sucesso.",
-        agendamento: agendamentoAtualizado,
+        mensagem: cupomFoiRemovido
+          ? `Agendamento atualizado. O cupom ${agendamento.cupomCodigo ?? ""} foi removido porque não é válido para o novo serviço.`
+          : "Agendamento atualizado com sucesso.",
+        agendamento:
+          agendamentoAtualizado,
       };
     });
-    
 export const adminListarAgenda = createServerFn({
   method: "GET",
 }).handler(async () => {

@@ -26,17 +26,21 @@ import { Route as AdminAgendaRouteImport } from './routes/admin.agenda'
 import { Route as AdminAssinaturasRouteImport } from './routes/admin.assinaturas'
 import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
+import { Route as AdminComercialRouteImport } from './routes/admin.comercial'
+import { Route as AdminConexoesRouteImport } from './routes/admin.conexoes'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminContaRouteImport } from './routes/admin.conta'
 import { Route as AdminCorrecoesRouteImport } from './routes/admin.correcoes'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
+import { Route as AdminTesteClienteRouteImport } from './routes/admin.teste-cliente'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
 import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
 import { Route as ClienteAssinaturaRouteImport } from './routes/cliente.assinatura'
 import { Route as ClienteBeneficiosRouteImport } from './routes/cliente.beneficios'
+import { Route as ClienteCuponsRouteImport } from './routes/cliente.cupons'
 import { Route as ClienteFidelidadeRouteImport } from './routes/cliente.fidelidade'
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
@@ -132,6 +136,16 @@ const AdminClientesRoute = AdminClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminComercialRoute = AdminComercialRouteImport.update({
+  id: '/comercial',
+  path: '/comercial',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConexoesRoute = AdminConexoesRouteImport.update({
+  id: '/conexoes',
+  path: '/conexoes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -162,6 +176,11 @@ const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTesteClienteRoute = AdminTesteClienteRouteImport.update({
+  id: '/teste-cliente',
+  path: '/teste-cliente',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
   id: '/usuarios',
   path: '/usuarios',
@@ -185,6 +204,11 @@ const ClienteAssinaturaRoute = ClienteAssinaturaRouteImport.update({
 const ClienteBeneficiosRoute = ClienteBeneficiosRouteImport.update({
   id: '/beneficios',
   path: '/beneficios',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteCuponsRoute = ClienteCuponsRouteImport.update({
+  id: '/cupons',
+  path: '/cupons',
   getParentRoute: () => ClienteRoute,
 } as any)
 const ClienteFidelidadeRoute = ClienteFidelidadeRouteImport.update({
@@ -251,16 +275,20 @@ export interface FileRoutesByFullPath {
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/comercial': typeof AdminComercialRoute
+  '/admin/conexoes': typeof AdminConexoesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/admin/teste-cliente': typeof AdminTesteClienteRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
+  '/cliente/cupons': typeof ClienteCuponsRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
@@ -287,16 +315,20 @@ export interface FileRoutesByTo {
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/comercial': typeof AdminComercialRoute
+  '/admin/conexoes': typeof AdminConexoesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/admin/teste-cliente': typeof AdminTesteClienteRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
+  '/cliente/cupons': typeof ClienteCuponsRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
@@ -327,16 +359,20 @@ export interface FileRoutesById {
   '/admin/assinaturas': typeof AdminAssinaturasRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/comercial': typeof AdminComercialRoute
+  '/admin/conexoes': typeof AdminConexoesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
+  '/admin/teste-cliente': typeof AdminTesteClienteRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
+  '/cliente/cupons': typeof ClienteCuponsRoute
   '/cliente/fidelidade': typeof ClienteFidelidadeRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
@@ -368,16 +404,20 @@ export interface FileRouteTypes {
     | '/admin/assinaturas'
     | '/admin/bloqueios'
     | '/admin/clientes'
+    | '/admin/comercial'
+    | '/admin/conexoes'
     | '/admin/configuracoes'
     | '/admin/conta'
     | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
+    | '/admin/teste-cliente'
     | '/admin/usuarios'
     | '/cliente/agendamentos'
     | '/cliente/assinatura'
     | '/cliente/beneficios'
+    | '/cliente/cupons'
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
@@ -404,16 +444,20 @@ export interface FileRouteTypes {
     | '/admin/assinaturas'
     | '/admin/bloqueios'
     | '/admin/clientes'
+    | '/admin/comercial'
+    | '/admin/conexoes'
     | '/admin/configuracoes'
     | '/admin/conta'
     | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
+    | '/admin/teste-cliente'
     | '/admin/usuarios'
     | '/cliente/agendamentos'
     | '/cliente/assinatura'
     | '/cliente/beneficios'
+    | '/cliente/cupons'
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
@@ -443,16 +487,20 @@ export interface FileRouteTypes {
     | '/admin/assinaturas'
     | '/admin/bloqueios'
     | '/admin/clientes'
+    | '/admin/comercial'
+    | '/admin/conexoes'
     | '/admin/configuracoes'
     | '/admin/conta'
     | '/admin/correcoes'
     | '/admin/financeiro'
     | '/admin/marketing'
     | '/admin/relatorios'
+    | '/admin/teste-cliente'
     | '/admin/usuarios'
     | '/cliente/agendamentos'
     | '/cliente/assinatura'
     | '/cliente/beneficios'
+    | '/cliente/cupons'
     | '/cliente/fidelidade'
     | '/cliente/historico'
     | '/cliente/perfil'
@@ -602,6 +650,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/comercial': {
+      id: '/admin/comercial'
+      path: '/comercial'
+      fullPath: '/admin/comercial'
+      preLoaderRoute: typeof AdminComercialRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/conexoes': {
+      id: '/admin/conexoes'
+      path: '/conexoes'
+      fullPath: '/admin/conexoes'
+      preLoaderRoute: typeof AdminConexoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/configuracoes': {
       id: '/admin/configuracoes'
       path: '/configuracoes'
@@ -644,6 +706,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRelatoriosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/teste-cliente': {
+      id: '/admin/teste-cliente'
+      path: '/teste-cliente'
+      fullPath: '/admin/teste-cliente'
+      preLoaderRoute: typeof AdminTesteClienteRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/usuarios': {
       id: '/admin/usuarios'
       path: '/usuarios'
@@ -677,6 +746,13 @@ declare module '@tanstack/react-router' {
       path: '/beneficios'
       fullPath: '/cliente/beneficios'
       preLoaderRoute: typeof ClienteBeneficiosRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/cupons': {
+      id: '/cliente/cupons'
+      path: '/cupons'
+      fullPath: '/cliente/cupons'
+      preLoaderRoute: typeof ClienteCuponsRouteImport
       parentRoute: typeof ClienteRoute
     }
     '/cliente/fidelidade': {
@@ -750,12 +826,15 @@ interface AdminRouteChildren {
   AdminAssinaturasRoute: typeof AdminAssinaturasRoute
   AdminBloqueiosRoute: typeof AdminBloqueiosRoute
   AdminClientesRoute: typeof AdminClientesRoute
+  AdminComercialRoute: typeof AdminComercialRoute
+  AdminConexoesRoute: typeof AdminConexoesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContaRoute: typeof AdminContaRoute
   AdminCorrecoesRoute: typeof AdminCorrecoesRoute
   AdminFinanceiroRoute: typeof AdminFinanceiroRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminRelatoriosRoute: typeof AdminRelatoriosRoute
+  AdminTesteClienteRoute: typeof AdminTesteClienteRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -765,12 +844,15 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAssinaturasRoute: AdminAssinaturasRoute,
   AdminBloqueiosRoute: AdminBloqueiosRoute,
   AdminClientesRoute: AdminClientesRoute,
+  AdminComercialRoute: AdminComercialRoute,
+  AdminConexoesRoute: AdminConexoesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContaRoute: AdminContaRoute,
   AdminCorrecoesRoute: AdminCorrecoesRoute,
   AdminFinanceiroRoute: AdminFinanceiroRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminRelatoriosRoute: AdminRelatoriosRoute,
+  AdminTesteClienteRoute: AdminTesteClienteRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -781,6 +863,7 @@ interface ClienteRouteChildren {
   ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
   ClienteAssinaturaRoute: typeof ClienteAssinaturaRoute
   ClienteBeneficiosRoute: typeof ClienteBeneficiosRoute
+  ClienteCuponsRoute: typeof ClienteCuponsRoute
   ClienteFidelidadeRoute: typeof ClienteFidelidadeRoute
   ClienteHistoricoRoute: typeof ClienteHistoricoRoute
   ClientePerfilRoute: typeof ClientePerfilRoute
@@ -791,6 +874,7 @@ const ClienteRouteChildren: ClienteRouteChildren = {
   ClienteAgendamentosRoute: ClienteAgendamentosRoute,
   ClienteAssinaturaRoute: ClienteAssinaturaRoute,
   ClienteBeneficiosRoute: ClienteBeneficiosRoute,
+  ClienteCuponsRoute: ClienteCuponsRoute,
   ClienteFidelidadeRoute: ClienteFidelidadeRoute,
   ClienteHistoricoRoute: ClienteHistoricoRoute,
   ClientePerfilRoute: ClientePerfilRoute,

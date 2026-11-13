@@ -245,6 +245,7 @@ export type ServicoWhereInput = {
   criadoEm?: Prisma.DateTimeFilter<"Servico"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Servico"> | Date | string
   agendamentos?: Prisma.AgendamentoListRelationFilter
+  cupons?: Prisma.CupomServicoListRelationFilter
 }
 
 export type ServicoOrderByWithRelationInput = {
@@ -257,6 +258,7 @@ export type ServicoOrderByWithRelationInput = {
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   agendamentos?: Prisma.AgendamentoOrderByRelationAggregateInput
+  cupons?: Prisma.CupomServicoOrderByRelationAggregateInput
 }
 
 export type ServicoWhereUniqueInput = Prisma.AtLeast<{
@@ -272,6 +274,7 @@ export type ServicoWhereUniqueInput = Prisma.AtLeast<{
   criadoEm?: Prisma.DateTimeFilter<"Servico"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Servico"> | Date | string
   agendamentos?: Prisma.AgendamentoListRelationFilter
+  cupons?: Prisma.CupomServicoListRelationFilter
 }, "id" | "nome">
 
 export type ServicoOrderByWithAggregationInput = {
@@ -314,6 +317,7 @@ export type ServicoCreateInput = {
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutServicoInput
+  cupons?: Prisma.CupomServicoCreateNestedManyWithoutServicoInput
 }
 
 export type ServicoUncheckedCreateInput = {
@@ -326,6 +330,7 @@ export type ServicoUncheckedCreateInput = {
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutServicoInput
+  cupons?: Prisma.CupomServicoUncheckedCreateNestedManyWithoutServicoInput
 }
 
 export type ServicoUpdateInput = {
@@ -338,6 +343,7 @@ export type ServicoUpdateInput = {
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutServicoNestedInput
+  cupons?: Prisma.CupomServicoUpdateManyWithoutServicoNestedInput
 }
 
 export type ServicoUncheckedUpdateInput = {
@@ -350,6 +356,7 @@ export type ServicoUncheckedUpdateInput = {
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutServicoNestedInput
+  cupons?: Prisma.CupomServicoUncheckedUpdateManyWithoutServicoNestedInput
 }
 
 export type ServicoCreateManyInput = {
@@ -447,6 +454,20 @@ export type ServicoUpdateOneRequiredWithoutAgendamentosNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ServicoUpdateToOneWithWhereWithoutAgendamentosInput, Prisma.ServicoUpdateWithoutAgendamentosInput>, Prisma.ServicoUncheckedUpdateWithoutAgendamentosInput>
 }
 
+export type ServicoCreateNestedOneWithoutCuponsInput = {
+  create?: Prisma.XOR<Prisma.ServicoCreateWithoutCuponsInput, Prisma.ServicoUncheckedCreateWithoutCuponsInput>
+  connectOrCreate?: Prisma.ServicoCreateOrConnectWithoutCuponsInput
+  connect?: Prisma.ServicoWhereUniqueInput
+}
+
+export type ServicoUpdateOneRequiredWithoutCuponsNestedInput = {
+  create?: Prisma.XOR<Prisma.ServicoCreateWithoutCuponsInput, Prisma.ServicoUncheckedCreateWithoutCuponsInput>
+  connectOrCreate?: Prisma.ServicoCreateOrConnectWithoutCuponsInput
+  upsert?: Prisma.ServicoUpsertWithoutCuponsInput
+  connect?: Prisma.ServicoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServicoUpdateToOneWithWhereWithoutCuponsInput, Prisma.ServicoUpdateWithoutCuponsInput>, Prisma.ServicoUncheckedUpdateWithoutCuponsInput>
+}
+
 export type ServicoCreateWithoutAgendamentosInput = {
   id?: string
   nome: string
@@ -456,6 +477,7 @@ export type ServicoCreateWithoutAgendamentosInput = {
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  cupons?: Prisma.CupomServicoCreateNestedManyWithoutServicoInput
 }
 
 export type ServicoUncheckedCreateWithoutAgendamentosInput = {
@@ -467,6 +489,7 @@ export type ServicoUncheckedCreateWithoutAgendamentosInput = {
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  cupons?: Prisma.CupomServicoUncheckedCreateNestedManyWithoutServicoInput
 }
 
 export type ServicoCreateOrConnectWithoutAgendamentosInput = {
@@ -494,6 +517,7 @@ export type ServicoUpdateWithoutAgendamentosInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cupons?: Prisma.CupomServicoUpdateManyWithoutServicoNestedInput
 }
 
 export type ServicoUncheckedUpdateWithoutAgendamentosInput = {
@@ -505,6 +529,71 @@ export type ServicoUncheckedUpdateWithoutAgendamentosInput = {
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cupons?: Prisma.CupomServicoUncheckedUpdateManyWithoutServicoNestedInput
+}
+
+export type ServicoCreateWithoutCuponsInput = {
+  id?: string
+  nome: string
+  descricao?: string | null
+  duracaoMinutos: number
+  precoCentavos: number
+  ativo?: boolean
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutServicoInput
+}
+
+export type ServicoUncheckedCreateWithoutCuponsInput = {
+  id?: string
+  nome: string
+  descricao?: string | null
+  duracaoMinutos: number
+  precoCentavos: number
+  ativo?: boolean
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutServicoInput
+}
+
+export type ServicoCreateOrConnectWithoutCuponsInput = {
+  where: Prisma.ServicoWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServicoCreateWithoutCuponsInput, Prisma.ServicoUncheckedCreateWithoutCuponsInput>
+}
+
+export type ServicoUpsertWithoutCuponsInput = {
+  update: Prisma.XOR<Prisma.ServicoUpdateWithoutCuponsInput, Prisma.ServicoUncheckedUpdateWithoutCuponsInput>
+  create: Prisma.XOR<Prisma.ServicoCreateWithoutCuponsInput, Prisma.ServicoUncheckedCreateWithoutCuponsInput>
+  where?: Prisma.ServicoWhereInput
+}
+
+export type ServicoUpdateToOneWithWhereWithoutCuponsInput = {
+  where?: Prisma.ServicoWhereInput
+  data: Prisma.XOR<Prisma.ServicoUpdateWithoutCuponsInput, Prisma.ServicoUncheckedUpdateWithoutCuponsInput>
+}
+
+export type ServicoUpdateWithoutCuponsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duracaoMinutos?: Prisma.IntFieldUpdateOperationsInput | number
+  precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  agendamentos?: Prisma.AgendamentoUpdateManyWithoutServicoNestedInput
+}
+
+export type ServicoUncheckedUpdateWithoutCuponsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duracaoMinutos?: Prisma.IntFieldUpdateOperationsInput | number
+  precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutServicoNestedInput
 }
 
 
@@ -514,10 +603,12 @@ export type ServicoUncheckedUpdateWithoutAgendamentosInput = {
 
 export type ServicoCountOutputType = {
   agendamentos: number
+  cupons: number
 }
 
 export type ServicoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   agendamentos?: boolean | ServicoCountOutputTypeCountAgendamentosArgs
+  cupons?: boolean | ServicoCountOutputTypeCountCuponsArgs
 }
 
 /**
@@ -537,6 +628,13 @@ export type ServicoCountOutputTypeCountAgendamentosArgs<ExtArgs extends runtime.
   where?: Prisma.AgendamentoWhereInput
 }
 
+/**
+ * ServicoCountOutputType without action
+ */
+export type ServicoCountOutputTypeCountCuponsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CupomServicoWhereInput
+}
+
 
 export type ServicoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -548,6 +646,7 @@ export type ServicoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   criadoEm?: boolean
   atualizadoEm?: boolean
   agendamentos?: boolean | Prisma.Servico$agendamentosArgs<ExtArgs>
+  cupons?: boolean | Prisma.Servico$cuponsArgs<ExtArgs>
   _count?: boolean | Prisma.ServicoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["servico"]>
 
@@ -587,6 +686,7 @@ export type ServicoSelectScalar = {
 export type ServicoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "descricao" | "duracaoMinutos" | "precoCentavos" | "ativo" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["servico"]>
 export type ServicoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   agendamentos?: boolean | Prisma.Servico$agendamentosArgs<ExtArgs>
+  cupons?: boolean | Prisma.Servico$cuponsArgs<ExtArgs>
   _count?: boolean | Prisma.ServicoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ServicoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -596,6 +696,7 @@ export type $ServicoPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   name: "Servico"
   objects: {
     agendamentos: Prisma.$AgendamentoPayload<ExtArgs>[]
+    cupons: Prisma.$CupomServicoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1001,6 +1102,7 @@ readonly fields: ServicoFieldRefs;
 export interface Prisma__ServicoClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   agendamentos<T extends Prisma.Servico$agendamentosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Servico$agendamentosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgendamentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  cupons<T extends Prisma.Servico$cuponsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Servico$cuponsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CupomServicoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1452,6 +1554,30 @@ export type Servico$agendamentosArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.AgendamentoScalarFieldEnum | Prisma.AgendamentoScalarFieldEnum[]
+}
+
+/**
+ * Servico.cupons
+ */
+export type Servico$cuponsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CupomServico
+   */
+  select?: Prisma.CupomServicoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CupomServico
+   */
+  omit?: Prisma.CupomServicoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CupomServicoInclude<ExtArgs> | null
+  where?: Prisma.CupomServicoWhereInput
+  orderBy?: Prisma.CupomServicoOrderByWithRelationInput | Prisma.CupomServicoOrderByWithRelationInput[]
+  cursor?: Prisma.CupomServicoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CupomServicoScalarFieldEnum | Prisma.CupomServicoScalarFieldEnum[]
 }
 
 /**

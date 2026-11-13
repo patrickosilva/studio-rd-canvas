@@ -122,7 +122,7 @@ function EsqueciSenhaPage() {
         <div className="mt-6 text-center text-sm">
           <Link
             to="/login"
-            search={{}}
+            search={{ redirect: undefined }}
             className="text-muted-foreground hover:text-foreground"
           >
             Voltar para o login

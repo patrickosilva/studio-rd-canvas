@@ -28,10 +28,12 @@ export type AggregateAssinaturaCliente = {
 
 export type AssinaturaClienteAvgAggregateOutputType = {
   saldoCortes: number | null
+  percentualComissaoBps: number | null
 }
 
 export type AssinaturaClienteSumAggregateOutputType = {
   saldoCortes: number | null
+  percentualComissaoBps: number | null
 }
 
 export type AssinaturaClienteMinAggregateOutputType = {
@@ -44,6 +46,12 @@ export type AssinaturaClienteMinAggregateOutputType = {
   vigenciaFim: Date | null
   saldoCortes: number | null
   renovaAutomaticamente: boolean | null
+  provedorPagamento: $Enums.ProvedorPagamento | null
+  providerCustomerId: string | null
+  providerSubscriptionId: string | null
+  proximaCobrancaEm: Date | null
+  cancelarAoFimDoCiclo: boolean | null
+  percentualComissaoBps: number | null
   observacao: string | null
   criadoEm: Date | null
   atualizadoEm: Date | null
@@ -59,6 +67,12 @@ export type AssinaturaClienteMaxAggregateOutputType = {
   vigenciaFim: Date | null
   saldoCortes: number | null
   renovaAutomaticamente: boolean | null
+  provedorPagamento: $Enums.ProvedorPagamento | null
+  providerCustomerId: string | null
+  providerSubscriptionId: string | null
+  proximaCobrancaEm: Date | null
+  cancelarAoFimDoCiclo: boolean | null
+  percentualComissaoBps: number | null
   observacao: string | null
   criadoEm: Date | null
   atualizadoEm: Date | null
@@ -74,6 +88,12 @@ export type AssinaturaClienteCountAggregateOutputType = {
   vigenciaFim: number
   saldoCortes: number
   renovaAutomaticamente: number
+  provedorPagamento: number
+  providerCustomerId: number
+  providerSubscriptionId: number
+  proximaCobrancaEm: number
+  cancelarAoFimDoCiclo: number
+  percentualComissaoBps: number
   observacao: number
   criadoEm: number
   atualizadoEm: number
@@ -83,10 +103,12 @@ export type AssinaturaClienteCountAggregateOutputType = {
 
 export type AssinaturaClienteAvgAggregateInputType = {
   saldoCortes?: true
+  percentualComissaoBps?: true
 }
 
 export type AssinaturaClienteSumAggregateInputType = {
   saldoCortes?: true
+  percentualComissaoBps?: true
 }
 
 export type AssinaturaClienteMinAggregateInputType = {
@@ -99,6 +121,12 @@ export type AssinaturaClienteMinAggregateInputType = {
   vigenciaFim?: true
   saldoCortes?: true
   renovaAutomaticamente?: true
+  provedorPagamento?: true
+  providerCustomerId?: true
+  providerSubscriptionId?: true
+  proximaCobrancaEm?: true
+  cancelarAoFimDoCiclo?: true
+  percentualComissaoBps?: true
   observacao?: true
   criadoEm?: true
   atualizadoEm?: true
@@ -114,6 +142,12 @@ export type AssinaturaClienteMaxAggregateInputType = {
   vigenciaFim?: true
   saldoCortes?: true
   renovaAutomaticamente?: true
+  provedorPagamento?: true
+  providerCustomerId?: true
+  providerSubscriptionId?: true
+  proximaCobrancaEm?: true
+  cancelarAoFimDoCiclo?: true
+  percentualComissaoBps?: true
   observacao?: true
   criadoEm?: true
   atualizadoEm?: true
@@ -129,6 +163,12 @@ export type AssinaturaClienteCountAggregateInputType = {
   vigenciaFim?: true
   saldoCortes?: true
   renovaAutomaticamente?: true
+  provedorPagamento?: true
+  providerCustomerId?: true
+  providerSubscriptionId?: true
+  proximaCobrancaEm?: true
+  cancelarAoFimDoCiclo?: true
+  percentualComissaoBps?: true
   observacao?: true
   criadoEm?: true
   atualizadoEm?: true
@@ -231,6 +271,12 @@ export type AssinaturaClienteGroupByOutputType = {
   vigenciaFim: Date
   saldoCortes: number
   renovaAutomaticamente: boolean
+  provedorPagamento: $Enums.ProvedorPagamento
+  providerCustomerId: string | null
+  providerSubscriptionId: string | null
+  proximaCobrancaEm: Date | null
+  cancelarAoFimDoCiclo: boolean
+  percentualComissaoBps: number
   observacao: string | null
   criadoEm: Date
   atualizadoEm: Date
@@ -269,6 +315,12 @@ export type AssinaturaClienteWhereInput = {
   vigenciaFim?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
   saldoCortes?: Prisma.IntFilter<"AssinaturaCliente"> | number
   renovaAutomaticamente?: Prisma.BoolFilter<"AssinaturaCliente"> | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFilter<"AssinaturaCliente"> | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.StringNullableFilter<"AssinaturaCliente"> | string | null
+  providerSubscriptionId?: Prisma.StringNullableFilter<"AssinaturaCliente"> | string | null
+  proximaCobrancaEm?: Prisma.DateTimeNullableFilter<"AssinaturaCliente"> | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFilter<"AssinaturaCliente"> | boolean
+  percentualComissaoBps?: Prisma.IntFilter<"AssinaturaCliente"> | number
   observacao?: Prisma.StringNullableFilter<"AssinaturaCliente"> | string | null
   criadoEm?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
@@ -288,6 +340,12 @@ export type AssinaturaClienteOrderByWithRelationInput = {
   vigenciaFim?: Prisma.SortOrder
   saldoCortes?: Prisma.SortOrder
   renovaAutomaticamente?: Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerSubscriptionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  proximaCobrancaEm?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelarAoFimDoCiclo?: Prisma.SortOrder
+  percentualComissaoBps?: Prisma.SortOrder
   observacao?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -299,6 +357,7 @@ export type AssinaturaClienteOrderByWithRelationInput = {
 
 export type AssinaturaClienteWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  providerSubscriptionId?: string
   AND?: Prisma.AssinaturaClienteWhereInput | Prisma.AssinaturaClienteWhereInput[]
   OR?: Prisma.AssinaturaClienteWhereInput[]
   NOT?: Prisma.AssinaturaClienteWhereInput | Prisma.AssinaturaClienteWhereInput[]
@@ -310,6 +369,11 @@ export type AssinaturaClienteWhereUniqueInput = Prisma.AtLeast<{
   vigenciaFim?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
   saldoCortes?: Prisma.IntFilter<"AssinaturaCliente"> | number
   renovaAutomaticamente?: Prisma.BoolFilter<"AssinaturaCliente"> | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFilter<"AssinaturaCliente"> | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.StringNullableFilter<"AssinaturaCliente"> | string | null
+  proximaCobrancaEm?: Prisma.DateTimeNullableFilter<"AssinaturaCliente"> | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFilter<"AssinaturaCliente"> | boolean
+  percentualComissaoBps?: Prisma.IntFilter<"AssinaturaCliente"> | number
   observacao?: Prisma.StringNullableFilter<"AssinaturaCliente"> | string | null
   criadoEm?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
@@ -317,7 +381,7 @@ export type AssinaturaClienteWhereUniqueInput = Prisma.AtLeast<{
   plano?: Prisma.XOR<Prisma.PlanoAssinaturaScalarRelationFilter, Prisma.PlanoAssinaturaWhereInput>
   usos?: Prisma.UsoAssinaturaListRelationFilter
   pagamentos?: Prisma.PagamentoAssinaturaListRelationFilter
-}, "id">
+}, "id" | "providerSubscriptionId">
 
 export type AssinaturaClienteOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -329,6 +393,12 @@ export type AssinaturaClienteOrderByWithAggregationInput = {
   vigenciaFim?: Prisma.SortOrder
   saldoCortes?: Prisma.SortOrder
   renovaAutomaticamente?: Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerSubscriptionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  proximaCobrancaEm?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelarAoFimDoCiclo?: Prisma.SortOrder
+  percentualComissaoBps?: Prisma.SortOrder
   observacao?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -352,6 +422,12 @@ export type AssinaturaClienteScalarWhereWithAggregatesInput = {
   vigenciaFim?: Prisma.DateTimeWithAggregatesFilter<"AssinaturaCliente"> | Date | string
   saldoCortes?: Prisma.IntWithAggregatesFilter<"AssinaturaCliente"> | number
   renovaAutomaticamente?: Prisma.BoolWithAggregatesFilter<"AssinaturaCliente"> | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoWithAggregatesFilter<"AssinaturaCliente"> | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.StringNullableWithAggregatesFilter<"AssinaturaCliente"> | string | null
+  providerSubscriptionId?: Prisma.StringNullableWithAggregatesFilter<"AssinaturaCliente"> | string | null
+  proximaCobrancaEm?: Prisma.DateTimeNullableWithAggregatesFilter<"AssinaturaCliente"> | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolWithAggregatesFilter<"AssinaturaCliente"> | boolean
+  percentualComissaoBps?: Prisma.IntWithAggregatesFilter<"AssinaturaCliente"> | number
   observacao?: Prisma.StringNullableWithAggregatesFilter<"AssinaturaCliente"> | string | null
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"AssinaturaCliente"> | Date | string
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"AssinaturaCliente"> | Date | string
@@ -365,6 +441,12 @@ export type AssinaturaClienteCreateInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -384,6 +466,12 @@ export type AssinaturaClienteUncheckedCreateInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -399,6 +487,12 @@ export type AssinaturaClienteUpdateInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -418,6 +512,12 @@ export type AssinaturaClienteUncheckedUpdateInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -435,6 +535,12 @@ export type AssinaturaClienteCreateManyInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -448,6 +554,12 @@ export type AssinaturaClienteUpdateManyMutationInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -463,6 +575,12 @@ export type AssinaturaClienteUncheckedUpdateManyInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -488,6 +606,12 @@ export type AssinaturaClienteCountOrderByAggregateInput = {
   vigenciaFim?: Prisma.SortOrder
   saldoCortes?: Prisma.SortOrder
   renovaAutomaticamente?: Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerCustomerId?: Prisma.SortOrder
+  providerSubscriptionId?: Prisma.SortOrder
+  proximaCobrancaEm?: Prisma.SortOrder
+  cancelarAoFimDoCiclo?: Prisma.SortOrder
+  percentualComissaoBps?: Prisma.SortOrder
   observacao?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -495,6 +619,7 @@ export type AssinaturaClienteCountOrderByAggregateInput = {
 
 export type AssinaturaClienteAvgOrderByAggregateInput = {
   saldoCortes?: Prisma.SortOrder
+  percentualComissaoBps?: Prisma.SortOrder
 }
 
 export type AssinaturaClienteMaxOrderByAggregateInput = {
@@ -507,6 +632,12 @@ export type AssinaturaClienteMaxOrderByAggregateInput = {
   vigenciaFim?: Prisma.SortOrder
   saldoCortes?: Prisma.SortOrder
   renovaAutomaticamente?: Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerCustomerId?: Prisma.SortOrder
+  providerSubscriptionId?: Prisma.SortOrder
+  proximaCobrancaEm?: Prisma.SortOrder
+  cancelarAoFimDoCiclo?: Prisma.SortOrder
+  percentualComissaoBps?: Prisma.SortOrder
   observacao?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -522,6 +653,12 @@ export type AssinaturaClienteMinOrderByAggregateInput = {
   vigenciaFim?: Prisma.SortOrder
   saldoCortes?: Prisma.SortOrder
   renovaAutomaticamente?: Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerCustomerId?: Prisma.SortOrder
+  providerSubscriptionId?: Prisma.SortOrder
+  proximaCobrancaEm?: Prisma.SortOrder
+  cancelarAoFimDoCiclo?: Prisma.SortOrder
+  percentualComissaoBps?: Prisma.SortOrder
   observacao?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -529,6 +666,7 @@ export type AssinaturaClienteMinOrderByAggregateInput = {
 
 export type AssinaturaClienteSumOrderByAggregateInput = {
   saldoCortes?: Prisma.SortOrder
+  percentualComissaoBps?: Prisma.SortOrder
 }
 
 export type AssinaturaClienteScalarRelationFilter = {
@@ -624,6 +762,10 @@ export type EnumStatusAssinaturaFieldUpdateOperationsInput = {
   set?: $Enums.StatusAssinatura
 }
 
+export type EnumProvedorPagamentoFieldUpdateOperationsInput = {
+  set?: $Enums.ProvedorPagamento
+}
+
 export type AssinaturaClienteCreateNestedOneWithoutUsosInput = {
   create?: Prisma.XOR<Prisma.AssinaturaClienteCreateWithoutUsosInput, Prisma.AssinaturaClienteUncheckedCreateWithoutUsosInput>
   connectOrCreate?: Prisma.AssinaturaClienteCreateOrConnectWithoutUsosInput
@@ -660,6 +802,12 @@ export type AssinaturaClienteCreateWithoutClienteInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -677,6 +825,12 @@ export type AssinaturaClienteUncheckedCreateWithoutClienteInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -723,6 +877,12 @@ export type AssinaturaClienteScalarWhereInput = {
   vigenciaFim?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
   saldoCortes?: Prisma.IntFilter<"AssinaturaCliente"> | number
   renovaAutomaticamente?: Prisma.BoolFilter<"AssinaturaCliente"> | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFilter<"AssinaturaCliente"> | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.StringNullableFilter<"AssinaturaCliente"> | string | null
+  providerSubscriptionId?: Prisma.StringNullableFilter<"AssinaturaCliente"> | string | null
+  proximaCobrancaEm?: Prisma.DateTimeNullableFilter<"AssinaturaCliente"> | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFilter<"AssinaturaCliente"> | boolean
+  percentualComissaoBps?: Prisma.IntFilter<"AssinaturaCliente"> | number
   observacao?: Prisma.StringNullableFilter<"AssinaturaCliente"> | string | null
   criadoEm?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"AssinaturaCliente"> | Date | string
@@ -736,6 +896,12 @@ export type AssinaturaClienteCreateWithoutPlanoInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -753,6 +919,12 @@ export type AssinaturaClienteUncheckedCreateWithoutPlanoInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -794,6 +966,12 @@ export type AssinaturaClienteCreateWithoutUsosInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -812,6 +990,12 @@ export type AssinaturaClienteUncheckedCreateWithoutUsosInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -842,6 +1026,12 @@ export type AssinaturaClienteUpdateWithoutUsosInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -860,6 +1050,12 @@ export type AssinaturaClienteUncheckedUpdateWithoutUsosInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -874,6 +1070,12 @@ export type AssinaturaClienteCreateWithoutPagamentosInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -892,6 +1094,12 @@ export type AssinaturaClienteUncheckedCreateWithoutPagamentosInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -922,6 +1130,12 @@ export type AssinaturaClienteUpdateWithoutPagamentosInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -940,6 +1154,12 @@ export type AssinaturaClienteUncheckedUpdateWithoutPagamentosInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -955,6 +1175,12 @@ export type AssinaturaClienteCreateManyClienteInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -968,6 +1194,12 @@ export type AssinaturaClienteUpdateWithoutClienteInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -985,6 +1217,12 @@ export type AssinaturaClienteUncheckedUpdateWithoutClienteInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1001,6 +1239,12 @@ export type AssinaturaClienteUncheckedUpdateManyWithoutClienteInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1015,6 +1259,12 @@ export type AssinaturaClienteCreateManyPlanoInput = {
   vigenciaFim: Date | string
   saldoCortes: number
   renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
   observacao?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -1028,6 +1278,12 @@ export type AssinaturaClienteUpdateWithoutPlanoInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1045,6 +1301,12 @@ export type AssinaturaClienteUncheckedUpdateWithoutPlanoInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1061,6 +1323,12 @@ export type AssinaturaClienteUncheckedUpdateManyWithoutPlanoInput = {
   vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
   renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1116,6 +1384,12 @@ export type AssinaturaClienteSelect<ExtArgs extends runtime.Types.Extensions.Int
   vigenciaFim?: boolean
   saldoCortes?: boolean
   renovaAutomaticamente?: boolean
+  provedorPagamento?: boolean
+  providerCustomerId?: boolean
+  providerSubscriptionId?: boolean
+  proximaCobrancaEm?: boolean
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: boolean
   observacao?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
@@ -1136,6 +1410,12 @@ export type AssinaturaClienteSelectCreateManyAndReturn<ExtArgs extends runtime.T
   vigenciaFim?: boolean
   saldoCortes?: boolean
   renovaAutomaticamente?: boolean
+  provedorPagamento?: boolean
+  providerCustomerId?: boolean
+  providerSubscriptionId?: boolean
+  proximaCobrancaEm?: boolean
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: boolean
   observacao?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
@@ -1153,6 +1433,12 @@ export type AssinaturaClienteSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   vigenciaFim?: boolean
   saldoCortes?: boolean
   renovaAutomaticamente?: boolean
+  provedorPagamento?: boolean
+  providerCustomerId?: boolean
+  providerSubscriptionId?: boolean
+  proximaCobrancaEm?: boolean
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: boolean
   observacao?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
@@ -1170,12 +1456,18 @@ export type AssinaturaClienteSelectScalar = {
   vigenciaFim?: boolean
   saldoCortes?: boolean
   renovaAutomaticamente?: boolean
+  provedorPagamento?: boolean
+  providerCustomerId?: boolean
+  providerSubscriptionId?: boolean
+  proximaCobrancaEm?: boolean
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: boolean
   observacao?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
 }
 
-export type AssinaturaClienteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "planoId" | "status" | "inicio" | "vigenciaInicio" | "vigenciaFim" | "saldoCortes" | "renovaAutomaticamente" | "observacao" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["assinaturaCliente"]>
+export type AssinaturaClienteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "planoId" | "status" | "inicio" | "vigenciaInicio" | "vigenciaFim" | "saldoCortes" | "renovaAutomaticamente" | "provedorPagamento" | "providerCustomerId" | "providerSubscriptionId" | "proximaCobrancaEm" | "cancelarAoFimDoCiclo" | "percentualComissaoBps" | "observacao" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["assinaturaCliente"]>
 export type AssinaturaClienteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   plano?: boolean | Prisma.PlanoAssinaturaDefaultArgs<ExtArgs>
@@ -1210,6 +1502,12 @@ export type $AssinaturaClientePayload<ExtArgs extends runtime.Types.Extensions.I
     vigenciaFim: Date
     saldoCortes: number
     renovaAutomaticamente: boolean
+    provedorPagamento: $Enums.ProvedorPagamento
+    providerCustomerId: string | null
+    providerSubscriptionId: string | null
+    proximaCobrancaEm: Date | null
+    cancelarAoFimDoCiclo: boolean
+    percentualComissaoBps: number
     observacao: string | null
     criadoEm: Date
     atualizadoEm: Date
@@ -1649,6 +1947,12 @@ export interface AssinaturaClienteFieldRefs {
   readonly vigenciaFim: Prisma.FieldRef<"AssinaturaCliente", 'DateTime'>
   readonly saldoCortes: Prisma.FieldRef<"AssinaturaCliente", 'Int'>
   readonly renovaAutomaticamente: Prisma.FieldRef<"AssinaturaCliente", 'Boolean'>
+  readonly provedorPagamento: Prisma.FieldRef<"AssinaturaCliente", 'ProvedorPagamento'>
+  readonly providerCustomerId: Prisma.FieldRef<"AssinaturaCliente", 'String'>
+  readonly providerSubscriptionId: Prisma.FieldRef<"AssinaturaCliente", 'String'>
+  readonly proximaCobrancaEm: Prisma.FieldRef<"AssinaturaCliente", 'DateTime'>
+  readonly cancelarAoFimDoCiclo: Prisma.FieldRef<"AssinaturaCliente", 'Boolean'>
+  readonly percentualComissaoBps: Prisma.FieldRef<"AssinaturaCliente", 'Int'>
   readonly observacao: Prisma.FieldRef<"AssinaturaCliente", 'String'>
   readonly criadoEm: Prisma.FieldRef<"AssinaturaCliente", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"AssinaturaCliente", 'DateTime'>

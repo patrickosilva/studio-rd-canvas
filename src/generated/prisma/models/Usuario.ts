@@ -237,6 +237,7 @@ export type UsuarioWhereInput = {
   notificacoes?: Prisma.NotificacaoListRelationFilter
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaListRelationFilter
   contasOAuth?: Prisma.ContaOAuthListRelationFilter
+  usosCupons?: Prisma.UsoCupomListRelationFilter
 }
 
 export type UsuarioOrderByWithRelationInput = {
@@ -258,6 +259,7 @@ export type UsuarioOrderByWithRelationInput = {
   notificacoes?: Prisma.NotificacaoOrderByRelationAggregateInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaOrderByRelationAggregateInput
   contasOAuth?: Prisma.ContaOAuthOrderByRelationAggregateInput
+  usosCupons?: Prisma.UsoCupomOrderByRelationAggregateInput
 }
 
 export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
@@ -282,6 +284,7 @@ export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
   notificacoes?: Prisma.NotificacaoListRelationFilter
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaListRelationFilter
   contasOAuth?: Prisma.ContaOAuthListRelationFilter
+  usosCupons?: Prisma.UsoCupomListRelationFilter
 }, "id" | "email">
 
 export type UsuarioOrderByWithAggregationInput = {
@@ -337,6 +340,7 @@ export type UsuarioCreateInput = {
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUncheckedCreateInput = {
@@ -358,6 +362,7 @@ export type UsuarioUncheckedCreateInput = {
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomUncheckedCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUpdateInput = {
@@ -379,6 +384,7 @@ export type UsuarioUpdateInput = {
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioUncheckedUpdateInput = {
@@ -400,6 +406,7 @@ export type UsuarioUncheckedUpdateInput = {
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUncheckedUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioCreateManyInput = {
@@ -608,6 +615,20 @@ export type UsuarioUpdateOneRequiredWithoutTokensRedefinicaoSenhaNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutTokensRedefinicaoSenhaInput, Prisma.UsuarioUpdateWithoutTokensRedefinicaoSenhaInput>, Prisma.UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput>
 }
 
+export type UsuarioCreateNestedOneWithoutUsosCuponsInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutUsosCuponsInput, Prisma.UsuarioUncheckedCreateWithoutUsosCuponsInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutUsosCuponsInput
+  connect?: Prisma.UsuarioWhereUniqueInput
+}
+
+export type UsuarioUpdateOneRequiredWithoutUsosCuponsNestedInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutUsosCuponsInput, Prisma.UsuarioUncheckedCreateWithoutUsosCuponsInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutUsosCuponsInput
+  upsert?: Prisma.UsuarioUpsertWithoutUsosCuponsInput
+  connect?: Prisma.UsuarioWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutUsosCuponsInput, Prisma.UsuarioUpdateWithoutUsosCuponsInput>, Prisma.UsuarioUncheckedUpdateWithoutUsosCuponsInput>
+}
+
 export type UsuarioCreateWithoutProfissionalInput = {
   id?: string
   nome: string
@@ -626,6 +647,7 @@ export type UsuarioCreateWithoutProfissionalInput = {
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUncheckedCreateWithoutProfissionalInput = {
@@ -646,6 +668,7 @@ export type UsuarioUncheckedCreateWithoutProfissionalInput = {
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomUncheckedCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioCreateOrConnectWithoutProfissionalInput = {
@@ -682,6 +705,7 @@ export type UsuarioUpdateWithoutProfissionalInput = {
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutProfissionalInput = {
@@ -702,6 +726,7 @@ export type UsuarioUncheckedUpdateWithoutProfissionalInput = {
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUncheckedUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioCreateWithoutContasOAuthInput = {
@@ -722,6 +747,7 @@ export type UsuarioCreateWithoutContasOAuthInput = {
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUncheckedCreateWithoutContasOAuthInput = {
@@ -742,6 +768,7 @@ export type UsuarioUncheckedCreateWithoutContasOAuthInput = {
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomUncheckedCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioCreateOrConnectWithoutContasOAuthInput = {
@@ -778,6 +805,7 @@ export type UsuarioUpdateWithoutContasOAuthInput = {
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutContasOAuthInput = {
@@ -798,6 +826,7 @@ export type UsuarioUncheckedUpdateWithoutContasOAuthInput = {
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUncheckedUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioCreateWithoutSessoesInput = {
@@ -818,6 +847,7 @@ export type UsuarioCreateWithoutSessoesInput = {
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUncheckedCreateWithoutSessoesInput = {
@@ -838,6 +868,7 @@ export type UsuarioUncheckedCreateWithoutSessoesInput = {
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomUncheckedCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioCreateOrConnectWithoutSessoesInput = {
@@ -874,6 +905,7 @@ export type UsuarioUpdateWithoutSessoesInput = {
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutSessoesInput = {
@@ -894,6 +926,7 @@ export type UsuarioUncheckedUpdateWithoutSessoesInput = {
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUncheckedUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioCreateWithoutAgendamentosInput = {
@@ -914,6 +947,7 @@ export type UsuarioCreateWithoutAgendamentosInput = {
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUncheckedCreateWithoutAgendamentosInput = {
@@ -934,6 +968,7 @@ export type UsuarioUncheckedCreateWithoutAgendamentosInput = {
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomUncheckedCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioCreateOrConnectWithoutAgendamentosInput = {
@@ -970,6 +1005,7 @@ export type UsuarioUpdateWithoutAgendamentosInput = {
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutAgendamentosInput = {
@@ -990,6 +1026,7 @@ export type UsuarioUncheckedUpdateWithoutAgendamentosInput = {
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUncheckedUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioCreateWithoutAssinaturasInput = {
@@ -1010,6 +1047,7 @@ export type UsuarioCreateWithoutAssinaturasInput = {
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUncheckedCreateWithoutAssinaturasInput = {
@@ -1030,6 +1068,7 @@ export type UsuarioUncheckedCreateWithoutAssinaturasInput = {
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomUncheckedCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioCreateOrConnectWithoutAssinaturasInput = {
@@ -1066,6 +1105,7 @@ export type UsuarioUpdateWithoutAssinaturasInput = {
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutAssinaturasInput = {
@@ -1086,6 +1126,7 @@ export type UsuarioUncheckedUpdateWithoutAssinaturasInput = {
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUncheckedUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioCreateWithoutNotificacoesInput = {
@@ -1106,6 +1147,7 @@ export type UsuarioCreateWithoutNotificacoesInput = {
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUncheckedCreateWithoutNotificacoesInput = {
@@ -1126,6 +1168,7 @@ export type UsuarioUncheckedCreateWithoutNotificacoesInput = {
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomUncheckedCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioCreateOrConnectWithoutNotificacoesInput = {
@@ -1162,6 +1205,7 @@ export type UsuarioUpdateWithoutNotificacoesInput = {
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutNotificacoesInput = {
@@ -1182,6 +1226,7 @@ export type UsuarioUncheckedUpdateWithoutNotificacoesInput = {
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUncheckedUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioCreateWithoutTokensRedefinicaoSenhaInput = {
@@ -1202,6 +1247,7 @@ export type UsuarioCreateWithoutTokensRedefinicaoSenhaInput = {
   agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput = {
@@ -1222,6 +1268,7 @@ export type UsuarioUncheckedCreateWithoutTokensRedefinicaoSenhaInput = {
   agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
   notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
   contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
+  usosCupons?: Prisma.UsoCupomUncheckedCreateNestedManyWithoutClienteInput
 }
 
 export type UsuarioCreateOrConnectWithoutTokensRedefinicaoSenhaInput = {
@@ -1258,6 +1305,7 @@ export type UsuarioUpdateWithoutTokensRedefinicaoSenhaInput = {
   agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUpdateManyWithoutClienteNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput = {
@@ -1278,6 +1326,107 @@ export type UsuarioUncheckedUpdateWithoutTokensRedefinicaoSenhaInput = {
   agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
   notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
   contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
+  usosCupons?: Prisma.UsoCupomUncheckedUpdateManyWithoutClienteNestedInput
+}
+
+export type UsuarioCreateWithoutUsosCuponsInput = {
+  id?: string
+  nome: string
+  email: string
+  telefone?: string | null
+  senhaHash?: string | null
+  papel?: $Enums.PapelUsuario
+  ativo?: boolean
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
+  sessoes?: Prisma.SessaoCreateNestedManyWithoutUsuarioInput
+  profissional?: Prisma.ProfissionalCreateNestedOneWithoutUsuarioInput
+  assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutClienteInput
+  agendamentos?: Prisma.AgendamentoCreateNestedManyWithoutClienteInput
+  notificacoes?: Prisma.NotificacaoCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthCreateNestedManyWithoutUsuarioInput
+}
+
+export type UsuarioUncheckedCreateWithoutUsosCuponsInput = {
+  id?: string
+  nome: string
+  email: string
+  telefone?: string | null
+  senhaHash?: string | null
+  papel?: $Enums.PapelUsuario
+  ativo?: boolean
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  termosVersaoAceita?: string | null
+  termosAceitosEm?: Date | string | null
+  sessoes?: Prisma.SessaoUncheckedCreateNestedManyWithoutUsuarioInput
+  profissional?: Prisma.ProfissionalUncheckedCreateNestedOneWithoutUsuarioInput
+  assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutClienteInput
+  agendamentos?: Prisma.AgendamentoUncheckedCreateNestedManyWithoutClienteInput
+  notificacoes?: Prisma.NotificacaoUncheckedCreateNestedManyWithoutUsuarioInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedCreateNestedManyWithoutUsuarioInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedCreateNestedManyWithoutUsuarioInput
+}
+
+export type UsuarioCreateOrConnectWithoutUsosCuponsInput = {
+  where: Prisma.UsuarioWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutUsosCuponsInput, Prisma.UsuarioUncheckedCreateWithoutUsosCuponsInput>
+}
+
+export type UsuarioUpsertWithoutUsosCuponsInput = {
+  update: Prisma.XOR<Prisma.UsuarioUpdateWithoutUsosCuponsInput, Prisma.UsuarioUncheckedUpdateWithoutUsosCuponsInput>
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutUsosCuponsInput, Prisma.UsuarioUncheckedCreateWithoutUsosCuponsInput>
+  where?: Prisma.UsuarioWhereInput
+}
+
+export type UsuarioUpdateToOneWithWhereWithoutUsosCuponsInput = {
+  where?: Prisma.UsuarioWhereInput
+  data: Prisma.XOR<Prisma.UsuarioUpdateWithoutUsosCuponsInput, Prisma.UsuarioUncheckedUpdateWithoutUsosCuponsInput>
+}
+
+export type UsuarioUpdateWithoutUsosCuponsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessoes?: Prisma.SessaoUpdateManyWithoutUsuarioNestedInput
+  profissional?: Prisma.ProfissionalUpdateOneWithoutUsuarioNestedInput
+  assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutClienteNestedInput
+  agendamentos?: Prisma.AgendamentoUpdateManyWithoutClienteNestedInput
+  notificacoes?: Prisma.NotificacaoUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUpdateManyWithoutUsuarioNestedInput
+}
+
+export type UsuarioUncheckedUpdateWithoutUsosCuponsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  senhaHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  papel?: Prisma.EnumPapelUsuarioFieldUpdateOperationsInput | $Enums.PapelUsuario
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  termosVersaoAceita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  termosAceitosEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessoes?: Prisma.SessaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  profissional?: Prisma.ProfissionalUncheckedUpdateOneWithoutUsuarioNestedInput
+  assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutClienteNestedInput
+  agendamentos?: Prisma.AgendamentoUncheckedUpdateManyWithoutClienteNestedInput
+  notificacoes?: Prisma.NotificacaoUncheckedUpdateManyWithoutUsuarioNestedInput
+  tokensRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaUncheckedUpdateManyWithoutUsuarioNestedInput
+  contasOAuth?: Prisma.ContaOAuthUncheckedUpdateManyWithoutUsuarioNestedInput
 }
 
 
@@ -1292,6 +1441,7 @@ export type UsuarioCountOutputType = {
   notificacoes: number
   tokensRedefinicaoSenha: number
   contasOAuth: number
+  usosCupons: number
 }
 
 export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1301,6 +1451,7 @@ export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   notificacoes?: boolean | UsuarioCountOutputTypeCountNotificacoesArgs
   tokensRedefinicaoSenha?: boolean | UsuarioCountOutputTypeCountTokensRedefinicaoSenhaArgs
   contasOAuth?: boolean | UsuarioCountOutputTypeCountContasOAuthArgs
+  usosCupons?: boolean | UsuarioCountOutputTypeCountUsosCuponsArgs
 }
 
 /**
@@ -1355,6 +1506,13 @@ export type UsuarioCountOutputTypeCountContasOAuthArgs<ExtArgs extends runtime.T
   where?: Prisma.ContaOAuthWhereInput
 }
 
+/**
+ * UsuarioCountOutputType without action
+ */
+export type UsuarioCountOutputTypeCountUsosCuponsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UsoCupomWhereInput
+}
+
 
 export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1375,6 +1533,7 @@ export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   notificacoes?: boolean | Prisma.Usuario$notificacoesArgs<ExtArgs>
   tokensRedefinicaoSenha?: boolean | Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>
   contasOAuth?: boolean | Prisma.Usuario$contasOAuthArgs<ExtArgs>
+  usosCupons?: boolean | Prisma.Usuario$usosCuponsArgs<ExtArgs>
   _count?: boolean | Prisma.UsuarioCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["usuario"]>
 
@@ -1429,6 +1588,7 @@ export type UsuarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   notificacoes?: boolean | Prisma.Usuario$notificacoesArgs<ExtArgs>
   tokensRedefinicaoSenha?: boolean | Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>
   contasOAuth?: boolean | Prisma.Usuario$contasOAuthArgs<ExtArgs>
+  usosCupons?: boolean | Prisma.Usuario$usosCuponsArgs<ExtArgs>
   _count?: boolean | Prisma.UsuarioCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UsuarioIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1444,6 +1604,7 @@ export type $UsuarioPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     notificacoes: Prisma.$NotificacaoPayload<ExtArgs>[]
     tokensRedefinicaoSenha: Prisma.$TokenRedefinicaoSenhaPayload<ExtArgs>[]
     contasOAuth: Prisma.$ContaOAuthPayload<ExtArgs>[]
+    usosCupons: Prisma.$UsoCupomPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1858,6 +2019,7 @@ export interface Prisma__UsuarioClient<T, Null = never, ExtArgs extends runtime.
   notificacoes<T extends Prisma.Usuario$notificacoesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$notificacoesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificacaoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tokensRedefinicaoSenha<T extends Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$tokensRedefinicaoSenhaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TokenRedefinicaoSenhaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contasOAuth<T extends Prisma.Usuario$contasOAuthArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$contasOAuthArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContaOAuthPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  usosCupons<T extends Prisma.Usuario$usosCuponsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$usosCuponsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsoCupomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2451,6 +2613,30 @@ export type Usuario$contasOAuthArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.ContaOAuthScalarFieldEnum | Prisma.ContaOAuthScalarFieldEnum[]
+}
+
+/**
+ * Usuario.usosCupons
+ */
+export type Usuario$usosCuponsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UsoCupom
+   */
+  select?: Prisma.UsoCupomSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UsoCupom
+   */
+  omit?: Prisma.UsoCupomOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UsoCupomInclude<ExtArgs> | null
+  where?: Prisma.UsoCupomWhereInput
+  orderBy?: Prisma.UsoCupomOrderByWithRelationInput | Prisma.UsoCupomOrderByWithRelationInput[]
+  cursor?: Prisma.UsoCupomWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UsoCupomScalarFieldEnum | Prisma.UsoCupomScalarFieldEnum[]
 }
 
 /**

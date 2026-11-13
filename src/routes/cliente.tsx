@@ -11,6 +11,7 @@ import {
   History,
   LayoutDashboard,
   User,
+  TicketPercent,
 } from "lucide-react";
 
 import { DashboardShell } from "@/components/dashboard/Sidebar";
@@ -86,6 +87,11 @@ const items = [
     label: "Benefícios",
     to: "/cliente/beneficios",
     icon: Gift,
+  },
+  {
+    label: "Cupons",
+    to: "/cliente/cupons",
+    icon: TicketPercent,
   },
   {
     label: "Fidelidade",

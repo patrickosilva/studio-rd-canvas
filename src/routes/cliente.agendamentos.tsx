@@ -13,6 +13,7 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  TicketPercent,
   Scissors,
   UserRound,
 } from "lucide-react";
@@ -25,6 +26,7 @@ import {
   listarProfissionaisAtivos,
   listarServicosAtivos,
 } from "@/lib/api/catalogo.functions";
+import { validarMeuCupomParaAgendamento } from "@/lib/api/cupons.functions";
 import {
   clienteCancelarAgendamento,
   listarIndisponibilidadesAgenda,
@@ -81,11 +83,23 @@ type Profissional = {
   descricao: string | null;
 };
 
+type CupomAplicado = {
+  codigo: string;
+  descontoCentavos: number;
+  precoOriginalCentavos: number;
+  valorFinalCentavos: number;
+};
+
+
 type Agendamento = {
   id: string;
   inicio: string | Date;
   fim: string | Date;
   status: string;
+  precoOriginalCentavos: number | null;
+  descontoCupomCentavos: number | null;
+  valorFinalCentavos: number | null;
+  cupomCodigo: string | null;
   observacaoCliente: string | null;
   motivoRecusa: string | null;
   motivoCancelamento: string | null;
@@ -293,6 +307,9 @@ function AgendamentosPage() {
     listarMeusAgendamentos,
   );
   const enviarSolicitacao = useServerFn(solicitarAgendamento);
+  const validarCupom = useServerFn(
+    validarMeuCupomParaAgendamento,
+  );
   const cancelarAgendamento = useServerFn(
     clienteCancelarAgendamento,
   );
@@ -320,6 +337,11 @@ function AgendamentosPage() {
   const [profissionalId, setProfissionalId] = useState("");
   const [dataSelecionada, setDataSelecionada] = useState("");
   const [horarioSelecionado, setHorarioSelecionado] = useState("");
+  const [cupomCodigo, setCupomCodigo] = useState("");
+  const [cupomAplicado, setCupomAplicado] =
+    useState<CupomAplicado | null>(null);
+  const [validandoCupom, setValidandoCupom] = useState(false);
+  const [erroCupom, setErroCupom] = useState("");
 
   const [observacao, setObservacao] = useState("");
   const [carregando, setCarregando] = useState(true);
@@ -493,6 +515,54 @@ function AgendamentosPage() {
     }
   }, [horariosFiltrados, horarioSelecionado]);
 
+  async function handleAplicarCupom() {
+    setErroCupom("");
+    setCupomAplicado(null);
+
+    if (!servicoSelecionado) {
+      setErroCupom("Escolha um serviço antes de aplicar o cupom.");
+      return;
+    }
+
+    if (!cupomCodigo.trim()) {
+      setErroCupom("Informe o código do cupom.");
+      return;
+    }
+
+    setValidandoCupom(true);
+
+    try {
+      const resultado = await validarCupom({
+        data: {
+          codigo: cupomCodigo,
+          servicoId: servicoSelecionado.id,
+        },
+      });
+
+      if (!resultado.sucesso) {
+        setErroCupom(resultado.mensagem);
+        return;
+      }
+
+      setCupomAplicado({
+        codigo: resultado.codigo,
+        descontoCentavos:
+          resultado.descontoCentavos,
+        precoOriginalCentavos:
+          resultado.precoOriginalCentavos,
+        valorFinalCentavos:
+          resultado.valorFinalCentavos,
+      });
+
+      setCupomCodigo(resultado.codigo);
+    } catch (error) {
+      console.error(error);
+      setErroCupom("Não foi possível validar o cupom.");
+    } finally {
+      setValidandoCupom(false);
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -521,6 +591,7 @@ function AgendamentosPage() {
             horarioSelecionado,
           ),
           observacaoCliente: observacao,
+          cupomCodigo: cupomAplicado?.codigo ?? "",
         },
       });
 
@@ -531,6 +602,9 @@ function AgendamentosPage() {
 
       setMensagem(resultado.mensagem);
       setObservacao("");
+      setCupomCodigo("");
+      setCupomAplicado(null);
+      setErroCupom("");
 
       await carregarDados();
       await carregarIndisponibilidades(
@@ -661,6 +735,8 @@ function AgendamentosPage() {
                     onChange={(event) => {
                       setServicoId(event.target.value);
                       setHorarioSelecionado("");
+                      setCupomAplicado(null);
+                      setErroCupom("");
                     }}
                     className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                   >
@@ -787,6 +863,80 @@ function AgendamentosPage() {
                 )}
               </div>
 
+              <div className="rounded-2xl border border-border bg-background/40 p-4">
+                <div className="flex items-center gap-2">
+                  <TicketPercent className="h-4 w-4 text-gold" />
+                  <Label htmlFor="cupom">
+                    Cupom de desconto
+                  </Label>
+                </div>
+
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    id="cupom"
+                    value={cupomCodigo}
+                    onChange={(event) => {
+                      setCupomCodigo(
+                        event.target.value
+                          .toUpperCase()
+                          .replace(/\s+/g, ""),
+                      );
+                      setCupomAplicado(null);
+                      setErroCupom("");
+                    }}
+                    placeholder="Ex.: HALLOWEEN20"
+                    className="uppercase"
+                  />
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={validandoCupom || !cupomCodigo.trim()}
+                    onClick={() => void handleAplicarCupom()}
+                    className="shrink-0"
+                  >
+                    {validandoCupom
+                      ? "Validando..."
+                      : "Aplicar"}
+                  </Button>
+                </div>
+
+                {erroCupom && (
+                  <p className="mt-2 text-xs text-destructive">
+                    {erroCupom}
+                  </p>
+                )}
+
+                {cupomAplicado && (
+                  <div className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
+                    <p className="font-medium text-emerald-400">
+                      Cupom {cupomAplicado.codigo} aplicado
+                    </p>
+
+                    <div className="mt-2 grid gap-1 text-xs text-muted-foreground">
+                      <span>
+                        Valor original:{" "}
+                        {formatarMoeda(
+                          cupomAplicado.precoOriginalCentavos,
+                        )}
+                      </span>
+                      <span>
+                        Desconto: -{" "}
+                        {formatarMoeda(
+                          cupomAplicado.descontoCentavos,
+                        )}
+                      </span>
+                      <strong className="text-sm text-foreground">
+                        Total previsto:{" "}
+                        {formatarMoeda(
+                          cupomAplicado.valorFinalCentavos,
+                        )}
+                      </strong>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="observacao">
                   Observação para a equipe
@@ -876,6 +1026,31 @@ function AgendamentosPage() {
                       {traduzirStatus(agendamento.status)}
                     </span>
                   </div>
+
+                  {agendamento.cupomCodigo && (
+                    <div className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs">
+                      <p className="font-medium text-emerald-400">
+                        Cupom: {agendamento.cupomCodigo}
+                      </p>
+                      <p className="mt-1 text-muted-foreground">
+                        {formatarMoeda(
+                          agendamento.precoOriginalCentavos ??
+                            agendamento.servico.precoCentavos,
+                        )}{" "}
+                        -{" "}
+                        {formatarMoeda(
+                          agendamento.descontoCupomCentavos ?? 0,
+                        )}{" "}
+                        ={" "}
+                        <strong className="text-foreground">
+                          {formatarMoeda(
+                            agendamento.valorFinalCentavos ??
+                              agendamento.servico.precoCentavos,
+                          )}
+                        </strong>
+                      </p>
+                    </div>
+                  )}
 
                   {agendamento.observacaoCliente && (
                     <p className="mt-3 text-sm text-muted-foreground">

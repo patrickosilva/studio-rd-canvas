@@ -396,10 +396,16 @@ export const ModelName = {
   AssinaturaCliente: 'AssinaturaCliente',
   UsoAssinatura: 'UsoAssinatura',
   PagamentoAssinatura: 'PagamentoAssinatura',
+  ContaRecebedoraPagamento: 'ContaRecebedoraPagamento',
+  IntegracaoExterna: 'IntegracaoExterna',
+  EventoWebhookPagamento: 'EventoWebhookPagamento',
   Notificacao: 'Notificacao',
   TokenRedefinicaoSenha: 'TokenRedefinicaoSenha',
   EventoSeguranca: 'EventoSeguranca',
-  EventoWebhookResend: 'EventoWebhookResend'
+  EventoWebhookResend: 'EventoWebhookResend',
+  Cupom: 'Cupom',
+  CupomServico: 'CupomServico',
+  UsoCupom: 'UsoCupom'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -415,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "cliente" | "usuario" | "servico" | "profissional" | "contaOAuth" | "sessao" | "agendamento" | "bloqueioAgenda" | "planoAssinatura" | "assinaturaCliente" | "usoAssinatura" | "pagamentoAssinatura" | "notificacao" | "tokenRedefinicaoSenha" | "eventoSeguranca" | "eventoWebhookResend"
+    modelProps: "cliente" | "usuario" | "servico" | "profissional" | "contaOAuth" | "sessao" | "agendamento" | "bloqueioAgenda" | "planoAssinatura" | "assinaturaCliente" | "usoAssinatura" | "pagamentoAssinatura" | "contaRecebedoraPagamento" | "integracaoExterna" | "eventoWebhookPagamento" | "notificacao" | "tokenRedefinicaoSenha" | "eventoSeguranca" | "eventoWebhookResend" | "cupom" | "cupomServico" | "usoCupom"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1307,6 +1313,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ContaRecebedoraPagamento: {
+      payload: Prisma.$ContaRecebedoraPagamentoPayload<ExtArgs>
+      fields: Prisma.ContaRecebedoraPagamentoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContaRecebedoraPagamentoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContaRecebedoraPagamentoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>
+        }
+        findFirst: {
+          args: Prisma.ContaRecebedoraPagamentoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContaRecebedoraPagamentoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>
+        }
+        findMany: {
+          args: Prisma.ContaRecebedoraPagamentoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>[]
+        }
+        create: {
+          args: Prisma.ContaRecebedoraPagamentoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>
+        }
+        createMany: {
+          args: Prisma.ContaRecebedoraPagamentoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ContaRecebedoraPagamentoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>[]
+        }
+        delete: {
+          args: Prisma.ContaRecebedoraPagamentoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>
+        }
+        update: {
+          args: Prisma.ContaRecebedoraPagamentoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>
+        }
+        deleteMany: {
+          args: Prisma.ContaRecebedoraPagamentoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContaRecebedoraPagamentoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ContaRecebedoraPagamentoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>[]
+        }
+        upsert: {
+          args: Prisma.ContaRecebedoraPagamentoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContaRecebedoraPagamentoPayload>
+        }
+        aggregate: {
+          args: Prisma.ContaRecebedoraPagamentoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContaRecebedoraPagamento>
+        }
+        groupBy: {
+          args: Prisma.ContaRecebedoraPagamentoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContaRecebedoraPagamentoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContaRecebedoraPagamentoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContaRecebedoraPagamentoCountAggregateOutputType> | number
+        }
+      }
+    }
+    IntegracaoExterna: {
+      payload: Prisma.$IntegracaoExternaPayload<ExtArgs>
+      fields: Prisma.IntegracaoExternaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.IntegracaoExternaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.IntegracaoExternaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>
+        }
+        findFirst: {
+          args: Prisma.IntegracaoExternaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.IntegracaoExternaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>
+        }
+        findMany: {
+          args: Prisma.IntegracaoExternaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>[]
+        }
+        create: {
+          args: Prisma.IntegracaoExternaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>
+        }
+        createMany: {
+          args: Prisma.IntegracaoExternaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.IntegracaoExternaCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>[]
+        }
+        delete: {
+          args: Prisma.IntegracaoExternaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>
+        }
+        update: {
+          args: Prisma.IntegracaoExternaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>
+        }
+        deleteMany: {
+          args: Prisma.IntegracaoExternaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.IntegracaoExternaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.IntegracaoExternaUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>[]
+        }
+        upsert: {
+          args: Prisma.IntegracaoExternaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IntegracaoExternaPayload>
+        }
+        aggregate: {
+          args: Prisma.IntegracaoExternaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIntegracaoExterna>
+        }
+        groupBy: {
+          args: Prisma.IntegracaoExternaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IntegracaoExternaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.IntegracaoExternaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IntegracaoExternaCountAggregateOutputType> | number
+        }
+      }
+    }
+    EventoWebhookPagamento: {
+      payload: Prisma.$EventoWebhookPagamentoPayload<ExtArgs>
+      fields: Prisma.EventoWebhookPagamentoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventoWebhookPagamentoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventoWebhookPagamentoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>
+        }
+        findFirst: {
+          args: Prisma.EventoWebhookPagamentoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventoWebhookPagamentoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>
+        }
+        findMany: {
+          args: Prisma.EventoWebhookPagamentoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>[]
+        }
+        create: {
+          args: Prisma.EventoWebhookPagamentoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>
+        }
+        createMany: {
+          args: Prisma.EventoWebhookPagamentoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventoWebhookPagamentoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>[]
+        }
+        delete: {
+          args: Prisma.EventoWebhookPagamentoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>
+        }
+        update: {
+          args: Prisma.EventoWebhookPagamentoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>
+        }
+        deleteMany: {
+          args: Prisma.EventoWebhookPagamentoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventoWebhookPagamentoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventoWebhookPagamentoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>[]
+        }
+        upsert: {
+          args: Prisma.EventoWebhookPagamentoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventoWebhookPagamentoPayload>
+        }
+        aggregate: {
+          args: Prisma.EventoWebhookPagamentoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventoWebhookPagamento>
+        }
+        groupBy: {
+          args: Prisma.EventoWebhookPagamentoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventoWebhookPagamentoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventoWebhookPagamentoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventoWebhookPagamentoCountAggregateOutputType> | number
+        }
+      }
+    }
     Notificacao: {
       payload: Prisma.$NotificacaoPayload<ExtArgs>
       fields: Prisma.NotificacaoFieldRefs
@@ -1603,6 +1831,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Cupom: {
+      payload: Prisma.$CupomPayload<ExtArgs>
+      fields: Prisma.CupomFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CupomFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CupomFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>
+        }
+        findFirst: {
+          args: Prisma.CupomFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CupomFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>
+        }
+        findMany: {
+          args: Prisma.CupomFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>[]
+        }
+        create: {
+          args: Prisma.CupomCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>
+        }
+        createMany: {
+          args: Prisma.CupomCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CupomCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>[]
+        }
+        delete: {
+          args: Prisma.CupomDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>
+        }
+        update: {
+          args: Prisma.CupomUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>
+        }
+        deleteMany: {
+          args: Prisma.CupomDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CupomUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CupomUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>[]
+        }
+        upsert: {
+          args: Prisma.CupomUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomPayload>
+        }
+        aggregate: {
+          args: Prisma.CupomAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCupom>
+        }
+        groupBy: {
+          args: Prisma.CupomGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CupomGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CupomCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CupomCountAggregateOutputType> | number
+        }
+      }
+    }
+    CupomServico: {
+      payload: Prisma.$CupomServicoPayload<ExtArgs>
+      fields: Prisma.CupomServicoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CupomServicoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CupomServicoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>
+        }
+        findFirst: {
+          args: Prisma.CupomServicoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CupomServicoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>
+        }
+        findMany: {
+          args: Prisma.CupomServicoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>[]
+        }
+        create: {
+          args: Prisma.CupomServicoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>
+        }
+        createMany: {
+          args: Prisma.CupomServicoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CupomServicoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>[]
+        }
+        delete: {
+          args: Prisma.CupomServicoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>
+        }
+        update: {
+          args: Prisma.CupomServicoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>
+        }
+        deleteMany: {
+          args: Prisma.CupomServicoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CupomServicoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CupomServicoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>[]
+        }
+        upsert: {
+          args: Prisma.CupomServicoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CupomServicoPayload>
+        }
+        aggregate: {
+          args: Prisma.CupomServicoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCupomServico>
+        }
+        groupBy: {
+          args: Prisma.CupomServicoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CupomServicoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CupomServicoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CupomServicoCountAggregateOutputType> | number
+        }
+      }
+    }
+    UsoCupom: {
+      payload: Prisma.$UsoCupomPayload<ExtArgs>
+      fields: Prisma.UsoCupomFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UsoCupomFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UsoCupomFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>
+        }
+        findFirst: {
+          args: Prisma.UsoCupomFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UsoCupomFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>
+        }
+        findMany: {
+          args: Prisma.UsoCupomFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>[]
+        }
+        create: {
+          args: Prisma.UsoCupomCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>
+        }
+        createMany: {
+          args: Prisma.UsoCupomCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UsoCupomCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>[]
+        }
+        delete: {
+          args: Prisma.UsoCupomDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>
+        }
+        update: {
+          args: Prisma.UsoCupomUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>
+        }
+        deleteMany: {
+          args: Prisma.UsoCupomDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UsoCupomUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UsoCupomUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>[]
+        }
+        upsert: {
+          args: Prisma.UsoCupomUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UsoCupomPayload>
+        }
+        aggregate: {
+          args: Prisma.UsoCupomAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUsoCupom>
+        }
+        groupBy: {
+          args: Prisma.UsoCupomGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UsoCupomGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UsoCupomCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UsoCupomCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1746,7 +2196,11 @@ export const AgendamentoScalarFieldEnum = {
   observacaoPagamento: 'observacaoPagamento',
   reminderSentAt: 'reminderSentAt',
   criadoEm: 'criadoEm',
-  atualizadoEm: 'atualizadoEm'
+  atualizadoEm: 'atualizadoEm',
+  precoOriginalCentavos: 'precoOriginalCentavos',
+  descontoCupomCentavos: 'descontoCupomCentavos',
+  valorFinalCentavos: 'valorFinalCentavos',
+  cupomCodigo: 'cupomCodigo'
 } as const
 
 export type AgendamentoScalarFieldEnum = (typeof AgendamentoScalarFieldEnum)[keyof typeof AgendamentoScalarFieldEnum]
@@ -1774,6 +2228,7 @@ export const PlanoAssinaturaScalarFieldEnum = {
   cortesPorCiclo: 'cortesPorCiclo',
   duracaoDias: 'duracaoDias',
   ativo: 'ativo',
+  providerPlanId: 'providerPlanId',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
 } as const
@@ -1791,6 +2246,12 @@ export const AssinaturaClienteScalarFieldEnum = {
   vigenciaFim: 'vigenciaFim',
   saldoCortes: 'saldoCortes',
   renovaAutomaticamente: 'renovaAutomaticamente',
+  provedorPagamento: 'provedorPagamento',
+  providerCustomerId: 'providerCustomerId',
+  providerSubscriptionId: 'providerSubscriptionId',
+  proximaCobrancaEm: 'proximaCobrancaEm',
+  cancelarAoFimDoCiclo: 'cancelarAoFimDoCiclo',
+  percentualComissaoBps: 'percentualComissaoBps',
   observacao: 'observacao',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
@@ -1817,10 +2278,72 @@ export const PagamentoAssinaturaScalarFieldEnum = {
   valorCentavos: 'valorCentavos',
   pagoEm: 'pagoEm',
   observacao: 'observacao',
+  provedorPagamento: 'provedorPagamento',
+  providerPaymentId: 'providerPaymentId',
+  providerStatus: 'providerStatus',
+  taxaGatewayCentavos: 'taxaGatewayCentavos',
+  comissaoPlataformaCentavos: 'comissaoPlataformaCentavos',
+  valorLiquidoBarbeariaCentavos: 'valorLiquidoBarbeariaCentavos',
   criadoEm: 'criadoEm'
 } as const
 
 export type PagamentoAssinaturaScalarFieldEnum = (typeof PagamentoAssinaturaScalarFieldEnum)[keyof typeof PagamentoAssinaturaScalarFieldEnum]
+
+
+export const ContaRecebedoraPagamentoScalarFieldEnum = {
+  id: 'id',
+  chave: 'chave',
+  provedor: 'provedor',
+  status: 'status',
+  providerUserId: 'providerUserId',
+  providerAccountId: 'providerAccountId',
+  accessTokenCriptografado: 'accessTokenCriptografado',
+  refreshTokenCriptografado: 'refreshTokenCriptografado',
+  tokenExpiraEm: 'tokenExpiraEm',
+  conectadoEm: 'conectadoEm',
+  desconectadoEm: 'desconectadoEm',
+  ultimoErro: 'ultimoErro',
+  comissaoAtiva: 'comissaoAtiva',
+  percentualComissaoBps: 'percentualComissaoBps',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type ContaRecebedoraPagamentoScalarFieldEnum = (typeof ContaRecebedoraPagamentoScalarFieldEnum)[keyof typeof ContaRecebedoraPagamentoScalarFieldEnum]
+
+
+export const IntegracaoExternaScalarFieldEnum = {
+  id: 'id',
+  provedor: 'provedor',
+  status: 'status',
+  nomeConta: 'nomeConta',
+  identificadorExterno: 'identificadorExterno',
+  configuracaoPublica: 'configuracaoPublica',
+  segredoCriptografado: 'segredoCriptografado',
+  conectadoEm: 'conectadoEm',
+  verificadoEm: 'verificadoEm',
+  ultimoErro: 'ultimoErro',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type IntegracaoExternaScalarFieldEnum = (typeof IntegracaoExternaScalarFieldEnum)[keyof typeof IntegracaoExternaScalarFieldEnum]
+
+
+export const EventoWebhookPagamentoScalarFieldEnum = {
+  id: 'id',
+  provedor: 'provedor',
+  providerEventId: 'providerEventId',
+  tipo: 'tipo',
+  providerResourceId: 'providerResourceId',
+  payloadHash: 'payloadHash',
+  status: 'status',
+  recebidoEm: 'recebidoEm',
+  processadoEm: 'processadoEm',
+  erro: 'erro'
+} as const
+
+export type EventoWebhookPagamentoScalarFieldEnum = (typeof EventoWebhookPagamentoScalarFieldEnum)[keyof typeof EventoWebhookPagamentoScalarFieldEnum]
 
 
 export const NotificacaoScalarFieldEnum = {
@@ -1878,12 +2401,72 @@ export const EventoWebhookResendScalarFieldEnum = {
 export type EventoWebhookResendScalarFieldEnum = (typeof EventoWebhookResendScalarFieldEnum)[keyof typeof EventoWebhookResendScalarFieldEnum]
 
 
+export const CupomScalarFieldEnum = {
+  id: 'id',
+  codigo: 'codigo',
+  descricao: 'descricao',
+  campanha: 'campanha',
+  tipo: 'tipo',
+  percentualDesconto: 'percentualDesconto',
+  valorDescontoCentavos: 'valorDescontoCentavos',
+  limiteDescontoCentavos: 'limiteDescontoCentavos',
+  valorMinimoCentavos: 'valorMinimoCentavos',
+  inicioEm: 'inicioEm',
+  fimEm: 'fimEm',
+  limiteUsos: 'limiteUsos',
+  limitePorCliente: 'limitePorCliente',
+  publico: 'publico',
+  quantidadeAtendimentos: 'quantidadeAtendimentos',
+  diasSemAtendimento: 'diasSemAtendimento',
+  aplicaTodosServicos: 'aplicaTodosServicos',
+  visivelParaClientes: 'visivelParaClientes',
+  destaque: 'destaque',
+  combinavelComAssinatura: 'combinavelComAssinatura',
+  ativo: 'ativo',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type CupomScalarFieldEnum = (typeof CupomScalarFieldEnum)[keyof typeof CupomScalarFieldEnum]
+
+
+export const CupomServicoScalarFieldEnum = {
+  cupomId: 'cupomId',
+  servicoId: 'servicoId'
+} as const
+
+export type CupomServicoScalarFieldEnum = (typeof CupomServicoScalarFieldEnum)[keyof typeof CupomServicoScalarFieldEnum]
+
+
+export const UsoCupomScalarFieldEnum = {
+  id: 'id',
+  cupomId: 'cupomId',
+  clienteId: 'clienteId',
+  agendamentoId: 'agendamentoId',
+  codigoAplicado: 'codigoAplicado',
+  descontoCentavos: 'descontoCentavos',
+  criadoEm: 'criadoEm',
+  precoOriginalCentavos: 'precoOriginalCentavos',
+  valorFinalCentavos: 'valorFinalCentavos'
+} as const
+
+export type UsoCupomScalarFieldEnum = (typeof UsoCupomScalarFieldEnum)[keyof typeof UsoCupomScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1900,6 +2483,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -2024,6 +2616,104 @@ export type EnumStatusAssinaturaFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'StatusAssinatura[]'
  */
 export type ListEnumStatusAssinaturaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusAssinatura[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProvedorPagamento'
+ */
+export type EnumProvedorPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProvedorPagamento'>
+    
+
+
+/**
+ * Reference to a field of type 'ProvedorPagamento[]'
+ */
+export type ListEnumProvedorPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProvedorPagamento[]'>
+    
+
+
+/**
+ * Reference to a field of type 'StatusConexaoPagamento'
+ */
+export type EnumStatusConexaoPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusConexaoPagamento'>
+    
+
+
+/**
+ * Reference to a field of type 'StatusConexaoPagamento[]'
+ */
+export type ListEnumStatusConexaoPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusConexaoPagamento[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProvedorIntegracao'
+ */
+export type EnumProvedorIntegracaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProvedorIntegracao'>
+    
+
+
+/**
+ * Reference to a field of type 'ProvedorIntegracao[]'
+ */
+export type ListEnumProvedorIntegracaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProvedorIntegracao[]'>
+    
+
+
+/**
+ * Reference to a field of type 'StatusIntegracao'
+ */
+export type EnumStatusIntegracaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusIntegracao'>
+    
+
+
+/**
+ * Reference to a field of type 'StatusIntegracao[]'
+ */
+export type ListEnumStatusIntegracaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusIntegracao[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'TipoDescontoCupom'
+ */
+export type EnumTipoDescontoCupomFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDescontoCupom'>
+    
+
+
+/**
+ * Reference to a field of type 'TipoDescontoCupom[]'
+ */
+export type ListEnumTipoDescontoCupomFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDescontoCupom[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PublicoCupom'
+ */
+export type EnumPublicoCupomFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PublicoCupom'>
+    
+
+
+/**
+ * Reference to a field of type 'PublicoCupom[]'
+ */
+export type ListEnumPublicoCupomFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PublicoCupom[]'>
     
 
 
@@ -2162,10 +2852,16 @@ export type GlobalOmitConfig = {
   assinaturaCliente?: Prisma.AssinaturaClienteOmit
   usoAssinatura?: Prisma.UsoAssinaturaOmit
   pagamentoAssinatura?: Prisma.PagamentoAssinaturaOmit
+  contaRecebedoraPagamento?: Prisma.ContaRecebedoraPagamentoOmit
+  integracaoExterna?: Prisma.IntegracaoExternaOmit
+  eventoWebhookPagamento?: Prisma.EventoWebhookPagamentoOmit
   notificacao?: Prisma.NotificacaoOmit
   tokenRedefinicaoSenha?: Prisma.TokenRedefinicaoSenhaOmit
   eventoSeguranca?: Prisma.EventoSegurancaOmit
   eventoWebhookResend?: Prisma.EventoWebhookResendOmit
+  cupom?: Prisma.CupomOmit
+  cupomServico?: Prisma.CupomServicoOmit
+  usoCupom?: Prisma.UsoCupomOmit
 }
 
 /* Types for Logging */

@@ -51,6 +51,43 @@ export const FormaPagamento = {
 export type FormaPagamento = (typeof FormaPagamento)[keyof typeof FormaPagamento]
 
 
+export const ProvedorIntegracao = {
+  INTER: 'INTER',
+  META: 'META'
+} as const
+
+export type ProvedorIntegracao = (typeof ProvedorIntegracao)[keyof typeof ProvedorIntegracao]
+
+
+export const StatusIntegracao = {
+  DESCONECTADA: 'DESCONECTADA',
+  CONFIGURANDO: 'CONFIGURANDO',
+  CONECTADA: 'CONECTADA',
+  ERRO: 'ERRO'
+} as const
+
+export type StatusIntegracao = (typeof StatusIntegracao)[keyof typeof StatusIntegracao]
+
+
+export const ProvedorPagamento = {
+  INTER: 'INTER',
+  MANUAL: 'MANUAL',
+  MERCADO_PAGO: 'MERCADO_PAGO'
+} as const
+
+export type ProvedorPagamento = (typeof ProvedorPagamento)[keyof typeof ProvedorPagamento]
+
+
+export const StatusConexaoPagamento = {
+  DESCONECTADA: 'DESCONECTADA',
+  PENDENTE: 'PENDENTE',
+  CONECTADA: 'CONECTADA',
+  ERRO: 'ERRO'
+} as const
+
+export type StatusConexaoPagamento = (typeof StatusConexaoPagamento)[keyof typeof StatusConexaoPagamento]
+
+
 export const StatusAssinatura = {
   ATIVA: 'ATIVA',
   PAUSADA: 'PAUSADA',
@@ -59,3 +96,23 @@ export const StatusAssinatura = {
 } as const
 
 export type StatusAssinatura = (typeof StatusAssinatura)[keyof typeof StatusAssinatura]
+
+
+export const TipoDescontoCupom = {
+  PERCENTUAL: 'PERCENTUAL',
+  VALOR_FIXO: 'VALOR_FIXO'
+} as const
+
+export type TipoDescontoCupom = (typeof TipoDescontoCupom)[keyof typeof TipoDescontoCupom]
+
+
+export const PublicoCupom = {
+  TODOS: 'TODOS',
+  PRIMEIRO_ATENDIMENTO: 'PRIMEIRO_ATENDIMENTO',
+  ATE_X_ATENDIMENTOS: 'ATE_X_ATENDIMENTOS',
+  MINIMO_X_ATENDIMENTOS: 'MINIMO_X_ATENDIMENTOS',
+  SEM_ATENDIMENTO_HA_X_DIAS: 'SEM_ATENDIMENTO_HA_X_DIAS',
+  ASSINANTE_ATIVO: 'ASSINANTE_ATIVO'
+} as const
+
+export type PublicoCupom = (typeof PublicoCupom)[keyof typeof PublicoCupom]

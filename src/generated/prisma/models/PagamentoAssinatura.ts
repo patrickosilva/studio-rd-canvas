@@ -28,10 +28,16 @@ export type AggregatePagamentoAssinatura = {
 
 export type PagamentoAssinaturaAvgAggregateOutputType = {
   valorCentavos: number | null
+  taxaGatewayCentavos: number | null
+  comissaoPlataformaCentavos: number | null
+  valorLiquidoBarbeariaCentavos: number | null
 }
 
 export type PagamentoAssinaturaSumAggregateOutputType = {
   valorCentavos: number | null
+  taxaGatewayCentavos: number | null
+  comissaoPlataformaCentavos: number | null
+  valorLiquidoBarbeariaCentavos: number | null
 }
 
 export type PagamentoAssinaturaMinAggregateOutputType = {
@@ -41,6 +47,12 @@ export type PagamentoAssinaturaMinAggregateOutputType = {
   valorCentavos: number | null
   pagoEm: Date | null
   observacao: string | null
+  provedorPagamento: $Enums.ProvedorPagamento | null
+  providerPaymentId: string | null
+  providerStatus: string | null
+  taxaGatewayCentavos: number | null
+  comissaoPlataformaCentavos: number | null
+  valorLiquidoBarbeariaCentavos: number | null
   criadoEm: Date | null
 }
 
@@ -51,6 +63,12 @@ export type PagamentoAssinaturaMaxAggregateOutputType = {
   valorCentavos: number | null
   pagoEm: Date | null
   observacao: string | null
+  provedorPagamento: $Enums.ProvedorPagamento | null
+  providerPaymentId: string | null
+  providerStatus: string | null
+  taxaGatewayCentavos: number | null
+  comissaoPlataformaCentavos: number | null
+  valorLiquidoBarbeariaCentavos: number | null
   criadoEm: Date | null
 }
 
@@ -61,6 +79,12 @@ export type PagamentoAssinaturaCountAggregateOutputType = {
   valorCentavos: number
   pagoEm: number
   observacao: number
+  provedorPagamento: number
+  providerPaymentId: number
+  providerStatus: number
+  taxaGatewayCentavos: number
+  comissaoPlataformaCentavos: number
+  valorLiquidoBarbeariaCentavos: number
   criadoEm: number
   _all: number
 }
@@ -68,10 +92,16 @@ export type PagamentoAssinaturaCountAggregateOutputType = {
 
 export type PagamentoAssinaturaAvgAggregateInputType = {
   valorCentavos?: true
+  taxaGatewayCentavos?: true
+  comissaoPlataformaCentavos?: true
+  valorLiquidoBarbeariaCentavos?: true
 }
 
 export type PagamentoAssinaturaSumAggregateInputType = {
   valorCentavos?: true
+  taxaGatewayCentavos?: true
+  comissaoPlataformaCentavos?: true
+  valorLiquidoBarbeariaCentavos?: true
 }
 
 export type PagamentoAssinaturaMinAggregateInputType = {
@@ -81,6 +111,12 @@ export type PagamentoAssinaturaMinAggregateInputType = {
   valorCentavos?: true
   pagoEm?: true
   observacao?: true
+  provedorPagamento?: true
+  providerPaymentId?: true
+  providerStatus?: true
+  taxaGatewayCentavos?: true
+  comissaoPlataformaCentavos?: true
+  valorLiquidoBarbeariaCentavos?: true
   criadoEm?: true
 }
 
@@ -91,6 +127,12 @@ export type PagamentoAssinaturaMaxAggregateInputType = {
   valorCentavos?: true
   pagoEm?: true
   observacao?: true
+  provedorPagamento?: true
+  providerPaymentId?: true
+  providerStatus?: true
+  taxaGatewayCentavos?: true
+  comissaoPlataformaCentavos?: true
+  valorLiquidoBarbeariaCentavos?: true
   criadoEm?: true
 }
 
@@ -101,6 +143,12 @@ export type PagamentoAssinaturaCountAggregateInputType = {
   valorCentavos?: true
   pagoEm?: true
   observacao?: true
+  provedorPagamento?: true
+  providerPaymentId?: true
+  providerStatus?: true
+  taxaGatewayCentavos?: true
+  comissaoPlataformaCentavos?: true
+  valorLiquidoBarbeariaCentavos?: true
   criadoEm?: true
   _all?: true
 }
@@ -198,6 +246,12 @@ export type PagamentoAssinaturaGroupByOutputType = {
   valorCentavos: number
   pagoEm: Date
   observacao: string | null
+  provedorPagamento: $Enums.ProvedorPagamento
+  providerPaymentId: string | null
+  providerStatus: string | null
+  taxaGatewayCentavos: number | null
+  comissaoPlataformaCentavos: number
+  valorLiquidoBarbeariaCentavos: number | null
   criadoEm: Date
   _count: PagamentoAssinaturaCountAggregateOutputType | null
   _avg: PagamentoAssinaturaAvgAggregateOutputType | null
@@ -231,6 +285,12 @@ export type PagamentoAssinaturaWhereInput = {
   valorCentavos?: Prisma.IntFilter<"PagamentoAssinatura"> | number
   pagoEm?: Prisma.DateTimeFilter<"PagamentoAssinatura"> | Date | string
   observacao?: Prisma.StringNullableFilter<"PagamentoAssinatura"> | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFilter<"PagamentoAssinatura"> | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.StringNullableFilter<"PagamentoAssinatura"> | string | null
+  providerStatus?: Prisma.StringNullableFilter<"PagamentoAssinatura"> | string | null
+  taxaGatewayCentavos?: Prisma.IntNullableFilter<"PagamentoAssinatura"> | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFilter<"PagamentoAssinatura"> | number
+  valorLiquidoBarbeariaCentavos?: Prisma.IntNullableFilter<"PagamentoAssinatura"> | number | null
   criadoEm?: Prisma.DateTimeFilter<"PagamentoAssinatura"> | Date | string
   assinatura?: Prisma.XOR<Prisma.AssinaturaClienteScalarRelationFilter, Prisma.AssinaturaClienteWhereInput>
 }
@@ -242,12 +302,19 @@ export type PagamentoAssinaturaOrderByWithRelationInput = {
   valorCentavos?: Prisma.SortOrder
   pagoEm?: Prisma.SortOrder
   observacao?: Prisma.SortOrderInput | Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerPaymentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  taxaGatewayCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  comissaoPlataformaCentavos?: Prisma.SortOrder
+  valorLiquidoBarbeariaCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   assinatura?: Prisma.AssinaturaClienteOrderByWithRelationInput
 }
 
 export type PagamentoAssinaturaWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  providerPaymentId?: string
   AND?: Prisma.PagamentoAssinaturaWhereInput | Prisma.PagamentoAssinaturaWhereInput[]
   OR?: Prisma.PagamentoAssinaturaWhereInput[]
   NOT?: Prisma.PagamentoAssinaturaWhereInput | Prisma.PagamentoAssinaturaWhereInput[]
@@ -256,9 +323,14 @@ export type PagamentoAssinaturaWhereUniqueInput = Prisma.AtLeast<{
   valorCentavos?: Prisma.IntFilter<"PagamentoAssinatura"> | number
   pagoEm?: Prisma.DateTimeFilter<"PagamentoAssinatura"> | Date | string
   observacao?: Prisma.StringNullableFilter<"PagamentoAssinatura"> | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFilter<"PagamentoAssinatura"> | $Enums.ProvedorPagamento
+  providerStatus?: Prisma.StringNullableFilter<"PagamentoAssinatura"> | string | null
+  taxaGatewayCentavos?: Prisma.IntNullableFilter<"PagamentoAssinatura"> | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFilter<"PagamentoAssinatura"> | number
+  valorLiquidoBarbeariaCentavos?: Prisma.IntNullableFilter<"PagamentoAssinatura"> | number | null
   criadoEm?: Prisma.DateTimeFilter<"PagamentoAssinatura"> | Date | string
   assinatura?: Prisma.XOR<Prisma.AssinaturaClienteScalarRelationFilter, Prisma.AssinaturaClienteWhereInput>
-}, "id">
+}, "id" | "providerPaymentId">
 
 export type PagamentoAssinaturaOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -267,6 +339,12 @@ export type PagamentoAssinaturaOrderByWithAggregationInput = {
   valorCentavos?: Prisma.SortOrder
   pagoEm?: Prisma.SortOrder
   observacao?: Prisma.SortOrderInput | Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerPaymentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  taxaGatewayCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  comissaoPlataformaCentavos?: Prisma.SortOrder
+  valorLiquidoBarbeariaCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   _count?: Prisma.PagamentoAssinaturaCountOrderByAggregateInput
   _avg?: Prisma.PagamentoAssinaturaAvgOrderByAggregateInput
@@ -285,6 +363,12 @@ export type PagamentoAssinaturaScalarWhereWithAggregatesInput = {
   valorCentavos?: Prisma.IntWithAggregatesFilter<"PagamentoAssinatura"> | number
   pagoEm?: Prisma.DateTimeWithAggregatesFilter<"PagamentoAssinatura"> | Date | string
   observacao?: Prisma.StringNullableWithAggregatesFilter<"PagamentoAssinatura"> | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoWithAggregatesFilter<"PagamentoAssinatura"> | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.StringNullableWithAggregatesFilter<"PagamentoAssinatura"> | string | null
+  providerStatus?: Prisma.StringNullableWithAggregatesFilter<"PagamentoAssinatura"> | string | null
+  taxaGatewayCentavos?: Prisma.IntNullableWithAggregatesFilter<"PagamentoAssinatura"> | number | null
+  comissaoPlataformaCentavos?: Prisma.IntWithAggregatesFilter<"PagamentoAssinatura"> | number
+  valorLiquidoBarbeariaCentavos?: Prisma.IntNullableWithAggregatesFilter<"PagamentoAssinatura"> | number | null
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"PagamentoAssinatura"> | Date | string
 }
 
@@ -294,6 +378,12 @@ export type PagamentoAssinaturaCreateInput = {
   valorCentavos: number
   pagoEm?: Date | string
   observacao?: string | null
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerPaymentId?: string | null
+  providerStatus?: string | null
+  taxaGatewayCentavos?: number | null
+  comissaoPlataformaCentavos?: number
+  valorLiquidoBarbeariaCentavos?: number | null
   criadoEm?: Date | string
   assinatura: Prisma.AssinaturaClienteCreateNestedOneWithoutPagamentosInput
 }
@@ -305,6 +395,12 @@ export type PagamentoAssinaturaUncheckedCreateInput = {
   valorCentavos: number
   pagoEm?: Date | string
   observacao?: string | null
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerPaymentId?: string | null
+  providerStatus?: string | null
+  taxaGatewayCentavos?: number | null
+  comissaoPlataformaCentavos?: number
+  valorLiquidoBarbeariaCentavos?: number | null
   criadoEm?: Date | string
 }
 
@@ -314,6 +410,12 @@ export type PagamentoAssinaturaUpdateInput = {
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   pagoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxaGatewayCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  valorLiquidoBarbeariaCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assinatura?: Prisma.AssinaturaClienteUpdateOneRequiredWithoutPagamentosNestedInput
 }
@@ -325,6 +427,12 @@ export type PagamentoAssinaturaUncheckedUpdateInput = {
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   pagoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxaGatewayCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  valorLiquidoBarbeariaCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -335,6 +443,12 @@ export type PagamentoAssinaturaCreateManyInput = {
   valorCentavos: number
   pagoEm?: Date | string
   observacao?: string | null
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerPaymentId?: string | null
+  providerStatus?: string | null
+  taxaGatewayCentavos?: number | null
+  comissaoPlataformaCentavos?: number
+  valorLiquidoBarbeariaCentavos?: number | null
   criadoEm?: Date | string
 }
 
@@ -344,6 +458,12 @@ export type PagamentoAssinaturaUpdateManyMutationInput = {
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   pagoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxaGatewayCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  valorLiquidoBarbeariaCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -354,6 +474,12 @@ export type PagamentoAssinaturaUncheckedUpdateManyInput = {
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   pagoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxaGatewayCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  valorLiquidoBarbeariaCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -374,11 +500,20 @@ export type PagamentoAssinaturaCountOrderByAggregateInput = {
   valorCentavos?: Prisma.SortOrder
   pagoEm?: Prisma.SortOrder
   observacao?: Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerPaymentId?: Prisma.SortOrder
+  providerStatus?: Prisma.SortOrder
+  taxaGatewayCentavos?: Prisma.SortOrder
+  comissaoPlataformaCentavos?: Prisma.SortOrder
+  valorLiquidoBarbeariaCentavos?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
 export type PagamentoAssinaturaAvgOrderByAggregateInput = {
   valorCentavos?: Prisma.SortOrder
+  taxaGatewayCentavos?: Prisma.SortOrder
+  comissaoPlataformaCentavos?: Prisma.SortOrder
+  valorLiquidoBarbeariaCentavos?: Prisma.SortOrder
 }
 
 export type PagamentoAssinaturaMaxOrderByAggregateInput = {
@@ -388,6 +523,12 @@ export type PagamentoAssinaturaMaxOrderByAggregateInput = {
   valorCentavos?: Prisma.SortOrder
   pagoEm?: Prisma.SortOrder
   observacao?: Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerPaymentId?: Prisma.SortOrder
+  providerStatus?: Prisma.SortOrder
+  taxaGatewayCentavos?: Prisma.SortOrder
+  comissaoPlataformaCentavos?: Prisma.SortOrder
+  valorLiquidoBarbeariaCentavos?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
@@ -398,11 +539,20 @@ export type PagamentoAssinaturaMinOrderByAggregateInput = {
   valorCentavos?: Prisma.SortOrder
   pagoEm?: Prisma.SortOrder
   observacao?: Prisma.SortOrder
+  provedorPagamento?: Prisma.SortOrder
+  providerPaymentId?: Prisma.SortOrder
+  providerStatus?: Prisma.SortOrder
+  taxaGatewayCentavos?: Prisma.SortOrder
+  comissaoPlataformaCentavos?: Prisma.SortOrder
+  valorLiquidoBarbeariaCentavos?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
 export type PagamentoAssinaturaSumOrderByAggregateInput = {
   valorCentavos?: Prisma.SortOrder
+  taxaGatewayCentavos?: Prisma.SortOrder
+  comissaoPlataformaCentavos?: Prisma.SortOrder
+  valorLiquidoBarbeariaCentavos?: Prisma.SortOrder
 }
 
 export type PagamentoAssinaturaCreateNestedManyWithoutAssinaturaInput = {
@@ -457,6 +607,12 @@ export type PagamentoAssinaturaCreateWithoutAssinaturaInput = {
   valorCentavos: number
   pagoEm?: Date | string
   observacao?: string | null
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerPaymentId?: string | null
+  providerStatus?: string | null
+  taxaGatewayCentavos?: number | null
+  comissaoPlataformaCentavos?: number
+  valorLiquidoBarbeariaCentavos?: number | null
   criadoEm?: Date | string
 }
 
@@ -466,6 +622,12 @@ export type PagamentoAssinaturaUncheckedCreateWithoutAssinaturaInput = {
   valorCentavos: number
   pagoEm?: Date | string
   observacao?: string | null
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerPaymentId?: string | null
+  providerStatus?: string | null
+  taxaGatewayCentavos?: number | null
+  comissaoPlataformaCentavos?: number
+  valorLiquidoBarbeariaCentavos?: number | null
   criadoEm?: Date | string
 }
 
@@ -505,6 +667,12 @@ export type PagamentoAssinaturaScalarWhereInput = {
   valorCentavos?: Prisma.IntFilter<"PagamentoAssinatura"> | number
   pagoEm?: Prisma.DateTimeFilter<"PagamentoAssinatura"> | Date | string
   observacao?: Prisma.StringNullableFilter<"PagamentoAssinatura"> | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFilter<"PagamentoAssinatura"> | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.StringNullableFilter<"PagamentoAssinatura"> | string | null
+  providerStatus?: Prisma.StringNullableFilter<"PagamentoAssinatura"> | string | null
+  taxaGatewayCentavos?: Prisma.IntNullableFilter<"PagamentoAssinatura"> | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFilter<"PagamentoAssinatura"> | number
+  valorLiquidoBarbeariaCentavos?: Prisma.IntNullableFilter<"PagamentoAssinatura"> | number | null
   criadoEm?: Prisma.DateTimeFilter<"PagamentoAssinatura"> | Date | string
 }
 
@@ -514,6 +682,12 @@ export type PagamentoAssinaturaCreateManyAssinaturaInput = {
   valorCentavos: number
   pagoEm?: Date | string
   observacao?: string | null
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerPaymentId?: string | null
+  providerStatus?: string | null
+  taxaGatewayCentavos?: number | null
+  comissaoPlataformaCentavos?: number
+  valorLiquidoBarbeariaCentavos?: number | null
   criadoEm?: Date | string
 }
 
@@ -523,6 +697,12 @@ export type PagamentoAssinaturaUpdateWithoutAssinaturaInput = {
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   pagoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxaGatewayCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  valorLiquidoBarbeariaCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -532,6 +712,12 @@ export type PagamentoAssinaturaUncheckedUpdateWithoutAssinaturaInput = {
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   pagoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxaGatewayCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  valorLiquidoBarbeariaCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -541,6 +727,12 @@ export type PagamentoAssinaturaUncheckedUpdateManyWithoutAssinaturaInput = {
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   pagoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taxaGatewayCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  comissaoPlataformaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  valorLiquidoBarbeariaCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -553,6 +745,12 @@ export type PagamentoAssinaturaSelect<ExtArgs extends runtime.Types.Extensions.I
   valorCentavos?: boolean
   pagoEm?: boolean
   observacao?: boolean
+  provedorPagamento?: boolean
+  providerPaymentId?: boolean
+  providerStatus?: boolean
+  taxaGatewayCentavos?: boolean
+  comissaoPlataformaCentavos?: boolean
+  valorLiquidoBarbeariaCentavos?: boolean
   criadoEm?: boolean
   assinatura?: boolean | Prisma.AssinaturaClienteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pagamentoAssinatura"]>
@@ -564,6 +762,12 @@ export type PagamentoAssinaturaSelectCreateManyAndReturn<ExtArgs extends runtime
   valorCentavos?: boolean
   pagoEm?: boolean
   observacao?: boolean
+  provedorPagamento?: boolean
+  providerPaymentId?: boolean
+  providerStatus?: boolean
+  taxaGatewayCentavos?: boolean
+  comissaoPlataformaCentavos?: boolean
+  valorLiquidoBarbeariaCentavos?: boolean
   criadoEm?: boolean
   assinatura?: boolean | Prisma.AssinaturaClienteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pagamentoAssinatura"]>
@@ -575,6 +779,12 @@ export type PagamentoAssinaturaSelectUpdateManyAndReturn<ExtArgs extends runtime
   valorCentavos?: boolean
   pagoEm?: boolean
   observacao?: boolean
+  provedorPagamento?: boolean
+  providerPaymentId?: boolean
+  providerStatus?: boolean
+  taxaGatewayCentavos?: boolean
+  comissaoPlataformaCentavos?: boolean
+  valorLiquidoBarbeariaCentavos?: boolean
   criadoEm?: boolean
   assinatura?: boolean | Prisma.AssinaturaClienteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pagamentoAssinatura"]>
@@ -586,10 +796,16 @@ export type PagamentoAssinaturaSelectScalar = {
   valorCentavos?: boolean
   pagoEm?: boolean
   observacao?: boolean
+  provedorPagamento?: boolean
+  providerPaymentId?: boolean
+  providerStatus?: boolean
+  taxaGatewayCentavos?: boolean
+  comissaoPlataformaCentavos?: boolean
+  valorLiquidoBarbeariaCentavos?: boolean
   criadoEm?: boolean
 }
 
-export type PagamentoAssinaturaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assinaturaId" | "formaPagamento" | "valorCentavos" | "pagoEm" | "observacao" | "criadoEm", ExtArgs["result"]["pagamentoAssinatura"]>
+export type PagamentoAssinaturaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assinaturaId" | "formaPagamento" | "valorCentavos" | "pagoEm" | "observacao" | "provedorPagamento" | "providerPaymentId" | "providerStatus" | "taxaGatewayCentavos" | "comissaoPlataformaCentavos" | "valorLiquidoBarbeariaCentavos" | "criadoEm", ExtArgs["result"]["pagamentoAssinatura"]>
 export type PagamentoAssinaturaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assinatura?: boolean | Prisma.AssinaturaClienteDefaultArgs<ExtArgs>
 }
@@ -612,6 +828,12 @@ export type $PagamentoAssinaturaPayload<ExtArgs extends runtime.Types.Extensions
     valorCentavos: number
     pagoEm: Date
     observacao: string | null
+    provedorPagamento: $Enums.ProvedorPagamento
+    providerPaymentId: string | null
+    providerStatus: string | null
+    taxaGatewayCentavos: number | null
+    comissaoPlataformaCentavos: number
+    valorLiquidoBarbeariaCentavos: number | null
     criadoEm: Date
   }, ExtArgs["result"]["pagamentoAssinatura"]>
   composites: {}
@@ -1043,6 +1265,12 @@ export interface PagamentoAssinaturaFieldRefs {
   readonly valorCentavos: Prisma.FieldRef<"PagamentoAssinatura", 'Int'>
   readonly pagoEm: Prisma.FieldRef<"PagamentoAssinatura", 'DateTime'>
   readonly observacao: Prisma.FieldRef<"PagamentoAssinatura", 'String'>
+  readonly provedorPagamento: Prisma.FieldRef<"PagamentoAssinatura", 'ProvedorPagamento'>
+  readonly providerPaymentId: Prisma.FieldRef<"PagamentoAssinatura", 'String'>
+  readonly providerStatus: Prisma.FieldRef<"PagamentoAssinatura", 'String'>
+  readonly taxaGatewayCentavos: Prisma.FieldRef<"PagamentoAssinatura", 'Int'>
+  readonly comissaoPlataformaCentavos: Prisma.FieldRef<"PagamentoAssinatura", 'Int'>
+  readonly valorLiquidoBarbeariaCentavos: Prisma.FieldRef<"PagamentoAssinatura", 'Int'>
   readonly criadoEm: Prisma.FieldRef<"PagamentoAssinatura", 'DateTime'>
 }
     

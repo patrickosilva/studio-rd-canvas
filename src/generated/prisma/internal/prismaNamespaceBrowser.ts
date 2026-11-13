@@ -63,10 +63,16 @@ export const ModelName = {
   AssinaturaCliente: 'AssinaturaCliente',
   UsoAssinatura: 'UsoAssinatura',
   PagamentoAssinatura: 'PagamentoAssinatura',
+  ContaRecebedoraPagamento: 'ContaRecebedoraPagamento',
+  IntegracaoExterna: 'IntegracaoExterna',
+  EventoWebhookPagamento: 'EventoWebhookPagamento',
   Notificacao: 'Notificacao',
   TokenRedefinicaoSenha: 'TokenRedefinicaoSenha',
   EventoSeguranca: 'EventoSeguranca',
-  EventoWebhookResend: 'EventoWebhookResend'
+  EventoWebhookResend: 'EventoWebhookResend',
+  Cupom: 'Cupom',
+  CupomServico: 'CupomServico',
+  UsoCupom: 'UsoCupom'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -189,7 +195,11 @@ export const AgendamentoScalarFieldEnum = {
   observacaoPagamento: 'observacaoPagamento',
   reminderSentAt: 'reminderSentAt',
   criadoEm: 'criadoEm',
-  atualizadoEm: 'atualizadoEm'
+  atualizadoEm: 'atualizadoEm',
+  precoOriginalCentavos: 'precoOriginalCentavos',
+  descontoCupomCentavos: 'descontoCupomCentavos',
+  valorFinalCentavos: 'valorFinalCentavos',
+  cupomCodigo: 'cupomCodigo'
 } as const
 
 export type AgendamentoScalarFieldEnum = (typeof AgendamentoScalarFieldEnum)[keyof typeof AgendamentoScalarFieldEnum]
@@ -217,6 +227,7 @@ export const PlanoAssinaturaScalarFieldEnum = {
   cortesPorCiclo: 'cortesPorCiclo',
   duracaoDias: 'duracaoDias',
   ativo: 'ativo',
+  providerPlanId: 'providerPlanId',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
 } as const
@@ -234,6 +245,12 @@ export const AssinaturaClienteScalarFieldEnum = {
   vigenciaFim: 'vigenciaFim',
   saldoCortes: 'saldoCortes',
   renovaAutomaticamente: 'renovaAutomaticamente',
+  provedorPagamento: 'provedorPagamento',
+  providerCustomerId: 'providerCustomerId',
+  providerSubscriptionId: 'providerSubscriptionId',
+  proximaCobrancaEm: 'proximaCobrancaEm',
+  cancelarAoFimDoCiclo: 'cancelarAoFimDoCiclo',
+  percentualComissaoBps: 'percentualComissaoBps',
   observacao: 'observacao',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
@@ -260,10 +277,72 @@ export const PagamentoAssinaturaScalarFieldEnum = {
   valorCentavos: 'valorCentavos',
   pagoEm: 'pagoEm',
   observacao: 'observacao',
+  provedorPagamento: 'provedorPagamento',
+  providerPaymentId: 'providerPaymentId',
+  providerStatus: 'providerStatus',
+  taxaGatewayCentavos: 'taxaGatewayCentavos',
+  comissaoPlataformaCentavos: 'comissaoPlataformaCentavos',
+  valorLiquidoBarbeariaCentavos: 'valorLiquidoBarbeariaCentavos',
   criadoEm: 'criadoEm'
 } as const
 
 export type PagamentoAssinaturaScalarFieldEnum = (typeof PagamentoAssinaturaScalarFieldEnum)[keyof typeof PagamentoAssinaturaScalarFieldEnum]
+
+
+export const ContaRecebedoraPagamentoScalarFieldEnum = {
+  id: 'id',
+  chave: 'chave',
+  provedor: 'provedor',
+  status: 'status',
+  providerUserId: 'providerUserId',
+  providerAccountId: 'providerAccountId',
+  accessTokenCriptografado: 'accessTokenCriptografado',
+  refreshTokenCriptografado: 'refreshTokenCriptografado',
+  tokenExpiraEm: 'tokenExpiraEm',
+  conectadoEm: 'conectadoEm',
+  desconectadoEm: 'desconectadoEm',
+  ultimoErro: 'ultimoErro',
+  comissaoAtiva: 'comissaoAtiva',
+  percentualComissaoBps: 'percentualComissaoBps',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type ContaRecebedoraPagamentoScalarFieldEnum = (typeof ContaRecebedoraPagamentoScalarFieldEnum)[keyof typeof ContaRecebedoraPagamentoScalarFieldEnum]
+
+
+export const IntegracaoExternaScalarFieldEnum = {
+  id: 'id',
+  provedor: 'provedor',
+  status: 'status',
+  nomeConta: 'nomeConta',
+  identificadorExterno: 'identificadorExterno',
+  configuracaoPublica: 'configuracaoPublica',
+  segredoCriptografado: 'segredoCriptografado',
+  conectadoEm: 'conectadoEm',
+  verificadoEm: 'verificadoEm',
+  ultimoErro: 'ultimoErro',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type IntegracaoExternaScalarFieldEnum = (typeof IntegracaoExternaScalarFieldEnum)[keyof typeof IntegracaoExternaScalarFieldEnum]
+
+
+export const EventoWebhookPagamentoScalarFieldEnum = {
+  id: 'id',
+  provedor: 'provedor',
+  providerEventId: 'providerEventId',
+  tipo: 'tipo',
+  providerResourceId: 'providerResourceId',
+  payloadHash: 'payloadHash',
+  status: 'status',
+  recebidoEm: 'recebidoEm',
+  processadoEm: 'processadoEm',
+  erro: 'erro'
+} as const
+
+export type EventoWebhookPagamentoScalarFieldEnum = (typeof EventoWebhookPagamentoScalarFieldEnum)[keyof typeof EventoWebhookPagamentoScalarFieldEnum]
 
 
 export const NotificacaoScalarFieldEnum = {
@@ -321,12 +400,72 @@ export const EventoWebhookResendScalarFieldEnum = {
 export type EventoWebhookResendScalarFieldEnum = (typeof EventoWebhookResendScalarFieldEnum)[keyof typeof EventoWebhookResendScalarFieldEnum]
 
 
+export const CupomScalarFieldEnum = {
+  id: 'id',
+  codigo: 'codigo',
+  descricao: 'descricao',
+  campanha: 'campanha',
+  tipo: 'tipo',
+  percentualDesconto: 'percentualDesconto',
+  valorDescontoCentavos: 'valorDescontoCentavos',
+  limiteDescontoCentavos: 'limiteDescontoCentavos',
+  valorMinimoCentavos: 'valorMinimoCentavos',
+  inicioEm: 'inicioEm',
+  fimEm: 'fimEm',
+  limiteUsos: 'limiteUsos',
+  limitePorCliente: 'limitePorCliente',
+  publico: 'publico',
+  quantidadeAtendimentos: 'quantidadeAtendimentos',
+  diasSemAtendimento: 'diasSemAtendimento',
+  aplicaTodosServicos: 'aplicaTodosServicos',
+  visivelParaClientes: 'visivelParaClientes',
+  destaque: 'destaque',
+  combinavelComAssinatura: 'combinavelComAssinatura',
+  ativo: 'ativo',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type CupomScalarFieldEnum = (typeof CupomScalarFieldEnum)[keyof typeof CupomScalarFieldEnum]
+
+
+export const CupomServicoScalarFieldEnum = {
+  cupomId: 'cupomId',
+  servicoId: 'servicoId'
+} as const
+
+export type CupomServicoScalarFieldEnum = (typeof CupomServicoScalarFieldEnum)[keyof typeof CupomServicoScalarFieldEnum]
+
+
+export const UsoCupomScalarFieldEnum = {
+  id: 'id',
+  cupomId: 'cupomId',
+  clienteId: 'clienteId',
+  agendamentoId: 'agendamentoId',
+  codigoAplicado: 'codigoAplicado',
+  descontoCentavos: 'descontoCentavos',
+  criadoEm: 'criadoEm',
+  precoOriginalCentavos: 'precoOriginalCentavos',
+  valorFinalCentavos: 'valorFinalCentavos'
+} as const
+
+export type UsoCupomScalarFieldEnum = (typeof UsoCupomScalarFieldEnum)[keyof typeof UsoCupomScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -343,4 +482,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
