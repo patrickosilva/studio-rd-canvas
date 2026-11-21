@@ -87,6 +87,21 @@ export type BloqueioAgenda = Prisma.BloqueioAgendaModel
  */
 export type PlanoAssinatura = Prisma.PlanoAssinaturaModel
 /**
+ * Model ConfiguracaoAssinatura
+ * 
+ */
+export type ConfiguracaoAssinatura = Prisma.ConfiguracaoAssinaturaModel
+/**
+ * Model SolicitacaoAssinatura
+ * 
+ */
+export type SolicitacaoAssinatura = Prisma.SolicitacaoAssinaturaModel
+/**
+ * Model PedidoAssinatura
+ * 
+ */
+export type PedidoAssinatura = Prisma.PedidoAssinaturaModel
+/**
  * Model AssinaturaCliente
  * 
  */
@@ -121,6 +136,11 @@ export type EventoWebhookPagamento = Prisma.EventoWebhookPagamentoModel
  * 
  */
 export type Notificacao = Prisma.NotificacaoModel
+/**
+ * Model ConviteFuncionario
+ * 
+ */
+export type ConviteFuncionario = Prisma.ConviteFuncionarioModel
 /**
  * Model TokenRedefinicaoSenha
  * 

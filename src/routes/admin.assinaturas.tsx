@@ -15,6 +15,7 @@ import {
 
 import { PageHeader } from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
+import { ControleAcessoAssinaturas } from "@/components/assinaturas/ControleAcessoAssinaturas";
 import {
   adminAtivarAssinaturaCliente,
   adminCancelarAssinaturaCliente,
@@ -50,7 +51,7 @@ type PlanoAssinatura = {
   descricao: string | null;
   precoCentavos: number;
   cortesPorCiclo: number;
-  duracaoDias: number;
+  duracaoMeses: number;
   ativo: boolean;
   criadoEm: string | Date;
   atualizadoEm: string | Date;
@@ -82,7 +83,7 @@ type AssinaturaCliente = {
     nome: string;
     precoCentavos: number;
     cortesPorCiclo: number;
-    duracaoDias: number;
+    duracaoMeses: number;
   };
 
   pagamentos: {
@@ -316,7 +317,7 @@ function AdminAssinaturasPage() {
   );
   const [precoPlano, setPrecoPlano] = useState("99,90");
   const [cortesPorCiclo, setCortesPorCiclo] = useState("2");
-  const [duracaoDias, setDuracaoDias] = useState("30");
+  const [duracaoMeses, setDuracaoDias] = useState("30");
 
   const [clienteBusca, setClienteBusca] = useState("");
   const [clienteId, setClienteId] = useState("");
@@ -436,7 +437,7 @@ function AdminAssinaturasPage() {
           descricao: descricaoPlano,
           precoCentavos: dinheiroParaCentavos(precoPlano),
           cortesPorCiclo: Number(cortesPorCiclo),
-          duracaoDias: Number(duracaoDias),
+          duracaoMeses: Number(duracaoMeses),
           ativo: true,
         },
       });
@@ -596,6 +597,8 @@ function AdminAssinaturasPage() {
         title="Assinaturas"
         subtitle="Gerencie planos, clientes assinantes, pagamentos e saldo de cortes."
       />
+
+      <ControleAcessoAssinaturas />
 
       {erro && (
         <div
@@ -770,7 +773,7 @@ function AdminAssinaturasPage() {
                 <input
                   type="number"
                   min={1}
-                  value={duracaoDias}
+                  value={duracaoMeses}
                   onChange={(event) =>
                     setDuracaoDias(event.target.value)
                   }
@@ -810,7 +813,7 @@ function AdminAssinaturasPage() {
 
                       <p className="mt-1 text-xs text-muted-foreground">
                         {plano.cortesPorCiclo} cortes a cada{" "}
-                        {plano.duracaoDias} dias
+                        {plano.duracaoMeses} meses
                       </p>
                     </div>
 

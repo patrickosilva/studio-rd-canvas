@@ -39,7 +39,7 @@ const criarPlanoAssinaturaSchema = z.object({
     .int("A quantidade de cortes precisa ser inteira.")
     .min(1, "Informe pelo menos 1 corte."),
 
-  duracaoDias: z
+  duracaoMeses: z
     .number()
     .int("A duração precisa ser em dias.")
     .min(1, "A duração precisa ter pelo menos 1 dia.")
@@ -125,10 +125,20 @@ async function exigirCliente() {
   return usuario;
 }
 
-function adicionarDias(data: Date, dias: number): Date {
+function adicionarMeses(data: Date, meses: number): Date {
   const resultado = new Date(data);
+  const diaOriginal = resultado.getDate();
 
-  resultado.setDate(resultado.getDate() + dias);
+  resultado.setDate(1);
+  resultado.setMonth(resultado.getMonth() + meses);
+
+  const ultimoDiaDoMes = new Date(
+    resultado.getFullYear(),
+    resultado.getMonth() + 1,
+    0,
+  ).getDate();
+
+  resultado.setDate(Math.min(diaOriginal, ultimoDiaDoMes));
 
   return resultado;
 }
@@ -151,7 +161,7 @@ export const adminListarPlanosAssinatura = createServerFn({
       descricao: true,
       precoCentavos: true,
       cortesPorCiclo: true,
-      duracaoDias: true,
+      duracaoMeses: true,
       ativo: true,
       criadoEm: true,
       atualizadoEm: true,
@@ -199,7 +209,7 @@ export const adminCriarPlanoAssinatura = createServerFn({
             descricao: data.descricao?.trim() || null,
             precoCentavos: data.precoCentavos,
             cortesPorCiclo: data.cortesPorCiclo,
-            duracaoDias: data.duracaoDias,
+            duracaoMeses: data.duracaoMeses,
             ativo: true,
           },
           select: {
@@ -208,7 +218,7 @@ export const adminCriarPlanoAssinatura = createServerFn({
             descricao: true,
             precoCentavos: true,
             cortesPorCiclo: true,
-            duracaoDias: true,
+            duracaoMeses: true,
             ativo: true,
             criadoEm: true,
             atualizadoEm: true,
@@ -228,7 +238,7 @@ export const adminCriarPlanoAssinatura = createServerFn({
         descricao: data.descricao?.trim() || null,
         precoCentavos: data.precoCentavos,
         cortesPorCiclo: data.cortesPorCiclo,
-        duracaoDias: data.duracaoDias,
+        duracaoMeses: data.duracaoMeses,
         ativo: data.ativo,
       },
       select: {
@@ -237,7 +247,7 @@ export const adminCriarPlanoAssinatura = createServerFn({
         descricao: true,
         precoCentavos: true,
         cortesPorCiclo: true,
-        duracaoDias: true,
+        duracaoMeses: true,
         ativo: true,
         criadoEm: true,
         atualizadoEm: true,
@@ -322,7 +332,7 @@ export const adminListarAssinaturas = createServerFn({
           nome: true,
           precoCentavos: true,
           cortesPorCiclo: true,
-          duracaoDias: true,
+          duracaoMeses: true,
         },
       },
 
@@ -401,7 +411,7 @@ export const adminAtivarAssinaturaCliente = createServerFn({
         nome: true,
         precoCentavos: true,
         cortesPorCiclo: true,
-        duracaoDias: true,
+        duracaoMeses: true,
       },
     });
 
@@ -448,9 +458,9 @@ export const adminAtivarAssinaturaCliente = createServerFn({
       };
     }
 
-    const vigenciaFim = adicionarDias(
+    const vigenciaFim = adicionarMeses(
       vigenciaInicio,
-      plano.duracaoDias,
+      plano.duracaoMeses,
     );
 
     const formaPagamento =
@@ -497,7 +507,7 @@ export const adminAtivarAssinaturaCliente = createServerFn({
                   nome: true,
                   precoCentavos: true,
                   cortesPorCiclo: true,
-                  duracaoDias: true,
+                  duracaoMeses: true,
                 },
               },
             },
@@ -624,7 +634,7 @@ export const listarMinhaAssinaturaAtiva = createServerFn({
           descricao: true,
           precoCentavos: true,
           cortesPorCiclo: true,
-          duracaoDias: true,
+          duracaoMeses: true,
         },
       },
 

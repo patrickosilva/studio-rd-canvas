@@ -53,6 +53,7 @@ export type FormaPagamento = (typeof FormaPagamento)[keyof typeof FormaPagamento
 
 export const ProvedorIntegracao = {
   INTER: 'INTER',
+  INFINITEPAY: 'INFINITEPAY',
   META: 'META'
 } as const
 
@@ -71,6 +72,7 @@ export type StatusIntegracao = (typeof StatusIntegracao)[keyof typeof StatusInte
 
 export const ProvedorPagamento = {
   INTER: 'INTER',
+  INFINITEPAY: 'INFINITEPAY',
   MANUAL: 'MANUAL',
   MERCADO_PAGO: 'MERCADO_PAGO'
 } as const
@@ -104,6 +106,29 @@ export const TipoDescontoCupom = {
 } as const
 
 export type TipoDescontoCupom = (typeof TipoDescontoCupom)[keyof typeof TipoDescontoCupom]
+
+
+export const StatusSolicitacaoAssinatura = {
+  PENDENTE: 'PENDENTE',
+  APROVADA: 'APROVADA',
+  RECUSADA: 'RECUSADA',
+  CANCELADA: 'CANCELADA',
+  UTILIZADA: 'UTILIZADA'
+} as const
+
+export type StatusSolicitacaoAssinatura = (typeof StatusSolicitacaoAssinatura)[keyof typeof StatusSolicitacaoAssinatura]
+
+
+export const StatusPedidoAssinatura = {
+  CRIADO: 'CRIADO',
+  CHECKOUT_CRIADO: 'CHECKOUT_CRIADO',
+  PAGO: 'PAGO',
+  FALHOU: 'FALHOU',
+  CANCELADO: 'CANCELADO',
+  ESTORNADO: 'ESTORNADO'
+} as const
+
+export type StatusPedidoAssinatura = (typeof StatusPedidoAssinatura)[keyof typeof StatusPedidoAssinatura]
 
 
 export const PublicoCupom = {

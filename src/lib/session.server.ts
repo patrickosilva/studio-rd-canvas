@@ -253,10 +253,111 @@ export async function obterSessaoAtual() {
   return sessao;
 }
 
+type UsuarioDonoSincronizavel = {
+  id: string;
+  nome: string;
+  telefone: string | null;
+  papel: "CLIENTE" | "FUNCIONARIO" | "DONO";
+  ativo: boolean;
+};
+
+async function garantirPerfilProfissionalDoDono(
+  usuario: UsuarioDonoSincronizavel,
+): Promise<void> {
+  if (usuario.papel !== "DONO" || !usuario.ativo) {
+    return;
+  }
+
+  const profissional = await prisma.profissional.findUnique({
+    where: {
+      usuarioId: usuario.id,
+    },
+    select: {
+      id: true,
+      nome: true,
+      telefone: true,
+      ativo: true,
+    },
+  });
+
+  if (!profissional) {
+    try {
+      await prisma.profissional.create({
+        data: {
+          usuarioId: usuario.id,
+          nome: usuario.nome,
+          telefone: usuario.telefone,
+          descricao:
+            "Administrador e profissional do Studio RD.",
+          ativo: true,
+        },
+      });
+    } catch (error) {
+      const criadoEmParalelo =
+        await prisma.profissional.findUnique({
+          where: {
+            usuarioId: usuario.id,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (!criadoEmParalelo) {
+        throw error;
+      }
+    }
+
+    return;
+  }
+
+  if (
+    !profissional.ativo ||
+    profissional.nome !== usuario.nome ||
+    profissional.telefone !== usuario.telefone
+  ) {
+    await prisma.profissional.update({
+      where: {
+        id: profissional.id,
+      },
+      data: {
+        nome: usuario.nome,
+        telefone: usuario.telefone,
+        ativo: true,
+      },
+    });
+  }
+}
+
+export async function garantirPerfisProfissionaisDosDonos(): Promise<void> {
+  const donos = await prisma.usuario.findMany({
+    where: {
+      papel: "DONO",
+      ativo: true,
+    },
+    select: {
+      id: true,
+      nome: true,
+      telefone: true,
+      papel: true,
+      ativo: true,
+    },
+  });
+
+  for (const dono of donos) {
+    await garantirPerfilProfissionalDoDono(dono);
+  }
+}
 export async function obterUsuarioAtual() {
   const sessao = await obterSessaoAtual();
 
-  return sessao?.usuario ?? null;
+  const usuario = sessao?.usuario ?? null;
+
+  if (usuario?.papel === "DONO") {
+    await garantirPerfilProfissionalDoDono(usuario);
+  }
+
+  return usuario;
 }
 
 export async function encerrarSessaoAtual(): Promise<void> {

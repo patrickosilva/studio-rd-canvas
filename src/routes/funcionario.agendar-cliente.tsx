@@ -64,6 +64,8 @@ type Servico = {
 type Profissional = {
   id: string;
   nome: string;
+  descricao: string | null;
+  fotoUrl: string | null;
 };
 
 type IndisponibilidadeAgenda = {
@@ -752,15 +754,9 @@ function FuncionarioAgendarClientePage() {
 
   useEffect(() => {
     if (
-      horariosOrdenadosPorEncaixe.length > 0 &&
+      horarioSelecionado &&
       !horariosOrdenadosPorEncaixe.includes(horarioSelecionado)
     ) {
-      setHorarioSelecionado(
-        horariosOrdenadosPorEncaixe[0],
-      );
-    }
-
-    if (horariosOrdenadosPorEncaixe.length === 0) {
       setHorarioSelecionado("");
     }
   }, [
@@ -1021,36 +1017,65 @@ function FuncionarioAgendarClientePage() {
                   <EtapaFormulario
                     numero="3"
                     titulo="Escolha o profissional"
-                    descricao="A disponibilidade é calculada para o profissional selecionado."
+                    descricao="A grade abaixo passa a usar somente a agenda do profissional escolhido."
                   >
-                    <div className="grid gap-2">
-                      <Label htmlFor="profissionalId">
-                        Profissional
-                      </Label>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {profissionais.map((profissional) => {
+                        const ativo =
+                          profissional.id === profissionalId;
 
-                      <select
-                        id="profissionalId"
-                        value={profissionalId}
-                        onChange={(event) => {
-                          setProfissionalId(event.target.value);
-                          setHorarioSelecionado("");
-                        }}
-                        className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
-                        required
-                      >
-                        <option value="">
-                          Selecione um profissional
-                        </option>
-
-                        {profissionais.map((profissional) => (
-                          <option
+                        return (
+                          <button
                             key={profissional.id}
-                            value={profissional.id}
+                            type="button"
+                            onClick={() => {
+                              setProfissionalId(
+                                profissional.id,
+                              );
+                              setHorarioSelecionado("");
+                            }}
+                            className={`flex min-w-0 flex-col items-center border px-3 py-4 text-center transition ${
+                              ativo
+                                ? "border-gold bg-gold-soft/40"
+                                : "border-border bg-background/30 hover:border-gold/50"
+                            }`}
                           >
-                            {profissional.nome}
-                          </option>
-                        ))}
-                      </select>
+                            <div
+                              className={`grid h-20 w-20 place-items-center overflow-hidden rounded-full border-2 ${
+                                ativo
+                                  ? "border-gold"
+                                  : "border-border"
+                              }`}
+                            >
+                              {profissional.fotoUrl ? (
+                                <img
+                                  src={profissional.fotoUrl}
+                                  alt={`Foto de ${profissional.nome}`}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <UserRound className="h-8 w-8 text-muted-foreground" />
+                              )}
+                            </div>
+
+                            <span
+                              className={`mt-3 truncate text-sm font-medium ${
+                                ativo
+                                  ? "text-gold"
+                                  : "text-foreground"
+                              }`}
+                            >
+                              {profissional.nome}
+                            </span>
+
+                            {profissional.descricao && (
+                              <span className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                                {profissional.descricao}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </EtapaFormulario>
 

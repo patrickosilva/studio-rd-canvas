@@ -30,6 +30,7 @@ export type ProfissionalMinAggregateOutputType = {
   nome: string | null
   telefone: string | null
   descricao: string | null
+  fotoUrl: string | null
   ativo: boolean | null
   criadoEm: Date | null
   atualizadoEm: Date | null
@@ -41,6 +42,7 @@ export type ProfissionalMaxAggregateOutputType = {
   nome: string | null
   telefone: string | null
   descricao: string | null
+  fotoUrl: string | null
   ativo: boolean | null
   criadoEm: Date | null
   atualizadoEm: Date | null
@@ -52,6 +54,7 @@ export type ProfissionalCountAggregateOutputType = {
   nome: number
   telefone: number
   descricao: number
+  fotoUrl: number
   ativo: number
   criadoEm: number
   atualizadoEm: number
@@ -65,6 +68,7 @@ export type ProfissionalMinAggregateInputType = {
   nome?: true
   telefone?: true
   descricao?: true
+  fotoUrl?: true
   ativo?: true
   criadoEm?: true
   atualizadoEm?: true
@@ -76,6 +80,7 @@ export type ProfissionalMaxAggregateInputType = {
   nome?: true
   telefone?: true
   descricao?: true
+  fotoUrl?: true
   ativo?: true
   criadoEm?: true
   atualizadoEm?: true
@@ -87,6 +92,7 @@ export type ProfissionalCountAggregateInputType = {
   nome?: true
   telefone?: true
   descricao?: true
+  fotoUrl?: true
   ativo?: true
   criadoEm?: true
   atualizadoEm?: true
@@ -171,6 +177,7 @@ export type ProfissionalGroupByOutputType = {
   nome: string
   telefone: string | null
   descricao: string | null
+  fotoUrl: string | null
   ativo: boolean
   criadoEm: Date
   atualizadoEm: Date
@@ -203,6 +210,7 @@ export type ProfissionalWhereInput = {
   nome?: Prisma.StringFilter<"Profissional"> | string
   telefone?: Prisma.StringNullableFilter<"Profissional"> | string | null
   descricao?: Prisma.StringNullableFilter<"Profissional"> | string | null
+  fotoUrl?: Prisma.StringNullableFilter<"Profissional"> | string | null
   ativo?: Prisma.BoolFilter<"Profissional"> | boolean
   criadoEm?: Prisma.DateTimeFilter<"Profissional"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Profissional"> | Date | string
@@ -217,6 +225,7 @@ export type ProfissionalOrderByWithRelationInput = {
   nome?: Prisma.SortOrder
   telefone?: Prisma.SortOrderInput | Prisma.SortOrder
   descricao?: Prisma.SortOrderInput | Prisma.SortOrder
+  fotoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -234,6 +243,7 @@ export type ProfissionalWhereUniqueInput = Prisma.AtLeast<{
   nome?: Prisma.StringFilter<"Profissional"> | string
   telefone?: Prisma.StringNullableFilter<"Profissional"> | string | null
   descricao?: Prisma.StringNullableFilter<"Profissional"> | string | null
+  fotoUrl?: Prisma.StringNullableFilter<"Profissional"> | string | null
   ativo?: Prisma.BoolFilter<"Profissional"> | boolean
   criadoEm?: Prisma.DateTimeFilter<"Profissional"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Profissional"> | Date | string
@@ -248,6 +258,7 @@ export type ProfissionalOrderByWithAggregationInput = {
   nome?: Prisma.SortOrder
   telefone?: Prisma.SortOrderInput | Prisma.SortOrder
   descricao?: Prisma.SortOrderInput | Prisma.SortOrder
+  fotoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -265,6 +276,7 @@ export type ProfissionalScalarWhereWithAggregatesInput = {
   nome?: Prisma.StringWithAggregatesFilter<"Profissional"> | string
   telefone?: Prisma.StringNullableWithAggregatesFilter<"Profissional"> | string | null
   descricao?: Prisma.StringNullableWithAggregatesFilter<"Profissional"> | string | null
+  fotoUrl?: Prisma.StringNullableWithAggregatesFilter<"Profissional"> | string | null
   ativo?: Prisma.BoolWithAggregatesFilter<"Profissional"> | boolean
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"Profissional"> | Date | string
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"Profissional"> | Date | string
@@ -275,6 +287,7 @@ export type ProfissionalCreateInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -289,6 +302,7 @@ export type ProfissionalUncheckedCreateInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -301,6 +315,7 @@ export type ProfissionalUpdateInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -315,6 +330,7 @@ export type ProfissionalUncheckedUpdateInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -328,6 +344,7 @@ export type ProfissionalCreateManyInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -338,6 +355,7 @@ export type ProfissionalUpdateManyMutationInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -349,6 +367,7 @@ export type ProfissionalUncheckedUpdateManyInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -365,6 +384,7 @@ export type ProfissionalCountOrderByAggregateInput = {
   nome?: Prisma.SortOrder
   telefone?: Prisma.SortOrder
   descricao?: Prisma.SortOrder
+  fotoUrl?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -376,6 +396,7 @@ export type ProfissionalMaxOrderByAggregateInput = {
   nome?: Prisma.SortOrder
   telefone?: Prisma.SortOrder
   descricao?: Prisma.SortOrder
+  fotoUrl?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -387,6 +408,7 @@ export type ProfissionalMinOrderByAggregateInput = {
   nome?: Prisma.SortOrder
   telefone?: Prisma.SortOrder
   descricao?: Prisma.SortOrder
+  fotoUrl?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
@@ -464,6 +486,7 @@ export type ProfissionalCreateWithoutUsuarioInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -476,6 +499,7 @@ export type ProfissionalUncheckedCreateWithoutUsuarioInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -504,6 +528,7 @@ export type ProfissionalUpdateWithoutUsuarioInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -516,6 +541,7 @@ export type ProfissionalUncheckedUpdateWithoutUsuarioInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -528,6 +554,7 @@ export type ProfissionalCreateWithoutAgendamentosInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -541,6 +568,7 @@ export type ProfissionalUncheckedCreateWithoutAgendamentosInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -568,6 +596,7 @@ export type ProfissionalUpdateWithoutAgendamentosInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -581,6 +610,7 @@ export type ProfissionalUncheckedUpdateWithoutAgendamentosInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -592,6 +622,7 @@ export type ProfissionalCreateWithoutBloqueiosInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -605,6 +636,7 @@ export type ProfissionalUncheckedCreateWithoutBloqueiosInput = {
   nome: string
   telefone?: string | null
   descricao?: string | null
+  fotoUrl?: string | null
   ativo?: boolean
   criadoEm?: Date | string
   atualizadoEm?: Date | string
@@ -632,6 +664,7 @@ export type ProfissionalUpdateWithoutBloqueiosInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -645,6 +678,7 @@ export type ProfissionalUncheckedUpdateWithoutBloqueiosInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -697,6 +731,7 @@ export type ProfissionalSelect<ExtArgs extends runtime.Types.Extensions.Internal
   nome?: boolean
   telefone?: boolean
   descricao?: boolean
+  fotoUrl?: boolean
   ativo?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
@@ -712,6 +747,7 @@ export type ProfissionalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   nome?: boolean
   telefone?: boolean
   descricao?: boolean
+  fotoUrl?: boolean
   ativo?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
@@ -724,6 +760,7 @@ export type ProfissionalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   nome?: boolean
   telefone?: boolean
   descricao?: boolean
+  fotoUrl?: boolean
   ativo?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
@@ -736,12 +773,13 @@ export type ProfissionalSelectScalar = {
   nome?: boolean
   telefone?: boolean
   descricao?: boolean
+  fotoUrl?: boolean
   ativo?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
 }
 
-export type ProfissionalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "usuarioId" | "nome" | "telefone" | "descricao" | "ativo" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["profissional"]>
+export type ProfissionalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "usuarioId" | "nome" | "telefone" | "descricao" | "fotoUrl" | "ativo" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["profissional"]>
 export type ProfissionalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   usuario?: boolean | Prisma.Profissional$usuarioArgs<ExtArgs>
   agendamentos?: boolean | Prisma.Profissional$agendamentosArgs<ExtArgs>
@@ -768,6 +806,7 @@ export type $ProfissionalPayload<ExtArgs extends runtime.Types.Extensions.Intern
     nome: string
     telefone: string | null
     descricao: string | null
+    fotoUrl: string | null
     ativo: boolean
     criadoEm: Date
     atualizadoEm: Date
@@ -1202,6 +1241,7 @@ export interface ProfissionalFieldRefs {
   readonly nome: Prisma.FieldRef<"Profissional", 'String'>
   readonly telefone: Prisma.FieldRef<"Profissional", 'String'>
   readonly descricao: Prisma.FieldRef<"Profissional", 'String'>
+  readonly fotoUrl: Prisma.FieldRef<"Profissional", 'String'>
   readonly ativo: Prisma.FieldRef<"Profissional", 'Boolean'>
   readonly criadoEm: Prisma.FieldRef<"Profissional", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"Profissional", 'DateTime'>

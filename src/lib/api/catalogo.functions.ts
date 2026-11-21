@@ -78,6 +78,19 @@ const profissionalSchema = z.object({
     .optional()
     .or(z.literal("")),
 
+  fotoUrl: z
+    .string()
+    .trim()
+    .max(400000, "A foto ficou muito grande.")
+    .refine(
+      (valor) =>
+        !valor ||
+        /^data:image\/(jpeg|png|webp);base64,/.test(valor),
+      "Formato de foto inválido.",
+    )
+    .optional()
+    .or(z.literal("")),
+
   ativo: z.boolean().default(true),
 });
 
@@ -86,6 +99,24 @@ const desativarItemCatalogoSchema = z.object({
     .string()
     .trim()
     .min(1, "Item inválido."),
+});
+
+const atualizarFotoProfissionalSchema = z.object({
+  id: z
+    .string()
+    .trim()
+    .min(1, "Profissional inválido."),
+
+  fotoUrl: z
+    .string()
+    .trim()
+    .max(400000, "A foto ficou muito grande.")
+    .refine(
+      (valor) =>
+        !valor ||
+        /^data:image\/(jpeg|png|webp);base64,/.test(valor),
+      "Formato de foto inválido.",
+    ),
 });
 
 export const listarServicos = createServerFn({
@@ -192,6 +223,10 @@ export const listarProfissionais = createServerFn({
   await exigirDonoCatalogo();
 
   const prisma = await getPrisma();
+  const { garantirPerfisProfissionaisDosDonos } =
+    await import("../session.server");
+
+  await garantirPerfisProfissionaisDosDonos();
 
   return prisma.profissional.findMany({
     where: {
@@ -207,6 +242,10 @@ export const listarProfissionaisAtivos = createServerFn({
   method: "GET",
 }).handler(async () => {
   const prisma = await getPrisma();
+  const { garantirPerfisProfissionaisDosDonos } =
+    await import("../session.server");
+
+  await garantirPerfisProfissionaisDosDonos();
 
   return prisma.profissional.findMany({
     where: {
@@ -260,6 +299,7 @@ export const cadastrarProfissional = createServerFn({
           nome: data.nome,
           telefone: data.telefone?.trim() || null,
           descricao: data.descricao?.trim() || null,
+          fotoUrl: data.fotoUrl?.trim() || null,
           ativo: true,
         },
       });
@@ -276,6 +316,7 @@ export const cadastrarProfissional = createServerFn({
         nome: data.nome,
         telefone: data.telefone?.trim() || null,
         descricao: data.descricao?.trim() || null,
+        fotoUrl: data.fotoUrl?.trim() || null,
         ativo: true,
       },
     });
@@ -283,6 +324,49 @@ export const cadastrarProfissional = createServerFn({
     return {
       sucesso: true,
       mensagem: "Profissional cadastrado com sucesso.",
+    };
+  });
+
+export const adminAtualizarFotoProfissional = createServerFn({
+  method: "POST",
+})
+  .validator(atualizarFotoProfissionalSchema)
+  .handler(async ({ data }) => {
+    await exigirDonoCatalogo();
+
+    const prisma = await getPrisma();
+
+    const profissional = await prisma.profissional.findUnique({
+      where: {
+        id: data.id,
+      },
+      select: {
+        id: true,
+        nome: true,
+      },
+    });
+
+    if (!profissional) {
+      return {
+        sucesso: false,
+        mensagem: "Profissional não encontrado.",
+      };
+    }
+
+    await prisma.profissional.update({
+      where: {
+        id: profissional.id,
+      },
+      data: {
+        fotoUrl: data.fotoUrl.trim() || null,
+      },
+    });
+
+    return {
+      sucesso: true,
+      mensagem: data.fotoUrl
+        ? `Foto de ${profissional.nome} atualizada.`
+        : `Foto de ${profissional.nome} removida.`,
     };
   });
 

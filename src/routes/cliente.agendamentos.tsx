@@ -81,6 +81,7 @@ type Profissional = {
   id: string;
   nome: string;
   descricao: string | null;
+  fotoUrl: string | null;
 };
 
 type CupomAplicado = {
@@ -285,6 +286,22 @@ function formatarDataHora(valor: string | Date): string {
   }).format(data);
 }
 
+function obterPeriodoHorario(
+  horario: string,
+): "Manhã" | "Tarde" | "Noite" {
+  const hora = Number(horario.split(":")[0]);
+
+  if (hora < 12) {
+    return "Manhã";
+  }
+
+  if (hora < 18) {
+    return "Tarde";
+  }
+
+  return "Noite";
+}
+
 function traduzirStatus(status: string): string {
   const mapa: Record<string, string> = {
     SOLICITADO: "Solicitado",
@@ -405,6 +422,19 @@ function AgendamentosPage() {
     indisponibilidades,
   ]);
 
+  const horariosPorPeriodo = useMemo(() => {
+    const ordem = ["Manhã", "Tarde", "Noite"] as const;
+
+    return ordem
+      .map((periodo) => ({
+        periodo,
+        horarios: horariosFiltrados.filter(
+          (horario) => obterPeriodoHorario(horario) === periodo,
+        ),
+      }))
+      .filter((grupo) => grupo.horarios.length > 0);
+  }, [horariosFiltrados]);
+
   const formularioCompleto =
     servicoId &&
     profissionalId &&
@@ -444,9 +474,6 @@ function AgendamentosPage() {
         setServicoId(servicosResposta[0].id);
       }
 
-      if (!profissionalId && profissionaisResposta[0]) {
-        setProfissionalId(profissionaisResposta[0].id);
-      }
 
       if (!dataSelecionada && proximosDias[0]) {
         setDataSelecionada(proximosDias[0]);
@@ -503,14 +530,9 @@ function AgendamentosPage() {
 
   useEffect(() => {
     if (
-      horariosFiltrados.length > 0 &&
+      horarioSelecionado &&
       !horariosFiltrados.includes(horarioSelecionado)
     ) {
-      setHorarioSelecionado(horariosFiltrados[0]);
-      return;
-    }
-
-    if (horariosFiltrados.length === 0) {
       setHorarioSelecionado("");
     }
   }, [horariosFiltrados, horarioSelecionado]);
@@ -723,93 +745,90 @@ function AgendamentosPage() {
               className="space-y-6"
               onSubmit={handleSubmit}
             >
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="servico">
-                    Serviço
-                  </Label>
+              <div className="space-y-2">
+                <Label htmlFor="servico">
+                  Serviço
+                </Label>
 
-                  <select
-                    id="servico"
-                    value={servicoId}
-                    onChange={(event) => {
-                      setServicoId(event.target.value);
-                      setHorarioSelecionado("");
-                      setCupomAplicado(null);
-                      setErroCupom("");
-                    }}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  >
-                    {servicos.map((servico) => (
-                      <option
-                        key={servico.id}
-                        value={servico.id}
-                      >
-                        {servico.nome} · {servico.duracaoMinutos} min ·{" "}
-                        {formatarMoeda(servico.precoCentavos)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="profissional">
-                    Profissional
-                  </Label>
-
-                  <select
-                    id="profissional"
-                    value={profissionalId}
-                    onChange={(event) => {
-                      setProfissionalId(event.target.value);
-                      setHorarioSelecionado("");
-                    }}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  >
-                    {profissionais.map((profissional) => (
-                      <option
-                        key={profissional.id}
-                        value={profissional.id}
-                      >
-                        {profissional.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <select
+                  id="servico"
+                  value={servicoId}
+                  onChange={(event) => {
+                    setServicoId(event.target.value);
+                    setHorarioSelecionado("");
+                    setCupomAplicado(null);
+                    setErroCupom("");
+                  }}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {servicos.map((servico) => (
+                    <option
+                      key={servico.id}
+                      value={servico.id}
+                    >
+                      {servico.nome} · {servico.duracaoMinutos} min ·{" "}
+                      {formatarMoeda(servico.precoCentavos)}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
-                <Label>
-                  Dia
-                </Label>
+                <Label>Escolha o profissional</Label>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Selecione quem vai te atender. Os horários abaixo serão
+                  recalculados usando somente a agenda desse profissional.
+                </p>
 
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {proximosDias.map((dia) => {
-                    const ativo = dia === dataSelecionada;
-                    const regra =
-                      funcionamentoPorDia[criarDataLocal(dia).getDay()];
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {profissionais.map((profissional) => {
+                    const ativo = profissional.id === profissionalId;
 
                     return (
                       <button
-                        key={dia}
+                        key={profissional.id}
                         type="button"
                         onClick={() => {
-                          setDataSelecionada(dia);
+                          setProfissionalId(profissional.id);
                           setHorarioSelecionado("");
                         }}
-                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
+                        className={`group flex min-w-0 flex-col items-center border px-3 py-4 text-center transition ${
                           ativo
-                            ? "border-gold bg-gold-soft text-gold"
-                            : "border-border bg-background/40 hover:bg-surface-elevated"
+                            ? "border-gold bg-gold-soft/40"
+                            : "border-border bg-background/30 hover:border-gold/50"
                         }`}
                       >
-                        <span className="block font-medium capitalize">
-                          {obterNomeDia(dia)}
+                        <div
+                          className={`grid h-20 w-20 place-items-center overflow-hidden rounded-full border-2 ${
+                            ativo
+                              ? "border-gold"
+                              : "border-border"
+                          }`}
+                        >
+                          {profissional.fotoUrl ? (
+                            <img
+                              src={profissional.fotoUrl}
+                              alt={`Foto de ${profissional.nome}`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <UserRound className="h-8 w-8 text-muted-foreground" />
+                          )}
+                        </div>
+
+                        <span
+                          className={`mt-3 truncate text-sm font-medium ${
+                            ativo ? "text-gold" : "text-foreground"
+                          }`}
+                        >
+                          {profissional.nome}
                         </span>
 
-                        <span className="mt-1 block text-xs text-muted-foreground">
-                          {regra.abre} às {regra.fecha}
-                        </span>
+                        {profissional.descricao && (
+                          <span className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                            {profissional.descricao}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -817,40 +836,105 @@ function AgendamentosPage() {
               </div>
 
               <div>
+                <Label>Dia</Label>
+
+                {!profissionalId ? (
+                  <div className="mt-3 border-l-2 border-gold/50 px-4 py-3 text-sm text-muted-foreground">
+                    Escolha primeiro o profissional para consultar a agenda dele.
+                  </div>
+                ) : (
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {proximosDias.map((dia) => {
+                      const ativo = dia === dataSelecionada;
+                      const regra =
+                        funcionamentoPorDia[criarDataLocal(dia).getDay()];
+
+                      return (
+                        <button
+                          key={dia}
+                          type="button"
+                          onClick={() => {
+                            setDataSelecionada(dia);
+                            setHorarioSelecionado("");
+                          }}
+                          className={`border px-4 py-3 text-left text-sm transition ${
+                            ativo
+                              ? "border-gold bg-gold-soft/40 text-gold"
+                              : "border-border bg-background/30 hover:border-gold/50"
+                          }`}
+                        >
+                          <span className="block font-medium capitalize">
+                            {obterNomeDia(dia)}
+                          </span>
+
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {regra.abre} às {regra.fecha}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div>
                 <Label>
                   Horário
                 </Label>
 
-                {!servicoSelecionado || !dataSelecionada ? (
-                  <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
-                    Escolha um serviço e um dia para ver os horários
-                    disponíveis.
+                {!servicoSelecionado ||
+                !profissionalId ||
+                !dataSelecionada ? (
+                  <div className="mt-3 border-l-2 border-gold/50 px-4 py-3 text-sm text-muted-foreground">
+                    Escolha o profissional e o dia para ver os horários disponíveis.
                   </div>
                 ) : horariosFiltrados.length === 0 ? (
-                  <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                  <div className="mt-3 border border-border bg-background/30 p-4 text-sm text-muted-foreground">
                     Nenhum horário disponível para este serviço,
                     profissional e dia.
                   </div>
                 ) : (
-                  <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
-                    {horariosFiltrados.map((horario) => {
-                      const ativo = horario === horarioSelecionado;
+                  <div className="mt-4 space-y-6">
+                    {horariosPorPeriodo.map((grupo) => (
+                      <div key={grupo.periodo}>
+                        <div className="mb-3 flex items-center gap-3">
+                          <span className="text-sm font-medium">
+                            {grupo.periodo}
+                          </span>
+                          <span className="h-px flex-1 bg-border" />
+                          <span className="text-xs text-muted-foreground">
+                            {grupo.horarios.length}{" "}
+                            {grupo.horarios.length === 1
+                              ? "horário"
+                              : "horários"}
+                          </span>
+                        </div>
 
-                      return (
-                        <button
-                          key={horario}
-                          type="button"
-                          onClick={() => setHorarioSelecionado(horario)}
-                          className={`rounded-xl border px-3 py-2 text-sm transition ${
-                            ativo
-                              ? "border-gold bg-gold-soft text-gold"
-                              : "border-border bg-background/40 hover:bg-surface-elevated"
-                          }`}
-                        >
-                          {horario}
-                        </button>
-                      );
-                    })}
+                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+                          {grupo.horarios.map((horario) => {
+                            const ativo =
+                              horario === horarioSelecionado;
+
+                            return (
+                              <button
+                                key={horario}
+                                type="button"
+                                onClick={() =>
+                                  setHorarioSelecionado(horario)
+                                }
+                                className={`border px-3 py-3 text-sm transition ${
+                                  ativo
+                                    ? "border-gold bg-gold-soft/40 text-gold"
+                                    : "border-border bg-background/30 hover:border-gold/50"
+                                }`}
+                              >
+                                {horario}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 

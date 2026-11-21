@@ -597,9 +597,7 @@ async function existeConflitoDeHorario({
           not: ignorarAgendamentoId,
         }
         : undefined,
-      status: {
-        in: ["SOLICITADO", "CONFIRMADO"],
-      },
+      status: "CONFIRMADO",
       inicio: {
         lt: fim,
       },
@@ -690,9 +688,7 @@ async function buscarAgendamentoConflitante({
           not: ignorarAgendamentoId,
         }
         : undefined,
-      status: {
-        in: ["SOLICITADO", "CONFIRMADO"],
-      },
+      status: "CONFIRMADO",
       inicio: {
         lt: fim,
       },
@@ -733,7 +729,7 @@ function descreverConflito(conflito: {
       minute: "2-digit",
     }).format(data);
 
-  return `Conflito com o atendimento de ${conflito.cliente.nome} (${conflito.servico.nome}) das ${formatarHora(conflito.inicio)} às ${formatarHora(conflito.fim)}. Escolha outro horário ou ajuste a duração.`;
+  return `Conflito com o atendimento de ${conflito.cliente.nome} (${conflito.servico.nome}) das ${formatarHora(conflito.inicio)} Ã s ${formatarHora(conflito.fim)}. Escolha outro horário ou ajuste a duração.`;
 }
 
 async function criarNotificacaoNovoAgendamento({
@@ -1289,6 +1285,8 @@ export const funcionarioListarDadosParaAgendarCliente =
           select: {
             id: true,
             nome: true,
+            descricao: true,
+            fotoUrl: true,
           },
         }),
       ]);
@@ -1863,7 +1861,26 @@ export const funcionarioListarSolicitacoes =
   })
     .validator(listarSolicitacoesSchema)
     .handler(async ({ data }) => {
-    await exigirOperacional();
+    const operador = await exigirOperacional();
+
+    const profissionalOperador =
+      operador.papel === "FUNCIONARIO"
+        ? await prisma.profissional.findUnique({
+            where: {
+              usuarioId: operador.id,
+            },
+            select: {
+              id: true,
+            },
+          })
+        : null;
+
+    if (
+      operador.papel === "FUNCIONARIO" &&
+      !profissionalOperador
+    ) {
+      return [];
+    }
 
     // Sem período (painel): só os ativos, como sempre foi.
     // Com período (agenda): inclui concluídos, filtrando no banco pelo
@@ -1889,6 +1906,10 @@ export const funcionarioListarSolicitacoes =
 
     return prisma.agendamento.findMany({
       where: {
+        profissionalId:
+          operador.papel === "FUNCIONARIO"
+            ? profissionalOperador?.id
+            : undefined,
         status: {
           in: periodo
             ? ["SOLICITADO", "CONFIRMADO", "CONCLUIDO"]
@@ -1946,105 +1967,235 @@ export const funcionarioConfirmarAgendamento =
   })
     .validator(alterarStatusSchema)
     .handler(async ({ data }) => {
-      await exigirOperacional();
+      const operador = await exigirOperacional();
 
-      const agendamento =
-        await prisma.agendamento.findUnique({
-          where: {
-            id: data.agendamentoId,
-          },
-          select: {
-            id: true,
-            profissionalId: true,
-            inicio: true,
-            fim: true,
-            status: true,
+      const resultado = await prisma.$transaction(
+        async (tx) => {
+          const inicial = await tx.agendamento.findUnique({
+            where: {
+              id: data.agendamentoId,
+            },
+            select: {
+              id: true,
+              profissionalId: true,
+            },
+          });
 
-            cliente: {
-              select: {
-                nome: true,
-                email: true,
+          if (!inicial) {
+            return {
+              sucesso: false as const,
+              mensagem: "Agendamento nao encontrado.",
+            };
+          }
+
+          // O advisory lock retorna void no PostgreSQL. Usar $executeRaw
+          // evita a desserializacao de void pelo Prisma e preserva o lock
+          // ate o fim desta transacao.
+          await tx.$executeRaw`
+            SELECT pg_advisory_xact_lock(hashtext(${inicial.profissionalId}))
+          `;
+
+          const agendamento = await tx.agendamento.findUnique({
+            where: {
+              id: inicial.id,
+            },
+            select: {
+              id: true,
+              profissionalId: true,
+              inicio: true,
+              fim: true,
+              status: true,
+              cliente: {
+                select: {
+                  nome: true,
+                  email: true,
+                },
+              },
+              profissional: {
+                select: {
+                  nome: true,
+                  usuarioId: true,
+                },
+              },
+              servico: {
+                select: {
+                  nome: true,
+                },
               },
             },
+          });
 
-            profissional: {
-              select: {
-                nome: true,
+          if (!agendamento) {
+            return {
+              sucesso: false as const,
+              mensagem: "Agendamento nao encontrado.",
+            };
+          }
+
+          if (
+            operador.papel === "FUNCIONARIO" &&
+            agendamento.profissional.usuarioId !== operador.id
+          ) {
+            return {
+              sucesso: false as const,
+              mensagem:
+                "Voce so pode decidir solicitacoes da sua propria agenda.",
+            };
+          }
+
+          if (agendamento.status !== "SOLICITADO") {
+            return {
+              sucesso: false as const,
+              mensagem:
+                "Apenas solicitacoes pendentes podem ser confirmadas.",
+            };
+          }
+
+          const confirmadoConflitante =
+            await tx.agendamento.findFirst({
+              where: {
+                profissionalId: agendamento.profissionalId,
+                id: { not: agendamento.id },
+                status: "CONFIRMADO",
+                inicio: { lt: agendamento.fim },
+                fim: { gt: agendamento.inicio },
               },
-            },
+              select: { id: true },
+            });
 
-            servico: {
-              select: {
-                nome: true,
+          if (confirmadoConflitante) {
+            return {
+              sucesso: false as const,
+              mensagem:
+                "Esse horario ja foi confirmado para outro cliente.",
+            };
+          }
+
+          const concorrentes =
+            await tx.agendamento.findMany({
+              where: {
+                profissionalId: agendamento.profissionalId,
+                id: { not: agendamento.id },
+                status: "SOLICITADO",
+                inicio: { lt: agendamento.fim },
+                fim: { gt: agendamento.inicio },
               },
+              select: {
+                id: true,
+                inicio: true,
+                cliente: {
+                  select: {
+                    nome: true,
+                    email: true,
+                  },
+                },
+                profissional: {
+                  select: {
+                    nome: true,
+                  },
+                },
+                servico: {
+                  select: {
+                    nome: true,
+                  },
+                },
+              },
+            });
+
+          const agendamentoAtualizado =
+            await tx.agendamento.update({
+              where: { id: agendamento.id },
+              data: {
+                status: "CONFIRMADO",
+                motivoRecusa: null,
+              },
+              select: {
+                id: true,
+                status: true,
+                inicio: true,
+                fim: true,
+              },
+            });
+
+          if (concorrentes.length > 0) {
+            const ids = concorrentes.map((item) => item.id);
+
+            await tx.agendamento.updateMany({
+              where: {
+                id: { in: ids },
+                status: "SOLICITADO",
+              },
+              data: {
+                status: "RECUSADO",
+                motivoRecusa:
+                  "Horario preenchido por outra solicitacao confirmada.",
+              },
+            });
+
+            await tx.usoCupom.deleteMany({
+              where: {
+                agendamentoId: { in: ids },
+              },
+            });
+          }
+
+          return {
+            sucesso: true as const,
+            mensagem:
+              concorrentes.length > 0
+                ? `Agendamento confirmado. ${concorrentes.length} solicitacao(oes) concorrente(s) foram recusadas automaticamente.`
+                : "Agendamento confirmado com sucesso.",
+            agendamento: agendamentoAtualizado,
+            confirmado: {
+              cliente: agendamento.cliente,
+              profissional: {
+                nome: agendamento.profissional.nome,
+              },
+              servico: agendamento.servico,
             },
-          },
-        });
+            concorrentes,
+          };
+        },
+        {
+          maxWait: 5000,
+          timeout: 10000,
+        },
+      );
 
-      if (!agendamento) {
-        return {
-          sucesso: false,
-          mensagem: "Agendamento não encontrado.",
-        };
+      if (!resultado.sucesso) {
+        return resultado;
       }
-
-      if (agendamento.status !== "SOLICITADO") {
-        return {
-          sucesso: false,
-          mensagem:
-            "Apenas solicitações pendentes podem ser confirmadas.",
-        };
-      }
-
-      const conflito = await existeConflitoDeHorario({
-        profissionalId: agendamento.profissionalId,
-        inicio: agendamento.inicio,
-        fim: agendamento.fim,
-        ignorarAgendamentoId: agendamento.id,
-      });
-
-      if (conflito) {
-        return {
-          sucesso: false,
-          mensagem:
-            "Existe outro agendamento ou solicitação ocupando esse horário.",
-        };
-      }
-
-      const agendamentoAtualizado =
-        await prisma.agendamento.update({
-          where: {
-            id: agendamento.id,
-          },
-          data: {
-            status: "CONFIRMADO",
-            motivoRecusa: null,
-          },
-          select: {
-            id: true,
-            status: true,
-            inicio: true,
-            fim: true,
-          },
-        });
 
       dispararEmailSemBloquear("AGENDAMENTO_CONFIRMADO", () =>
         enviarEmailConfirmacaoAgendamento({
-          agendamentoId: agendamento.id,
-          cliente: agendamento.cliente,
-          servico: agendamento.servico,
-          profissional: agendamento.profissional,
-          inicio: agendamentoAtualizado.inicio,
+          agendamentoId: resultado.agendamento.id,
+          cliente: resultado.confirmado.cliente,
+          servico: resultado.confirmado.servico,
+          profissional: resultado.confirmado.profissional,
+          inicio: resultado.agendamento.inicio,
         }),
       );
 
+      for (const concorrente of resultado.concorrentes) {
+        dispararEmailSemBloquear(
+          "AGENDAMENTO_RECUSADO_CONCORRENCIA",
+          () =>
+            enviarEmailRecusaAgendamento({
+              agendamentoId: concorrente.id,
+              cliente: concorrente.cliente,
+              servico: concorrente.servico,
+              profissional: concorrente.profissional,
+              inicio: concorrente.inicio,
+            }),
+        );
+      }
+
       return {
         sucesso: true,
-        mensagem: "Agendamento confirmado com sucesso.",
-        agendamento: agendamentoAtualizado,
+        mensagem: resultado.mensagem,
+        agendamento: resultado.agendamento,
       };
     });
-
 export const funcionarioRecusarAgendamento =
   createServerFn({
     method: "POST",
@@ -2562,7 +2713,7 @@ export const operacionalAtualizarAtendimentoConcluido =
         `Profissional: "${atual.profissional.nome}" -> "${profissional.nome}".`,
         `Serviço: "${atual.servico.nome}" -> "${servico.nome}".`,
         `Período: ${atual.inicio.toISOString()}–${atual.fim.toISOString()} -> ${novoInicio.toISOString()}–${novoFim.toISOString()}.`,
-        `Pagamento: ${atual.formaPagamento ?? "NÃO INFORMADO"} -> ${data.formaPagamento}.`,
+        `Pagamento: ${atual.formaPagamento ?? "NÃƒO INFORMADO"} -> ${data.formaPagamento}.`,
         `Valor: ${formatarValorAuditoria(atual.valorPagoCentavos)} -> ${formatarValorAuditoria(valorFinal)}.`,
         `Motivo: ${data.motivo.trim()}`,
       ].join(" ");
@@ -3789,9 +3940,7 @@ export const listarIndisponibilidadesAgenda =
         prisma.agendamento.findMany({
           where: {
             profissionalId: data.profissionalId,
-            status: {
-              in: ["SOLICITADO", "CONFIRMADO"],
-            },
+            status: "CONFIRMADO",
             inicio: {
               lt: fimDia,
             },

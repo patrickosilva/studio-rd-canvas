@@ -20,7 +20,6 @@ import { Label } from "@/components/ui/label";
 import {
   adminDesativarProfissional,
   adminDesativarServico,
-  cadastrarProfissional,
   cadastrarServico,
   listarProfissionais,
   listarServicos,
@@ -44,6 +43,7 @@ type Profissional = {
   nome: string;
   telefone: string | null;
   descricao: string | null;
+  fotoUrl: string | null;
   ativo: boolean;
   usuario?: {
     id: string;
@@ -84,6 +84,81 @@ function formatarTelefone(telefone: string | null): string {
   return telefone;
 }
 
+async function processarFotoProfissional(file: File): Promise<string> {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Selecione uma imagem válida.");
+  }
+
+  if (file.size > 8 * 1024 * 1024) {
+    throw new Error("A imagem original deve ter no máximo 8 MB.");
+  }
+
+  const dataUrlOriginal = await new Promise<string>((resolve, reject) => {
+    const leitor = new FileReader();
+
+    leitor.onload = () => resolve(String(leitor.result ?? ""));
+    leitor.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+    leitor.readAsDataURL(file);
+  });
+
+  const imagem = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const elemento = new Image();
+
+    elemento.onload = () => resolve(elemento);
+    elemento.onerror = () => reject(new Error("Não foi possível abrir a imagem."));
+    elemento.src = dataUrlOriginal;
+  });
+
+  const ladoOrigem = Math.min(
+    imagem.naturalWidth,
+    imagem.naturalHeight,
+  );
+  const origemX = Math.max(
+    0,
+    Math.floor((imagem.naturalWidth - ladoOrigem) / 2),
+  );
+  const origemY = Math.max(
+    0,
+    Math.floor((imagem.naturalHeight - ladoOrigem) / 2),
+  );
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 480;
+  canvas.height = 480;
+
+  const contexto = canvas.getContext("2d");
+
+  if (!contexto) {
+    throw new Error("Não foi possível preparar a foto.");
+  }
+
+  contexto.drawImage(
+    imagem,
+    origemX,
+    origemY,
+    ladoOrigem,
+    ladoOrigem,
+    0,
+    0,
+    480,
+    480,
+  );
+
+  let resultado = canvas.toDataURL("image/jpeg", 0.82);
+
+  if (resultado.length > 400000) {
+    resultado = canvas.toDataURL("image/jpeg", 0.68);
+  }
+
+  if (resultado.length > 400000) {
+    throw new Error(
+      "A foto continuou muito grande após a otimização. Escolha outra imagem.",
+    );
+  }
+
+  return resultado;
+}
+
 function converterPrecoParaCentavos(valor: string): number {
   const limpo = valor
     .trim()
@@ -103,23 +178,19 @@ function ConfiguracoesPage() {
   const carregarServicos = useServerFn(listarServicos);
   const carregarProfissionais = useServerFn(listarProfissionais);
   const criarServico = useServerFn(cadastrarServico);
-  const criarProfissional = useServerFn(cadastrarProfissional);
   const desativarServico = useServerFn(adminDesativarServico);
   const desativarProfissional = useServerFn(
     adminDesativarProfissional,
   );
-
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
 
   const [carregando, setCarregando] = useState(true);
   const [salvandoServico, setSalvandoServico] = useState(false);
-  const [salvandoProfissional, setSalvandoProfissional] = useState(false);
   const [removendoServicoId, setRemovendoServicoId] = useState("");
-  const [removendoProfissionalId, setRemovendoProfissionalId] =
+    const [removendoProfissionalId, setRemovendoProfissionalId] =
     useState("");
-
-
+  const [atualizandoFotoId, setAtualizandoFotoId] = useState("");
 
   const [mensagemServico, setMensagemServico] = useState("");
   const [mensagemProfissional, setMensagemProfissional] = useState("");
@@ -198,44 +269,7 @@ function ConfiguracoesPage() {
       setSalvandoServico(false);
     }
   }
-async function handleCadastrarProfissional(
-  event: FormEvent<HTMLFormElement>,
-) {
-  event.preventDefault();
-
-  setSalvandoProfissional(true);
-  setMensagemProfissional("");
-
-  const formulario = event.currentTarget;
-  const formData = new FormData(formulario);
-
-  try {
-    const resultado = await criarProfissional({
-      data: {
-        nome: String(formData.get("nome") ?? ""),
-        telefone: String(formData.get("telefone") ?? ""),
-        descricao: String(formData.get("descricao") ?? ""),
-        ativo: true,
-      },
-    });
-
-    setMensagemProfissional(resultado.mensagem);
-
-    if (resultado.sucesso) {
-      formulario.reset();
-      await carregarDados();
-    }
-  } catch (error) {
-    console.error(error);
-
-    setMensagemProfissional(
-      "Não foi possível cadastrar o profissional.",
-    );
-  } finally {
-    setSalvandoProfissional(false);
-  }
-}
-  async function handleDesativarServico(servico: Servico) {
+async function handleDesativarServico(servico: Servico) {
     const confirmar = window.confirm(
       `Tem certeza que deseja excluir o serviço "${servico.nome}"? Ele ficará indisponível para novos agendamentos.`,
     );
@@ -317,7 +351,7 @@ async function handleCadastrarProfissional(
     <div className="max-w-7xl p-8 lg:p-12">
       <PageHeader
         title="Configurações"
-        subtitle="Cadastre serviços e profissionais usados no fluxo de agendamento."
+        subtitle="Gerencie serviços e a equipe que aparece no fluxo de agendamento."
       />
 
       {erro && (
@@ -513,69 +547,24 @@ async function handleCadastrarProfissional(
               </h2>
 
               <p className="text-sm text-muted-foreground">
-                Cadastre quem poderá aparecer no agendamento.
-              </p>
+                Os perfis abaixo são criados a partir do convite de funcionário.</p>
             </div>
           </div>
 
-          <form
-            className="space-y-4"
-            onSubmit={handleCadastrarProfissional}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="profissionalNome">
-                Nome do profissional
-              </Label>
-
-              <Input
-                id="profissionalNome"
-                name="nome"
-                required
-                placeholder="Ex: Rafael Dias"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="profissionalTelefone">
-                Telefone
-              </Label>
-
-              <Input
-                id="profissionalTelefone"
-                name="telefone"
-                placeholder="Ex: (21) 99999-9999"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="profissionalDescricao">
-                Descrição
-              </Label>
-
-              <Input
-                id="profissionalDescricao"
-                name="descricao"
-                placeholder="Ex: Especialista em corte masculino"
-              />
-            </div>
-
-            {mensagemProfissional && (
-              <p className="text-sm text-muted-foreground">
-                {mensagemProfissional}
-              </p>
-            )}
-
-            <Button
-              type="submit"
-              disabled={salvandoProfissional}
-              className="w-full"
+                    <div className="rounded-xl border border-gold/20 bg-gold-soft/40 p-4">
+            <p className="text-sm font-medium">
+              Entrada de profissionais pela equipe
+            </p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Novos profissionais não são cadastrados manualmente aqui. Envie um convite em Usuários; ao concluir o cadastro, o funcionário recebe automaticamente o próprio perfil operacional.
+            </p>
+            <a
+              href="/admin/usuarios"
+              className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-gold/30 px-3 text-sm font-medium text-gold transition hover:bg-gold-soft"
             >
-              <Plus className="mr-2 h-4 w-4" />
-              {salvandoProfissional
-                ? "Cadastrando..."
-                : "Cadastrar profissional"}
-            </Button>
-          </form>
+              Convidar funcionário
+            </a>
+          </div>
 
           <div className="mt-8 border-t border-border pt-6">
             <h3 className="mb-4 text-sm font-medium">
@@ -595,27 +584,52 @@ async function handleCadastrarProfissional(
                 {profissionais.map((profissional) => (
                   <article
                     key={profissional.id}
-                    className="rounded-xl border border-border bg-background/40 p-4"
+                    className="border-b border-border py-4 last:border-b-0"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h4 className="font-medium">
-                          {profissional.nome}
-                        </h4>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex min-w-0 items-start gap-4">
+                        <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-border bg-background">
+                          {profissional.fotoUrl ? (
+                            <img
+                              src={profissional.fotoUrl}
+                              alt={`Foto de ${profissional.nome}`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <UserRound className="h-7 w-7 text-muted-foreground" />
+                          )}
+                        </div>
 
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {formatarTelefone(profissional.telefone)}
-                        </p>
+                        <div className="min-w-0">
+                          <h4 className="font-medium">
+                            {profissional.nome}
+                          </h4>
 
-                        {profissional.descricao && (
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            {profissional.descricao}
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {formatarTelefone(profissional.telefone)}
                           </p>
-                        )}
+
+                          {profissional.descricao && (
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              {profissional.descricao}
+                            </p>
+                          )}
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-border px-3 text-xs font-medium transition hover:border-gold/50">
+                              {atualizandoFotoId === profissional.id
+                                ? "Processando..."
+                                : profissional.fotoUrl
+                                  ? "Trocar foto"
+                                  : "Adicionar foto"}
+                            </label>
+
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="rounded-full bg-gold-soft px-3 py-1 text-xs text-gold">
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="rounded-md bg-gold-soft px-2.5 py-1 text-xs text-gold">
                           {profissional.ativo ? "Ativo" : "Inativo"}
                         </span>
 

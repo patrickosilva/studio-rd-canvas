@@ -31,11 +31,14 @@ import { Route as AdminConexoesRouteImport } from './routes/admin.conexoes'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminContaRouteImport } from './routes/admin.conta'
 import { Route as AdminCorrecoesRouteImport } from './routes/admin.correcoes'
+import { Route as AdminEquipeRouteImport } from './routes/admin.equipe'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
+import { Route as AdminMonitoramentoRouteImport } from './routes/admin.monitoramento'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 import { Route as AdminTesteClienteRouteImport } from './routes/admin.teste-cliente'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
+import { Route as CadastroFuncionarioTokenRouteImport } from './routes/cadastro-funcionario.$token'
 import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
 import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
 import { Route as ClienteAssinaturaRouteImport } from './routes/cliente.assinatura'
@@ -50,6 +53,8 @@ import { Route as FuncionarioBloqueiosRouteImport } from './routes/funcionario.b
 import { Route as FuncionarioContaRouteImport } from './routes/funcionario.conta'
 import { Route as FuncionarioCorrecoesRouteImport } from './routes/funcionario.correcoes'
 import { Route as FuncionarioSolicitacoesRouteImport } from './routes/funcionario.solicitacoes'
+import { Route as PagamentoAssinaturaRetornoRouteImport } from './routes/pagamento-assinatura.retorno'
+import { Route as ApiWebhooksInfinitepayRouteImport } from './routes/api.webhooks.infinitepay'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -161,6 +166,11 @@ const AdminCorrecoesRoute = AdminCorrecoesRouteImport.update({
   path: '/correcoes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminEquipeRoute = AdminEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
   id: '/financeiro',
   path: '/financeiro',
@@ -169,6 +179,11 @@ const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
 const AdminMarketingRoute = AdminMarketingRouteImport.update({
   id: '/marketing',
   path: '/marketing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMonitoramentoRoute = AdminMonitoramentoRouteImport.update({
+  id: '/monitoramento',
+  path: '/monitoramento',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
@@ -186,6 +201,12 @@ const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => AdminRoute,
 } as any)
+const CadastroFuncionarioTokenRoute =
+  CadastroFuncionarioTokenRouteImport.update({
+    id: '/cadastro-funcionario/$token',
+    path: '/cadastro-funcionario/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ClienteIndexRoute = ClienteIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -257,6 +278,17 @@ const FuncionarioSolicitacoesRoute = FuncionarioSolicitacoesRouteImport.update({
   path: '/solicitacoes',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const PagamentoAssinaturaRetornoRoute =
+  PagamentoAssinaturaRetornoRouteImport.update({
+    id: '/pagamento-assinatura/retorno',
+    path: '/pagamento-assinatura/retorno',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiWebhooksInfinitepayRoute = ApiWebhooksInfinitepayRouteImport.update({
+  id: '/api/webhooks/infinitepay',
+  path: '/api/webhooks/infinitepay',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -280,11 +312,14 @@ export interface FileRoutesByFullPath {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
+  '/admin/equipe': typeof AdminEquipeRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/monitoramento': typeof AdminMonitoramentoRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/teste-cliente': typeof AdminTesteClienteRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/cadastro-funcionario/$token': typeof CadastroFuncionarioTokenRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
@@ -297,9 +332,11 @@ export interface FileRoutesByFullPath {
   '/funcionario/conta': typeof FuncionarioContaRoute
   '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
+  '/pagamento-assinatura/retorno': typeof PagamentoAssinaturaRetornoRoute
   '/admin/': typeof AdminIndexRoute
   '/cliente/': typeof ClienteIndexRoute
   '/funcionario/': typeof FuncionarioIndexRoute
+  '/api/webhooks/infinitepay': typeof ApiWebhooksInfinitepayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -320,11 +357,14 @@ export interface FileRoutesByTo {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
+  '/admin/equipe': typeof AdminEquipeRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/monitoramento': typeof AdminMonitoramentoRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/teste-cliente': typeof AdminTesteClienteRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/cadastro-funcionario/$token': typeof CadastroFuncionarioTokenRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
@@ -337,9 +377,11 @@ export interface FileRoutesByTo {
   '/funcionario/conta': typeof FuncionarioContaRoute
   '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
+  '/pagamento-assinatura/retorno': typeof PagamentoAssinaturaRetornoRoute
   '/admin': typeof AdminIndexRoute
   '/cliente': typeof ClienteIndexRoute
   '/funcionario': typeof FuncionarioIndexRoute
+  '/api/webhooks/infinitepay': typeof ApiWebhooksInfinitepayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -364,11 +406,14 @@ export interface FileRoutesById {
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/conta': typeof AdminContaRoute
   '/admin/correcoes': typeof AdminCorrecoesRoute
+  '/admin/equipe': typeof AdminEquipeRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/monitoramento': typeof AdminMonitoramentoRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/teste-cliente': typeof AdminTesteClienteRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/cadastro-funcionario/$token': typeof CadastroFuncionarioTokenRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/assinatura': typeof ClienteAssinaturaRoute
   '/cliente/beneficios': typeof ClienteBeneficiosRoute
@@ -381,9 +426,11 @@ export interface FileRoutesById {
   '/funcionario/conta': typeof FuncionarioContaRoute
   '/funcionario/correcoes': typeof FuncionarioCorrecoesRoute
   '/funcionario/solicitacoes': typeof FuncionarioSolicitacoesRoute
+  '/pagamento-assinatura/retorno': typeof PagamentoAssinaturaRetornoRoute
   '/admin/': typeof AdminIndexRoute
   '/cliente/': typeof ClienteIndexRoute
   '/funcionario/': typeof FuncionarioIndexRoute
+  '/api/webhooks/infinitepay': typeof ApiWebhooksInfinitepayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -409,11 +456,14 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/conta'
     | '/admin/correcoes'
+    | '/admin/equipe'
     | '/admin/financeiro'
     | '/admin/marketing'
+    | '/admin/monitoramento'
     | '/admin/relatorios'
     | '/admin/teste-cliente'
     | '/admin/usuarios'
+    | '/cadastro-funcionario/$token'
     | '/cliente/agendamentos'
     | '/cliente/assinatura'
     | '/cliente/beneficios'
@@ -426,9 +476,11 @@ export interface FileRouteTypes {
     | '/funcionario/conta'
     | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
+    | '/pagamento-assinatura/retorno'
     | '/admin/'
     | '/cliente/'
     | '/funcionario/'
+    | '/api/webhooks/infinitepay'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -449,11 +501,14 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/conta'
     | '/admin/correcoes'
+    | '/admin/equipe'
     | '/admin/financeiro'
     | '/admin/marketing'
+    | '/admin/monitoramento'
     | '/admin/relatorios'
     | '/admin/teste-cliente'
     | '/admin/usuarios'
+    | '/cadastro-funcionario/$token'
     | '/cliente/agendamentos'
     | '/cliente/assinatura'
     | '/cliente/beneficios'
@@ -466,9 +521,11 @@ export interface FileRouteTypes {
     | '/funcionario/conta'
     | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
+    | '/pagamento-assinatura/retorno'
     | '/admin'
     | '/cliente'
     | '/funcionario'
+    | '/api/webhooks/infinitepay'
   id:
     | '__root__'
     | '/'
@@ -492,11 +549,14 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/conta'
     | '/admin/correcoes'
+    | '/admin/equipe'
     | '/admin/financeiro'
     | '/admin/marketing'
+    | '/admin/monitoramento'
     | '/admin/relatorios'
     | '/admin/teste-cliente'
     | '/admin/usuarios'
+    | '/cadastro-funcionario/$token'
     | '/cliente/agendamentos'
     | '/cliente/assinatura'
     | '/cliente/beneficios'
@@ -509,9 +569,11 @@ export interface FileRouteTypes {
     | '/funcionario/conta'
     | '/funcionario/correcoes'
     | '/funcionario/solicitacoes'
+    | '/pagamento-assinatura/retorno'
     | '/admin/'
     | '/cliente/'
     | '/funcionario/'
+    | '/api/webhooks/infinitepay'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -527,6 +589,9 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   TermosRoute: typeof TermosRoute
+  CadastroFuncionarioTokenRoute: typeof CadastroFuncionarioTokenRoute
+  PagamentoAssinaturaRetornoRoute: typeof PagamentoAssinaturaRetornoRoute
+  ApiWebhooksInfinitepayRoute: typeof ApiWebhooksInfinitepayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -685,6 +750,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCorrecoesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/equipe': {
+      id: '/admin/equipe'
+      path: '/equipe'
+      fullPath: '/admin/equipe'
+      preLoaderRoute: typeof AdminEquipeRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/financeiro': {
       id: '/admin/financeiro'
       path: '/financeiro'
@@ -697,6 +769,13 @@ declare module '@tanstack/react-router' {
       path: '/marketing'
       fullPath: '/admin/marketing'
       preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/monitoramento': {
+      id: '/admin/monitoramento'
+      path: '/monitoramento'
+      fullPath: '/admin/monitoramento'
+      preLoaderRoute: typeof AdminMonitoramentoRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/relatorios': {
@@ -719,6 +798,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/usuarios'
       preLoaderRoute: typeof AdminUsuariosRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/cadastro-funcionario/$token': {
+      id: '/cadastro-funcionario/$token'
+      path: '/cadastro-funcionario/$token'
+      fullPath: '/cadastro-funcionario/$token'
+      preLoaderRoute: typeof CadastroFuncionarioTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/cliente/': {
       id: '/cliente/'
@@ -818,6 +904,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioSolicitacoesRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/pagamento-assinatura/retorno': {
+      id: '/pagamento-assinatura/retorno'
+      path: '/pagamento-assinatura/retorno'
+      fullPath: '/pagamento-assinatura/retorno'
+      preLoaderRoute: typeof PagamentoAssinaturaRetornoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/infinitepay': {
+      id: '/api/webhooks/infinitepay'
+      path: '/api/webhooks/infinitepay'
+      fullPath: '/api/webhooks/infinitepay'
+      preLoaderRoute: typeof ApiWebhooksInfinitepayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -831,8 +931,10 @@ interface AdminRouteChildren {
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminContaRoute: typeof AdminContaRoute
   AdminCorrecoesRoute: typeof AdminCorrecoesRoute
+  AdminEquipeRoute: typeof AdminEquipeRoute
   AdminFinanceiroRoute: typeof AdminFinanceiroRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
+  AdminMonitoramentoRoute: typeof AdminMonitoramentoRoute
   AdminRelatoriosRoute: typeof AdminRelatoriosRoute
   AdminTesteClienteRoute: typeof AdminTesteClienteRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
@@ -849,8 +951,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminContaRoute: AdminContaRoute,
   AdminCorrecoesRoute: AdminCorrecoesRoute,
+  AdminEquipeRoute: AdminEquipeRoute,
   AdminFinanceiroRoute: AdminFinanceiroRoute,
   AdminMarketingRoute: AdminMarketingRoute,
+  AdminMonitoramentoRoute: AdminMonitoramentoRoute,
   AdminRelatoriosRoute: AdminRelatoriosRoute,
   AdminTesteClienteRoute: AdminTesteClienteRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
@@ -919,6 +1023,9 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   TermosRoute: TermosRoute,
+  CadastroFuncionarioTokenRoute: CadastroFuncionarioTokenRoute,
+  PagamentoAssinaturaRetornoRoute: PagamentoAssinaturaRetornoRoute,
+  ApiWebhooksInfinitepayRoute: ApiWebhooksInfinitepayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

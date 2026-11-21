@@ -59,6 +59,8 @@ model Usuario {
   tokensRedefinicaoSenha TokenRedefinicaoSenha[]
   contasOAuth            ContaOAuth[]
   usosCupons             UsoCupom[]
+  solicitacoesAssinatura SolicitacaoAssinatura[]
+  pedidosAssinatura      PedidoAssinatura[]
 
   @@index([telefone])
 }
@@ -84,6 +86,7 @@ model Profissional {
   nome         String
   telefone     String?
   descricao    String?
+  fotoUrl      String?  @db.Text
   ativo        Boolean  @default(true)
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
@@ -146,6 +149,7 @@ enum FormaPagamento {
 
 enum ProvedorIntegracao {
   INTER
+  INFINITEPAY
   META
 }
 
@@ -158,6 +162,7 @@ enum StatusIntegracao {
 
 enum ProvedorPagamento {
   INTER
+  INFINITEPAY
   MANUAL
   MERCADO_PAGO
 }
@@ -253,12 +258,20 @@ model BloqueioAgenda {
   @@index([profissionalId, inicio])
 }
 
+enum StatusSolicitacaoAssinatura {
+  PENDENTE
+  APROVADA
+  RECUSADA
+  CANCELADA
+  UTILIZADA
+}
 model PlanoAssinatura {
   id             String  @id @default(cuid())
   nome           String  @unique
   descricao      String?
   precoCentavos  Int
   cortesPorCiclo Int
+  duracaoMeses  Int     @default(1)
   duracaoDias    Int     @default(30)
   ativo          Boolean @default(true)
 
@@ -269,10 +282,88 @@ model PlanoAssinatura {
   atualizadoEm DateTime @updatedAt
 
   assinaturas AssinaturaCliente[]
+  solicitacoes SolicitacaoAssinatura[]
+  pedidosPagamento PedidoAssinatura[]
 
   @@index([ativo])
 }
 
+enum StatusPedidoAssinatura {
+  CRIADO
+  CHECKOUT_CRIADO
+  PAGO
+  FALHOU
+  CANCELADO
+  ESTORNADO
+}
+model ConfiguracaoAssinatura {
+  id                   String   @id @default(cuid())
+  chave                String   @unique @default("STUDIO_RD")
+  aprovacaoAutomatica  Boolean  @default(false)
+  criadoEm             DateTime @default(now())
+  atualizadoEm         DateTime @updatedAt
+}
+
+model SolicitacaoAssinatura {
+  id                    String                      @id @default(cuid())
+  clienteId             String
+  planoId               String?
+  status                StatusSolicitacaoAssinatura @default(PENDENTE)
+  solicitadoEm          DateTime                    @default(now())
+  decididoEm            DateTime?
+  decididoPorUsuarioId  String?
+  observacaoDecisao     String?
+  utilizadoEm           DateTime?
+  criadoEm              DateTime                    @default(now())
+  atualizadoEm          DateTime                    @updatedAt
+
+  cliente Usuario         @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  plano   PlanoAssinatura? @relation(fields: [planoId], references: [id], onDelete: Restrict)
+  pedidosPagamento PedidoAssinatura[]
+
+  @@index([clienteId, status])
+  @@index([planoId, status])
+  @@index([status, solicitadoEm])
+  @@index([clienteId, planoId, status])
+}
+model PedidoAssinatura {
+  id                     String                 @id @default(cuid())
+  clienteId              String
+  planoId                String
+  solicitacaoId          String
+  assinaturaId           String?                @unique
+  status                 StatusPedidoAssinatura @default(CRIADO)
+
+  precoOriginalCentavos  Int
+  descontoCentavos       Int                    @default(0)
+  valorFinalCentavos     Int
+
+  orderNsu               String                 @unique
+  checkoutUrl            String?                @db.Text
+  expiraEm               DateTime?
+
+  transactionNsu         String?                @unique
+  invoiceSlug            String?
+  receiptUrl             String?                @db.Text
+  captureMethod          String?
+  paidAmountCentavos     Int?
+  installments           Int?
+  pagoEm                 DateTime?
+
+  criadoEm               DateTime               @default(now())
+  atualizadoEm           DateTime               @updatedAt
+
+  cliente     Usuario                @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  plano       PlanoAssinatura        @relation(fields: [planoId], references: [id], onDelete: Restrict)
+  solicitacao SolicitacaoAssinatura  @relation(fields: [solicitacaoId], references: [id], onDelete: Restrict)
+  assinatura  AssinaturaCliente?     @relation(fields: [assinaturaId], references: [id], onDelete: SetNull)
+
+  @@index([clienteId, status])
+  @@index([planoId, status])
+  @@index([solicitacaoId])
+  @@index([status, criadoEm])
+  @@index([expiraEm])
+}
 model AssinaturaCliente {
   id String @id @default(cuid())
 
@@ -309,6 +400,7 @@ model AssinaturaCliente {
 
   usos       UsoAssinatura[]
   pagamentos PagamentoAssinatura[]
+  pedidoOrigem PedidoAssinatura?
 
   @@index([clienteId])
   @@index([planoId])
@@ -454,6 +546,20 @@ model Notificacao {
   @@index([usuarioId, lida])
 }
 
+
+model ConviteFuncionario {
+  id                    String   @id @default(cuid())
+  email                 String
+  tokenHash             String   @unique
+  expiraEm              DateTime
+  usadoEm               DateTime?
+  criadoPorUsuarioId    String
+  criadoEm              DateTime @default(now())
+
+  @@index([email])
+  @@index([expiraEm])
+  @@index([usadoEm])
+}
 model TokenRedefinicaoSenha {
   id        String @id @default(cuid())
   usuarioId String

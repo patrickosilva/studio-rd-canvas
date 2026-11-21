@@ -756,6 +756,7 @@ function SolicitacoesPage() {
       }
 
       setMensagem(resultado.mensagem);
+      limparFocoEFecharDetalhes();
 
       await carregarAgendamentos();
     } catch (error) {
@@ -950,6 +951,7 @@ function SolicitacoesPage() {
       }
 
       setMensagem(resultado.mensagem);
+      limparFocoEFecharDetalhes();
 
       await carregarAgendamentos();
     } catch (error) {

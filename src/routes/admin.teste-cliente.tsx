@@ -26,7 +26,7 @@ type Plano = {
   descricao: string | null;
   precoCentavos: number;
   cortesPorCiclo: number;
-  duracaoDias: number;
+  duracaoMeses: number;
   ativo: boolean;
 };
 
@@ -769,7 +769,7 @@ function AdminTesteClientePage() {
                             )}
                             <p className="mt-3 text-xs text-muted-foreground">
                               {item.cortesPorCiclo} cortes · ciclo de{" "}
-                              {item.duracaoDias} dias
+                              {item.duracaoMeses} meses
                             </p>
                           </div>
 
@@ -950,7 +950,7 @@ function AdminTesteClientePage() {
                   Pagar no estabelecimento
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Será conectado à maquininha/agendamento
+                  Será conectado Ã  maquininha/agendamento
                 </p>
               </div>
             </div>

@@ -8,6 +8,10 @@ import {
   descriptografarSegredo,
 } from "@/lib/integracoes/segredos.server";
 import {
+  testarConfiguracaoInfinitePay,
+  type CredenciaisInfinitePay,
+} from "@/lib/integracoes/infinitepay.server";
+import {
   consultarCobrancaPixInter,
   criarCobrancaPixTesteInter,
   testarAutenticacaoInter,
@@ -15,7 +19,7 @@ import {
   type CredenciaisInter,
 } from "@/lib/integracoes/inter.server";
 
-const provedores = ["INTER", "META"] as const;
+const provedores = ["INTER", "INFINITEPAY", "META"] as const;
 
 async function exigirDono() {
   const usuario = await obterUsuarioAtual();
@@ -481,3 +485,176 @@ export const adminConsultarCobrancaPixTesteInter =
         };
       }
     });
+
+const salvarInfinitePaySchema = z.object({
+  infiniteTag: z
+    .string()
+    .trim()
+    .min(2, "Informe a InfiniteTag.")
+    .max(100)
+    .transform((valor) => valor.replace(/^\$/, "")),
+  apiKey: z
+    .string()
+    .trim()
+    .min(10, "Informe a API Key.")
+    .max(500)
+    .refine(
+      (valor) => valor.startsWith("inchk_"),
+      "A API Key da InfinitePay deve começar com inchk_.",
+    ),
+});
+
+type ConfiguracaoPublicaInfinitePay = {
+  infiniteTag: string;
+};
+
+async function obterIntegracaoInfinitePayComSegredo() {
+  const integracao =
+    await prisma.integracaoExterna.findUnique({
+      where: {
+        provedor: "INFINITEPAY",
+      },
+      select: {
+        id: true,
+        status: true,
+        configuracaoPublica: true,
+        segredoCriptografado: true,
+        conectadoEm: true,
+      },
+    });
+
+  if (!integracao?.segredoCriptografado) {
+    throw new Error(
+      "Salve a InfiniteTag e a API Key antes de validar a integração.",
+    );
+  }
+
+  const configuracao =
+    (integracao.configuracaoPublica ??
+      {}) as ConfiguracaoPublicaInfinitePay;
+
+  if (!configuracao.infiniteTag) {
+    throw new Error(
+      "A InfiniteTag não está configurada.",
+    );
+  }
+
+  return {
+    integracao,
+    configuracao,
+    credenciais:
+      descriptografarSegredo<CredenciaisInfinitePay>(
+        integracao.segredoCriptografado,
+      ),
+  };
+}
+
+export const adminSalvarConfiguracaoInfinitePay =
+  createServerFn({
+    method: "POST",
+  })
+    .validator(salvarInfinitePaySchema)
+    .handler(async ({ data }) => {
+      await exigirDono();
+
+      const segredo = criptografarSegredo({
+        apiKey: data.apiKey,
+      } satisfies CredenciaisInfinitePay);
+
+      await prisma.integracaoExterna.upsert({
+        where: {
+          provedor: "INFINITEPAY",
+        },
+        create: {
+          provedor: "INFINITEPAY",
+          status: "CONFIGURANDO",
+          nomeConta: "InfinitePay",
+          identificadorExterno:
+            data.infiniteTag,
+          configuracaoPublica: {
+            infiniteTag: data.infiniteTag,
+          },
+          segredoCriptografado: segredo,
+          ultimoErro: null,
+        },
+        update: {
+          status: "CONFIGURANDO",
+          nomeConta: "InfinitePay",
+          identificadorExterno:
+            data.infiniteTag,
+          configuracaoPublica: {
+            infiniteTag: data.infiniteTag,
+          },
+          segredoCriptografado: segredo,
+          ultimoErro: null,
+        },
+      });
+
+      return {
+        sucesso: true,
+        mensagem:
+          "Configuração da InfinitePay salva e criptografada. Agora você pode validar a integração.",
+      };
+    });
+
+export const adminTestarConexaoInfinitePay =
+  createServerFn({
+    method: "POST",
+  }).handler(async () => {
+    await exigirDono();
+
+    const {
+      integracao,
+      configuracao,
+      credenciais,
+    } =
+      await obterIntegracaoInfinitePayComSegredo();
+
+    try {
+      await testarConfiguracaoInfinitePay({
+        apiKey: credenciais.apiKey,
+        handle: configuracao.infiniteTag,
+      });
+
+      const agora = new Date();
+
+      await prisma.integracaoExterna.update({
+        where: {
+          id: integracao.id,
+        },
+        data: {
+          status: "CONECTADA",
+          conectadoEm:
+            integracao.conectadoEm ?? agora,
+          verificadoEm: agora,
+          ultimoErro: null,
+        },
+      });
+
+      return {
+        sucesso: true,
+        mensagem:
+          "InfinitePay validada. O link temporário de R$ 1,00 expira automaticamente e não realiza cobrança sozinho.",
+      };
+    } catch (error) {
+      const mensagem =
+        error instanceof Error
+          ? error.message
+          : "Falha ao validar a InfinitePay.";
+
+      await prisma.integracaoExterna.update({
+        where: {
+          id: integracao.id,
+        },
+        data: {
+          status: "ERRO",
+          ultimoErro: mensagem.slice(0, 1000),
+        },
+      });
+
+      return {
+        sucesso: false,
+        mensagem,
+      };
+    }
+  });

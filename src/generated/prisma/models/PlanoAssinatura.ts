@@ -29,12 +29,14 @@ export type AggregatePlanoAssinatura = {
 export type PlanoAssinaturaAvgAggregateOutputType = {
   precoCentavos: number | null
   cortesPorCiclo: number | null
+  duracaoMeses: number | null
   duracaoDias: number | null
 }
 
 export type PlanoAssinaturaSumAggregateOutputType = {
   precoCentavos: number | null
   cortesPorCiclo: number | null
+  duracaoMeses: number | null
   duracaoDias: number | null
 }
 
@@ -44,6 +46,7 @@ export type PlanoAssinaturaMinAggregateOutputType = {
   descricao: string | null
   precoCentavos: number | null
   cortesPorCiclo: number | null
+  duracaoMeses: number | null
   duracaoDias: number | null
   ativo: boolean | null
   providerPlanId: string | null
@@ -57,6 +60,7 @@ export type PlanoAssinaturaMaxAggregateOutputType = {
   descricao: string | null
   precoCentavos: number | null
   cortesPorCiclo: number | null
+  duracaoMeses: number | null
   duracaoDias: number | null
   ativo: boolean | null
   providerPlanId: string | null
@@ -70,6 +74,7 @@ export type PlanoAssinaturaCountAggregateOutputType = {
   descricao: number
   precoCentavos: number
   cortesPorCiclo: number
+  duracaoMeses: number
   duracaoDias: number
   ativo: number
   providerPlanId: number
@@ -82,12 +87,14 @@ export type PlanoAssinaturaCountAggregateOutputType = {
 export type PlanoAssinaturaAvgAggregateInputType = {
   precoCentavos?: true
   cortesPorCiclo?: true
+  duracaoMeses?: true
   duracaoDias?: true
 }
 
 export type PlanoAssinaturaSumAggregateInputType = {
   precoCentavos?: true
   cortesPorCiclo?: true
+  duracaoMeses?: true
   duracaoDias?: true
 }
 
@@ -97,6 +104,7 @@ export type PlanoAssinaturaMinAggregateInputType = {
   descricao?: true
   precoCentavos?: true
   cortesPorCiclo?: true
+  duracaoMeses?: true
   duracaoDias?: true
   ativo?: true
   providerPlanId?: true
@@ -110,6 +118,7 @@ export type PlanoAssinaturaMaxAggregateInputType = {
   descricao?: true
   precoCentavos?: true
   cortesPorCiclo?: true
+  duracaoMeses?: true
   duracaoDias?: true
   ativo?: true
   providerPlanId?: true
@@ -123,6 +132,7 @@ export type PlanoAssinaturaCountAggregateInputType = {
   descricao?: true
   precoCentavos?: true
   cortesPorCiclo?: true
+  duracaoMeses?: true
   duracaoDias?: true
   ativo?: true
   providerPlanId?: true
@@ -223,6 +233,7 @@ export type PlanoAssinaturaGroupByOutputType = {
   descricao: string | null
   precoCentavos: number
   cortesPorCiclo: number
+  duracaoMeses: number
   duracaoDias: number
   ativo: boolean
   providerPlanId: string | null
@@ -259,12 +270,15 @@ export type PlanoAssinaturaWhereInput = {
   descricao?: Prisma.StringNullableFilter<"PlanoAssinatura"> | string | null
   precoCentavos?: Prisma.IntFilter<"PlanoAssinatura"> | number
   cortesPorCiclo?: Prisma.IntFilter<"PlanoAssinatura"> | number
+  duracaoMeses?: Prisma.IntFilter<"PlanoAssinatura"> | number
   duracaoDias?: Prisma.IntFilter<"PlanoAssinatura"> | number
   ativo?: Prisma.BoolFilter<"PlanoAssinatura"> | boolean
   providerPlanId?: Prisma.StringNullableFilter<"PlanoAssinatura"> | string | null
   criadoEm?: Prisma.DateTimeFilter<"PlanoAssinatura"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"PlanoAssinatura"> | Date | string
   assinaturas?: Prisma.AssinaturaClienteListRelationFilter
+  solicitacoes?: Prisma.SolicitacaoAssinaturaListRelationFilter
+  pedidosPagamento?: Prisma.PedidoAssinaturaListRelationFilter
 }
 
 export type PlanoAssinaturaOrderByWithRelationInput = {
@@ -273,12 +287,15 @@ export type PlanoAssinaturaOrderByWithRelationInput = {
   descricao?: Prisma.SortOrderInput | Prisma.SortOrder
   precoCentavos?: Prisma.SortOrder
   cortesPorCiclo?: Prisma.SortOrder
+  duracaoMeses?: Prisma.SortOrder
   duracaoDias?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   providerPlanId?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   assinaturas?: Prisma.AssinaturaClienteOrderByRelationAggregateInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaOrderByRelationAggregateInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaOrderByRelationAggregateInput
 }
 
 export type PlanoAssinaturaWhereUniqueInput = Prisma.AtLeast<{
@@ -290,12 +307,15 @@ export type PlanoAssinaturaWhereUniqueInput = Prisma.AtLeast<{
   descricao?: Prisma.StringNullableFilter<"PlanoAssinatura"> | string | null
   precoCentavos?: Prisma.IntFilter<"PlanoAssinatura"> | number
   cortesPorCiclo?: Prisma.IntFilter<"PlanoAssinatura"> | number
+  duracaoMeses?: Prisma.IntFilter<"PlanoAssinatura"> | number
   duracaoDias?: Prisma.IntFilter<"PlanoAssinatura"> | number
   ativo?: Prisma.BoolFilter<"PlanoAssinatura"> | boolean
   providerPlanId?: Prisma.StringNullableFilter<"PlanoAssinatura"> | string | null
   criadoEm?: Prisma.DateTimeFilter<"PlanoAssinatura"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"PlanoAssinatura"> | Date | string
   assinaturas?: Prisma.AssinaturaClienteListRelationFilter
+  solicitacoes?: Prisma.SolicitacaoAssinaturaListRelationFilter
+  pedidosPagamento?: Prisma.PedidoAssinaturaListRelationFilter
 }, "id" | "nome">
 
 export type PlanoAssinaturaOrderByWithAggregationInput = {
@@ -304,6 +324,7 @@ export type PlanoAssinaturaOrderByWithAggregationInput = {
   descricao?: Prisma.SortOrderInput | Prisma.SortOrder
   precoCentavos?: Prisma.SortOrder
   cortesPorCiclo?: Prisma.SortOrder
+  duracaoMeses?: Prisma.SortOrder
   duracaoDias?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   providerPlanId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -325,6 +346,7 @@ export type PlanoAssinaturaScalarWhereWithAggregatesInput = {
   descricao?: Prisma.StringNullableWithAggregatesFilter<"PlanoAssinatura"> | string | null
   precoCentavos?: Prisma.IntWithAggregatesFilter<"PlanoAssinatura"> | number
   cortesPorCiclo?: Prisma.IntWithAggregatesFilter<"PlanoAssinatura"> | number
+  duracaoMeses?: Prisma.IntWithAggregatesFilter<"PlanoAssinatura"> | number
   duracaoDias?: Prisma.IntWithAggregatesFilter<"PlanoAssinatura"> | number
   ativo?: Prisma.BoolWithAggregatesFilter<"PlanoAssinatura"> | boolean
   providerPlanId?: Prisma.StringNullableWithAggregatesFilter<"PlanoAssinatura"> | string | null
@@ -338,12 +360,15 @@ export type PlanoAssinaturaCreateInput = {
   descricao?: string | null
   precoCentavos: number
   cortesPorCiclo: number
+  duracaoMeses?: number
   duracaoDias?: number
   ativo?: boolean
   providerPlanId?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutPlanoInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaCreateNestedManyWithoutPlanoInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaCreateNestedManyWithoutPlanoInput
 }
 
 export type PlanoAssinaturaUncheckedCreateInput = {
@@ -352,12 +377,15 @@ export type PlanoAssinaturaUncheckedCreateInput = {
   descricao?: string | null
   precoCentavos: number
   cortesPorCiclo: number
+  duracaoMeses?: number
   duracaoDias?: number
   ativo?: boolean
   providerPlanId?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutPlanoInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUncheckedCreateNestedManyWithoutPlanoInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUncheckedCreateNestedManyWithoutPlanoInput
 }
 
 export type PlanoAssinaturaUpdateInput = {
@@ -366,12 +394,15 @@ export type PlanoAssinaturaUpdateInput = {
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
   duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutPlanoNestedInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUpdateManyWithoutPlanoNestedInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUpdateManyWithoutPlanoNestedInput
 }
 
 export type PlanoAssinaturaUncheckedUpdateInput = {
@@ -380,12 +411,15 @@ export type PlanoAssinaturaUncheckedUpdateInput = {
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
   duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutPlanoNestedInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUncheckedUpdateManyWithoutPlanoNestedInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUncheckedUpdateManyWithoutPlanoNestedInput
 }
 
 export type PlanoAssinaturaCreateManyInput = {
@@ -394,6 +428,7 @@ export type PlanoAssinaturaCreateManyInput = {
   descricao?: string | null
   precoCentavos: number
   cortesPorCiclo: number
+  duracaoMeses?: number
   duracaoDias?: number
   ativo?: boolean
   providerPlanId?: string | null
@@ -407,6 +442,7 @@ export type PlanoAssinaturaUpdateManyMutationInput = {
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
   duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -420,6 +456,7 @@ export type PlanoAssinaturaUncheckedUpdateManyInput = {
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
   duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -433,6 +470,7 @@ export type PlanoAssinaturaCountOrderByAggregateInput = {
   descricao?: Prisma.SortOrder
   precoCentavos?: Prisma.SortOrder
   cortesPorCiclo?: Prisma.SortOrder
+  duracaoMeses?: Prisma.SortOrder
   duracaoDias?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   providerPlanId?: Prisma.SortOrder
@@ -443,6 +481,7 @@ export type PlanoAssinaturaCountOrderByAggregateInput = {
 export type PlanoAssinaturaAvgOrderByAggregateInput = {
   precoCentavos?: Prisma.SortOrder
   cortesPorCiclo?: Prisma.SortOrder
+  duracaoMeses?: Prisma.SortOrder
   duracaoDias?: Prisma.SortOrder
 }
 
@@ -452,6 +491,7 @@ export type PlanoAssinaturaMaxOrderByAggregateInput = {
   descricao?: Prisma.SortOrder
   precoCentavos?: Prisma.SortOrder
   cortesPorCiclo?: Prisma.SortOrder
+  duracaoMeses?: Prisma.SortOrder
   duracaoDias?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   providerPlanId?: Prisma.SortOrder
@@ -465,6 +505,7 @@ export type PlanoAssinaturaMinOrderByAggregateInput = {
   descricao?: Prisma.SortOrder
   precoCentavos?: Prisma.SortOrder
   cortesPorCiclo?: Prisma.SortOrder
+  duracaoMeses?: Prisma.SortOrder
   duracaoDias?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
   providerPlanId?: Prisma.SortOrder
@@ -475,12 +516,48 @@ export type PlanoAssinaturaMinOrderByAggregateInput = {
 export type PlanoAssinaturaSumOrderByAggregateInput = {
   precoCentavos?: Prisma.SortOrder
   cortesPorCiclo?: Prisma.SortOrder
+  duracaoMeses?: Prisma.SortOrder
   duracaoDias?: Prisma.SortOrder
+}
+
+export type PlanoAssinaturaNullableScalarRelationFilter = {
+  is?: Prisma.PlanoAssinaturaWhereInput | null
+  isNot?: Prisma.PlanoAssinaturaWhereInput | null
 }
 
 export type PlanoAssinaturaScalarRelationFilter = {
   is?: Prisma.PlanoAssinaturaWhereInput
   isNot?: Prisma.PlanoAssinaturaWhereInput
+}
+
+export type PlanoAssinaturaCreateNestedOneWithoutSolicitacoesInput = {
+  create?: Prisma.XOR<Prisma.PlanoAssinaturaCreateWithoutSolicitacoesInput, Prisma.PlanoAssinaturaUncheckedCreateWithoutSolicitacoesInput>
+  connectOrCreate?: Prisma.PlanoAssinaturaCreateOrConnectWithoutSolicitacoesInput
+  connect?: Prisma.PlanoAssinaturaWhereUniqueInput
+}
+
+export type PlanoAssinaturaUpdateOneWithoutSolicitacoesNestedInput = {
+  create?: Prisma.XOR<Prisma.PlanoAssinaturaCreateWithoutSolicitacoesInput, Prisma.PlanoAssinaturaUncheckedCreateWithoutSolicitacoesInput>
+  connectOrCreate?: Prisma.PlanoAssinaturaCreateOrConnectWithoutSolicitacoesInput
+  upsert?: Prisma.PlanoAssinaturaUpsertWithoutSolicitacoesInput
+  disconnect?: Prisma.PlanoAssinaturaWhereInput | boolean
+  delete?: Prisma.PlanoAssinaturaWhereInput | boolean
+  connect?: Prisma.PlanoAssinaturaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PlanoAssinaturaUpdateToOneWithWhereWithoutSolicitacoesInput, Prisma.PlanoAssinaturaUpdateWithoutSolicitacoesInput>, Prisma.PlanoAssinaturaUncheckedUpdateWithoutSolicitacoesInput>
+}
+
+export type PlanoAssinaturaCreateNestedOneWithoutPedidosPagamentoInput = {
+  create?: Prisma.XOR<Prisma.PlanoAssinaturaCreateWithoutPedidosPagamentoInput, Prisma.PlanoAssinaturaUncheckedCreateWithoutPedidosPagamentoInput>
+  connectOrCreate?: Prisma.PlanoAssinaturaCreateOrConnectWithoutPedidosPagamentoInput
+  connect?: Prisma.PlanoAssinaturaWhereUniqueInput
+}
+
+export type PlanoAssinaturaUpdateOneRequiredWithoutPedidosPagamentoNestedInput = {
+  create?: Prisma.XOR<Prisma.PlanoAssinaturaCreateWithoutPedidosPagamentoInput, Prisma.PlanoAssinaturaUncheckedCreateWithoutPedidosPagamentoInput>
+  connectOrCreate?: Prisma.PlanoAssinaturaCreateOrConnectWithoutPedidosPagamentoInput
+  upsert?: Prisma.PlanoAssinaturaUpsertWithoutPedidosPagamentoInput
+  connect?: Prisma.PlanoAssinaturaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PlanoAssinaturaUpdateToOneWithWhereWithoutPedidosPagamentoInput, Prisma.PlanoAssinaturaUpdateWithoutPedidosPagamentoInput>, Prisma.PlanoAssinaturaUncheckedUpdateWithoutPedidosPagamentoInput>
 }
 
 export type PlanoAssinaturaCreateNestedOneWithoutAssinaturasInput = {
@@ -497,17 +574,180 @@ export type PlanoAssinaturaUpdateOneRequiredWithoutAssinaturasNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PlanoAssinaturaUpdateToOneWithWhereWithoutAssinaturasInput, Prisma.PlanoAssinaturaUpdateWithoutAssinaturasInput>, Prisma.PlanoAssinaturaUncheckedUpdateWithoutAssinaturasInput>
 }
 
+export type PlanoAssinaturaCreateWithoutSolicitacoesInput = {
+  id?: string
+  nome: string
+  descricao?: string | null
+  precoCentavos: number
+  cortesPorCiclo: number
+  duracaoMeses?: number
+  duracaoDias?: number
+  ativo?: boolean
+  providerPlanId?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutPlanoInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaCreateNestedManyWithoutPlanoInput
+}
+
+export type PlanoAssinaturaUncheckedCreateWithoutSolicitacoesInput = {
+  id?: string
+  nome: string
+  descricao?: string | null
+  precoCentavos: number
+  cortesPorCiclo: number
+  duracaoMeses?: number
+  duracaoDias?: number
+  ativo?: boolean
+  providerPlanId?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutPlanoInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUncheckedCreateNestedManyWithoutPlanoInput
+}
+
+export type PlanoAssinaturaCreateOrConnectWithoutSolicitacoesInput = {
+  where: Prisma.PlanoAssinaturaWhereUniqueInput
+  create: Prisma.XOR<Prisma.PlanoAssinaturaCreateWithoutSolicitacoesInput, Prisma.PlanoAssinaturaUncheckedCreateWithoutSolicitacoesInput>
+}
+
+export type PlanoAssinaturaUpsertWithoutSolicitacoesInput = {
+  update: Prisma.XOR<Prisma.PlanoAssinaturaUpdateWithoutSolicitacoesInput, Prisma.PlanoAssinaturaUncheckedUpdateWithoutSolicitacoesInput>
+  create: Prisma.XOR<Prisma.PlanoAssinaturaCreateWithoutSolicitacoesInput, Prisma.PlanoAssinaturaUncheckedCreateWithoutSolicitacoesInput>
+  where?: Prisma.PlanoAssinaturaWhereInput
+}
+
+export type PlanoAssinaturaUpdateToOneWithWhereWithoutSolicitacoesInput = {
+  where?: Prisma.PlanoAssinaturaWhereInput
+  data: Prisma.XOR<Prisma.PlanoAssinaturaUpdateWithoutSolicitacoesInput, Prisma.PlanoAssinaturaUncheckedUpdateWithoutSolicitacoesInput>
+}
+
+export type PlanoAssinaturaUpdateWithoutSolicitacoesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutPlanoNestedInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUpdateManyWithoutPlanoNestedInput
+}
+
+export type PlanoAssinaturaUncheckedUpdateWithoutSolicitacoesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutPlanoNestedInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUncheckedUpdateManyWithoutPlanoNestedInput
+}
+
+export type PlanoAssinaturaCreateWithoutPedidosPagamentoInput = {
+  id?: string
+  nome: string
+  descricao?: string | null
+  precoCentavos: number
+  cortesPorCiclo: number
+  duracaoMeses?: number
+  duracaoDias?: number
+  ativo?: boolean
+  providerPlanId?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  assinaturas?: Prisma.AssinaturaClienteCreateNestedManyWithoutPlanoInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaCreateNestedManyWithoutPlanoInput
+}
+
+export type PlanoAssinaturaUncheckedCreateWithoutPedidosPagamentoInput = {
+  id?: string
+  nome: string
+  descricao?: string | null
+  precoCentavos: number
+  cortesPorCiclo: number
+  duracaoMeses?: number
+  duracaoDias?: number
+  ativo?: boolean
+  providerPlanId?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  assinaturas?: Prisma.AssinaturaClienteUncheckedCreateNestedManyWithoutPlanoInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUncheckedCreateNestedManyWithoutPlanoInput
+}
+
+export type PlanoAssinaturaCreateOrConnectWithoutPedidosPagamentoInput = {
+  where: Prisma.PlanoAssinaturaWhereUniqueInput
+  create: Prisma.XOR<Prisma.PlanoAssinaturaCreateWithoutPedidosPagamentoInput, Prisma.PlanoAssinaturaUncheckedCreateWithoutPedidosPagamentoInput>
+}
+
+export type PlanoAssinaturaUpsertWithoutPedidosPagamentoInput = {
+  update: Prisma.XOR<Prisma.PlanoAssinaturaUpdateWithoutPedidosPagamentoInput, Prisma.PlanoAssinaturaUncheckedUpdateWithoutPedidosPagamentoInput>
+  create: Prisma.XOR<Prisma.PlanoAssinaturaCreateWithoutPedidosPagamentoInput, Prisma.PlanoAssinaturaUncheckedCreateWithoutPedidosPagamentoInput>
+  where?: Prisma.PlanoAssinaturaWhereInput
+}
+
+export type PlanoAssinaturaUpdateToOneWithWhereWithoutPedidosPagamentoInput = {
+  where?: Prisma.PlanoAssinaturaWhereInput
+  data: Prisma.XOR<Prisma.PlanoAssinaturaUpdateWithoutPedidosPagamentoInput, Prisma.PlanoAssinaturaUncheckedUpdateWithoutPedidosPagamentoInput>
+}
+
+export type PlanoAssinaturaUpdateWithoutPedidosPagamentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assinaturas?: Prisma.AssinaturaClienteUpdateManyWithoutPlanoNestedInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUpdateManyWithoutPlanoNestedInput
+}
+
+export type PlanoAssinaturaUncheckedUpdateWithoutPedidosPagamentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
+  cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assinaturas?: Prisma.AssinaturaClienteUncheckedUpdateManyWithoutPlanoNestedInput
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUncheckedUpdateManyWithoutPlanoNestedInput
+}
+
 export type PlanoAssinaturaCreateWithoutAssinaturasInput = {
   id?: string
   nome: string
   descricao?: string | null
   precoCentavos: number
   cortesPorCiclo: number
+  duracaoMeses?: number
   duracaoDias?: number
   ativo?: boolean
   providerPlanId?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  solicitacoes?: Prisma.SolicitacaoAssinaturaCreateNestedManyWithoutPlanoInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaCreateNestedManyWithoutPlanoInput
 }
 
 export type PlanoAssinaturaUncheckedCreateWithoutAssinaturasInput = {
@@ -516,11 +756,14 @@ export type PlanoAssinaturaUncheckedCreateWithoutAssinaturasInput = {
   descricao?: string | null
   precoCentavos: number
   cortesPorCiclo: number
+  duracaoMeses?: number
   duracaoDias?: number
   ativo?: boolean
   providerPlanId?: string | null
   criadoEm?: Date | string
   atualizadoEm?: Date | string
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUncheckedCreateNestedManyWithoutPlanoInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUncheckedCreateNestedManyWithoutPlanoInput
 }
 
 export type PlanoAssinaturaCreateOrConnectWithoutAssinaturasInput = {
@@ -545,11 +788,14 @@ export type PlanoAssinaturaUpdateWithoutAssinaturasInput = {
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
   duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUpdateManyWithoutPlanoNestedInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUpdateManyWithoutPlanoNestedInput
 }
 
 export type PlanoAssinaturaUncheckedUpdateWithoutAssinaturasInput = {
@@ -558,11 +804,14 @@ export type PlanoAssinaturaUncheckedUpdateWithoutAssinaturasInput = {
   descricao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   precoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   cortesPorCiclo?: Prisma.IntFieldUpdateOperationsInput | number
+  duracaoMeses?: Prisma.IntFieldUpdateOperationsInput | number
   duracaoDias?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   providerPlanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  solicitacoes?: Prisma.SolicitacaoAssinaturaUncheckedUpdateManyWithoutPlanoNestedInput
+  pedidosPagamento?: Prisma.PedidoAssinaturaUncheckedUpdateManyWithoutPlanoNestedInput
 }
 
 
@@ -572,10 +821,14 @@ export type PlanoAssinaturaUncheckedUpdateWithoutAssinaturasInput = {
 
 export type PlanoAssinaturaCountOutputType = {
   assinaturas: number
+  solicitacoes: number
+  pedidosPagamento: number
 }
 
 export type PlanoAssinaturaCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assinaturas?: boolean | PlanoAssinaturaCountOutputTypeCountAssinaturasArgs
+  solicitacoes?: boolean | PlanoAssinaturaCountOutputTypeCountSolicitacoesArgs
+  pedidosPagamento?: boolean | PlanoAssinaturaCountOutputTypeCountPedidosPagamentoArgs
 }
 
 /**
@@ -595,6 +848,20 @@ export type PlanoAssinaturaCountOutputTypeCountAssinaturasArgs<ExtArgs extends r
   where?: Prisma.AssinaturaClienteWhereInput
 }
 
+/**
+ * PlanoAssinaturaCountOutputType without action
+ */
+export type PlanoAssinaturaCountOutputTypeCountSolicitacoesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SolicitacaoAssinaturaWhereInput
+}
+
+/**
+ * PlanoAssinaturaCountOutputType without action
+ */
+export type PlanoAssinaturaCountOutputTypeCountPedidosPagamentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PedidoAssinaturaWhereInput
+}
+
 
 export type PlanoAssinaturaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -602,12 +869,15 @@ export type PlanoAssinaturaSelect<ExtArgs extends runtime.Types.Extensions.Inter
   descricao?: boolean
   precoCentavos?: boolean
   cortesPorCiclo?: boolean
+  duracaoMeses?: boolean
   duracaoDias?: boolean
   ativo?: boolean
   providerPlanId?: boolean
   criadoEm?: boolean
   atualizadoEm?: boolean
   assinaturas?: boolean | Prisma.PlanoAssinatura$assinaturasArgs<ExtArgs>
+  solicitacoes?: boolean | Prisma.PlanoAssinatura$solicitacoesArgs<ExtArgs>
+  pedidosPagamento?: boolean | Prisma.PlanoAssinatura$pedidosPagamentoArgs<ExtArgs>
   _count?: boolean | Prisma.PlanoAssinaturaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["planoAssinatura"]>
 
@@ -617,6 +887,7 @@ export type PlanoAssinaturaSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   descricao?: boolean
   precoCentavos?: boolean
   cortesPorCiclo?: boolean
+  duracaoMeses?: boolean
   duracaoDias?: boolean
   ativo?: boolean
   providerPlanId?: boolean
@@ -630,6 +901,7 @@ export type PlanoAssinaturaSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   descricao?: boolean
   precoCentavos?: boolean
   cortesPorCiclo?: boolean
+  duracaoMeses?: boolean
   duracaoDias?: boolean
   ativo?: boolean
   providerPlanId?: boolean
@@ -643,6 +915,7 @@ export type PlanoAssinaturaSelectScalar = {
   descricao?: boolean
   precoCentavos?: boolean
   cortesPorCiclo?: boolean
+  duracaoMeses?: boolean
   duracaoDias?: boolean
   ativo?: boolean
   providerPlanId?: boolean
@@ -650,9 +923,11 @@ export type PlanoAssinaturaSelectScalar = {
   atualizadoEm?: boolean
 }
 
-export type PlanoAssinaturaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "descricao" | "precoCentavos" | "cortesPorCiclo" | "duracaoDias" | "ativo" | "providerPlanId" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["planoAssinatura"]>
+export type PlanoAssinaturaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "descricao" | "precoCentavos" | "cortesPorCiclo" | "duracaoMeses" | "duracaoDias" | "ativo" | "providerPlanId" | "criadoEm" | "atualizadoEm", ExtArgs["result"]["planoAssinatura"]>
 export type PlanoAssinaturaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assinaturas?: boolean | Prisma.PlanoAssinatura$assinaturasArgs<ExtArgs>
+  solicitacoes?: boolean | Prisma.PlanoAssinatura$solicitacoesArgs<ExtArgs>
+  pedidosPagamento?: boolean | Prisma.PlanoAssinatura$pedidosPagamentoArgs<ExtArgs>
   _count?: boolean | Prisma.PlanoAssinaturaCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PlanoAssinaturaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -662,6 +937,8 @@ export type $PlanoAssinaturaPayload<ExtArgs extends runtime.Types.Extensions.Int
   name: "PlanoAssinatura"
   objects: {
     assinaturas: Prisma.$AssinaturaClientePayload<ExtArgs>[]
+    solicitacoes: Prisma.$SolicitacaoAssinaturaPayload<ExtArgs>[]
+    pedidosPagamento: Prisma.$PedidoAssinaturaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -669,6 +946,7 @@ export type $PlanoAssinaturaPayload<ExtArgs extends runtime.Types.Extensions.Int
     descricao: string | null
     precoCentavos: number
     cortesPorCiclo: number
+    duracaoMeses: number
     duracaoDias: number
     ativo: boolean
     providerPlanId: string | null
@@ -1069,6 +1347,8 @@ readonly fields: PlanoAssinaturaFieldRefs;
 export interface Prisma__PlanoAssinaturaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   assinaturas<T extends Prisma.PlanoAssinatura$assinaturasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PlanoAssinatura$assinaturasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssinaturaClientePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  solicitacoes<T extends Prisma.PlanoAssinatura$solicitacoesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PlanoAssinatura$solicitacoesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SolicitacaoAssinaturaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pedidosPagamento<T extends Prisma.PlanoAssinatura$pedidosPagamentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PlanoAssinatura$pedidosPagamentoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PedidoAssinaturaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1103,6 +1383,7 @@ export interface PlanoAssinaturaFieldRefs {
   readonly descricao: Prisma.FieldRef<"PlanoAssinatura", 'String'>
   readonly precoCentavos: Prisma.FieldRef<"PlanoAssinatura", 'Int'>
   readonly cortesPorCiclo: Prisma.FieldRef<"PlanoAssinatura", 'Int'>
+  readonly duracaoMeses: Prisma.FieldRef<"PlanoAssinatura", 'Int'>
   readonly duracaoDias: Prisma.FieldRef<"PlanoAssinatura", 'Int'>
   readonly ativo: Prisma.FieldRef<"PlanoAssinatura", 'Boolean'>
   readonly providerPlanId: Prisma.FieldRef<"PlanoAssinatura", 'String'>
@@ -1522,6 +1803,54 @@ export type PlanoAssinatura$assinaturasArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.AssinaturaClienteScalarFieldEnum | Prisma.AssinaturaClienteScalarFieldEnum[]
+}
+
+/**
+ * PlanoAssinatura.solicitacoes
+ */
+export type PlanoAssinatura$solicitacoesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SolicitacaoAssinatura
+   */
+  select?: Prisma.SolicitacaoAssinaturaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SolicitacaoAssinatura
+   */
+  omit?: Prisma.SolicitacaoAssinaturaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SolicitacaoAssinaturaInclude<ExtArgs> | null
+  where?: Prisma.SolicitacaoAssinaturaWhereInput
+  orderBy?: Prisma.SolicitacaoAssinaturaOrderByWithRelationInput | Prisma.SolicitacaoAssinaturaOrderByWithRelationInput[]
+  cursor?: Prisma.SolicitacaoAssinaturaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SolicitacaoAssinaturaScalarFieldEnum | Prisma.SolicitacaoAssinaturaScalarFieldEnum[]
+}
+
+/**
+ * PlanoAssinatura.pedidosPagamento
+ */
+export type PlanoAssinatura$pedidosPagamentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PedidoAssinatura
+   */
+  select?: Prisma.PedidoAssinaturaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PedidoAssinatura
+   */
+  omit?: Prisma.PedidoAssinaturaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PedidoAssinaturaInclude<ExtArgs> | null
+  where?: Prisma.PedidoAssinaturaWhereInput
+  orderBy?: Prisma.PedidoAssinaturaOrderByWithRelationInput | Prisma.PedidoAssinaturaOrderByWithRelationInput[]
+  cursor?: Prisma.PedidoAssinaturaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PedidoAssinaturaScalarFieldEnum | Prisma.PedidoAssinaturaScalarFieldEnum[]
 }
 
 /**

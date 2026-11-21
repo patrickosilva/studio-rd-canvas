@@ -270,6 +270,40 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
 }
 
+export type EnumStatusSolicitacaoAssinaturaFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatusSolicitacaoAssinatura | Prisma.EnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  in?: $Enums.StatusSolicitacaoAssinatura[] | Prisma.ListEnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatusSolicitacaoAssinatura[] | Prisma.ListEnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatusSolicitacaoAssinaturaFilter<$PrismaModel> | $Enums.StatusSolicitacaoAssinatura
+}
+
+export type EnumStatusSolicitacaoAssinaturaWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatusSolicitacaoAssinatura | Prisma.EnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  in?: $Enums.StatusSolicitacaoAssinatura[] | Prisma.ListEnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatusSolicitacaoAssinatura[] | Prisma.ListEnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatusSolicitacaoAssinaturaWithAggregatesFilter<$PrismaModel> | $Enums.StatusSolicitacaoAssinatura
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatusSolicitacaoAssinaturaFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatusSolicitacaoAssinaturaFilter<$PrismaModel>
+}
+
+export type EnumStatusPedidoAssinaturaFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatusPedidoAssinatura | Prisma.EnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  in?: $Enums.StatusPedidoAssinatura[] | Prisma.ListEnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatusPedidoAssinatura[] | Prisma.ListEnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatusPedidoAssinaturaFilter<$PrismaModel> | $Enums.StatusPedidoAssinatura
+}
+
+export type EnumStatusPedidoAssinaturaWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatusPedidoAssinatura | Prisma.EnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  in?: $Enums.StatusPedidoAssinatura[] | Prisma.ListEnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatusPedidoAssinatura[] | Prisma.ListEnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatusPedidoAssinaturaWithAggregatesFilter<$PrismaModel> | $Enums.StatusPedidoAssinatura
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatusPedidoAssinaturaFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatusPedidoAssinaturaFilter<$PrismaModel>
+}
+
 export type EnumStatusAssinaturaFilter<$PrismaModel = never> = {
   equals?: $Enums.StatusAssinatura | Prisma.EnumStatusAssinaturaFieldRefInput<$PrismaModel>
   in?: $Enums.StatusAssinatura[] | Prisma.ListEnumStatusAssinaturaFieldRefInput<$PrismaModel>
@@ -737,6 +771,40 @@ export type NestedFloatNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumStatusSolicitacaoAssinaturaFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatusSolicitacaoAssinatura | Prisma.EnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  in?: $Enums.StatusSolicitacaoAssinatura[] | Prisma.ListEnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatusSolicitacaoAssinatura[] | Prisma.ListEnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatusSolicitacaoAssinaturaFilter<$PrismaModel> | $Enums.StatusSolicitacaoAssinatura
+}
+
+export type NestedEnumStatusSolicitacaoAssinaturaWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatusSolicitacaoAssinatura | Prisma.EnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  in?: $Enums.StatusSolicitacaoAssinatura[] | Prisma.ListEnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatusSolicitacaoAssinatura[] | Prisma.ListEnumStatusSolicitacaoAssinaturaFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatusSolicitacaoAssinaturaWithAggregatesFilter<$PrismaModel> | $Enums.StatusSolicitacaoAssinatura
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatusSolicitacaoAssinaturaFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatusSolicitacaoAssinaturaFilter<$PrismaModel>
+}
+
+export type NestedEnumStatusPedidoAssinaturaFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatusPedidoAssinatura | Prisma.EnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  in?: $Enums.StatusPedidoAssinatura[] | Prisma.ListEnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatusPedidoAssinatura[] | Prisma.ListEnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatusPedidoAssinaturaFilter<$PrismaModel> | $Enums.StatusPedidoAssinatura
+}
+
+export type NestedEnumStatusPedidoAssinaturaWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatusPedidoAssinatura | Prisma.EnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  in?: $Enums.StatusPedidoAssinatura[] | Prisma.ListEnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatusPedidoAssinatura[] | Prisma.ListEnumStatusPedidoAssinaturaFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatusPedidoAssinaturaWithAggregatesFilter<$PrismaModel> | $Enums.StatusPedidoAssinatura
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatusPedidoAssinaturaFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatusPedidoAssinaturaFilter<$PrismaModel>
 }
 
 export type NestedEnumStatusAssinaturaFilter<$PrismaModel = never> = {

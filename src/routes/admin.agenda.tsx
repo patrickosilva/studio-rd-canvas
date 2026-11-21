@@ -274,8 +274,8 @@ function traduzirStatus(status: string): string {
     RECUSADO: "Recusado",
     CANCELADO_CLIENTE: "Cancelado pelo cliente",
     CANCELADO_FUNCIONARIO: "Cancelado pela equipe",
-    CONCLUIDO: "ConcluÃ­do",
-    FALTOU: "NÃ£o compareceu",
+    CONCLUIDO: "Concluído",
+    FALTOU: "Não compareceu",
   };
 
   return mapa[status] ?? status;
@@ -378,7 +378,7 @@ function AdminAgendaPage() {
     } catch (error) {
       console.error(error);
 
-      setErro("NÃ£o foi possÃ­vel carregar a agenda administrativa.");
+      setErro("Não foi possível carregar a agenda administrativa.");
     } finally {
       setCarregando(false);
     }
@@ -564,7 +564,7 @@ return {
     setErro("");
 
     if (!dataRemarcacao || !horarioRemarcacao) {
-      setErro("Escolha um novo dia e horÃ¡rio para remarcar.");
+      setErro("Escolha um novo dia e horário para remarcar.");
       return;
     }
 
@@ -593,7 +593,7 @@ return {
       await carregarDados();
     } catch (error) {
       console.error(error);
-      setErro("NÃ£o foi possÃ­vel remarcar o agendamento.");
+      setErro("Não foi possível remarcar o agendamento.");
     } finally {
       setProcessandoRemarcacao(false);
     }
@@ -603,13 +603,13 @@ return {
     <div className="max-w-7xl p-8 lg:p-12">
       <PageHeader
         title="Monitorar agenda"
-        subtitle="Acompanhe solicitaÃ§Ãµes, confirmaÃ§Ãµes, atendimentos concluÃ­dos e valores da operaÃ§Ã£o."
+        subtitle="Acompanhe solicitações, confirmações, atendimentos concluídos e valores da operação."
         actions={
           <Link
             to="/funcionario/solicitacoes"
             className="inline-flex h-10 items-center rounded-full border border-border px-5 text-sm transition hover:bg-surface-elevated"
           >
-            Ir para operaÃ§Ã£o
+            Ir para operação
           </Link>
         }
       />
@@ -687,7 +687,7 @@ return {
         <section className="rounded-2xl border border-border bg-surface p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              ConcluÃ­dos
+              Concluídos
             </span>
 
             <Scissors className="h-4 w-4 text-gold" />
@@ -738,7 +738,7 @@ return {
           </h2>
 
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            Quando clientes solicitarem horÃ¡rios, eles aparecerÃ£o aqui para
+            Quando clientes solicitarem horários, eles aparecerão aqui para
             acompanhamento administrativo.
           </p>
         </section>
@@ -750,8 +750,8 @@ return {
             </h2>
 
             <p className="mt-1 text-xs text-muted-foreground">
-              Esta tela tambÃ©m permite que o administrador remarque horÃ¡rios
-              sem digitar horÃ¡rio livre manualmente.
+              Esta tela também permite que o administrador remarque horários
+              sem digitar horário livre manualmente.
             </p>
           </div>
 
@@ -785,7 +785,7 @@ return {
 
                       <p className="flex items-center gap-2">
                         <Scissors className="h-4 w-4 text-gold" />
-                        {obterDuracaoExibida(agendamento)} min Â·{" "}
+                        {obterDuracaoExibida(agendamento)} min ·{" "}
                         {formatarMoeda(
                           obterValorExibido(agendamento),
                         )}
@@ -804,7 +804,7 @@ return {
 
                     {agendamento.observacaoCliente && (
                       <p className="mt-4 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
-                        ObservaÃ§Ã£o do cliente:{" "}
+                        Observação do cliente:{" "}
                         {agendamento.observacaoCliente}
                       </p>
                     )}
@@ -867,7 +867,7 @@ return {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  HorÃ¡rio atual:{" "}
+                  Horário atual:{" "}
                   {formatarDataHora(agendamentoParaRemarcar.inicio)}
                 </p>
               </div>
@@ -889,7 +889,7 @@ return {
               <div className="grid gap-3 rounded-2xl border border-border bg-background/40 p-4 text-sm text-muted-foreground md:grid-cols-3">
                 <p>
                   <span className="block text-xs uppercase tracking-widest">
-                    ServiÃ§o
+                    Serviço
                   </span>
                   <strong className="mt-1 block text-foreground">
                     {agendamentoParaRemarcar.servico.nome}
@@ -898,7 +898,7 @@ return {
 
                 <p>
                   <span className="block text-xs uppercase tracking-widest">
-                    DuraÃ§Ã£o
+                    Duração
                   </span>
                   <strong className="mt-1 block text-foreground">
                     {agendamentoParaRemarcar.servico.duracaoMinutos} min
@@ -954,12 +954,12 @@ return {
 
               <div>
                 <label className="text-xs uppercase tracking-widest text-muted-foreground">
-                  Novo horÃ¡rio
+                  Novo horário
                 </label>
 
                 {horariosFiltradosRemarcacao.length === 0 ? (
                   <div className="mt-3 rounded-xl border border-border bg-background/40 p-4 text-sm text-muted-foreground">
-                    Nenhum horÃ¡rio disponÃ­vel para este dia, serviÃ§o e
+                    Nenhum horário disponível para este dia, serviço e
                     profissional.
                   </div>
                 ) : (
@@ -1012,7 +1012,7 @@ return {
                   ) : (
                     <>
                       <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Confirmar remarcaÃ§Ã£o
+                      Confirmar remarcação
                     </>
                   )}
                 </button>

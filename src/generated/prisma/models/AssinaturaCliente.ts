@@ -328,6 +328,7 @@ export type AssinaturaClienteWhereInput = {
   plano?: Prisma.XOR<Prisma.PlanoAssinaturaScalarRelationFilter, Prisma.PlanoAssinaturaWhereInput>
   usos?: Prisma.UsoAssinaturaListRelationFilter
   pagamentos?: Prisma.PagamentoAssinaturaListRelationFilter
+  pedidoOrigem?: Prisma.XOR<Prisma.PedidoAssinaturaNullableScalarRelationFilter, Prisma.PedidoAssinaturaWhereInput> | null
 }
 
 export type AssinaturaClienteOrderByWithRelationInput = {
@@ -353,6 +354,7 @@ export type AssinaturaClienteOrderByWithRelationInput = {
   plano?: Prisma.PlanoAssinaturaOrderByWithRelationInput
   usos?: Prisma.UsoAssinaturaOrderByRelationAggregateInput
   pagamentos?: Prisma.PagamentoAssinaturaOrderByRelationAggregateInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaOrderByWithRelationInput
 }
 
 export type AssinaturaClienteWhereUniqueInput = Prisma.AtLeast<{
@@ -381,6 +383,7 @@ export type AssinaturaClienteWhereUniqueInput = Prisma.AtLeast<{
   plano?: Prisma.XOR<Prisma.PlanoAssinaturaScalarRelationFilter, Prisma.PlanoAssinaturaWhereInput>
   usos?: Prisma.UsoAssinaturaListRelationFilter
   pagamentos?: Prisma.PagamentoAssinaturaListRelationFilter
+  pedidoOrigem?: Prisma.XOR<Prisma.PedidoAssinaturaNullableScalarRelationFilter, Prisma.PedidoAssinaturaWhereInput> | null
 }, "id" | "providerSubscriptionId">
 
 export type AssinaturaClienteOrderByWithAggregationInput = {
@@ -454,6 +457,7 @@ export type AssinaturaClienteCreateInput = {
   plano: Prisma.PlanoAssinaturaCreateNestedOneWithoutAssinaturasInput
   usos?: Prisma.UsoAssinaturaCreateNestedManyWithoutAssinaturaInput
   pagamentos?: Prisma.PagamentoAssinaturaCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteUncheckedCreateInput = {
@@ -477,6 +481,7 @@ export type AssinaturaClienteUncheckedCreateInput = {
   atualizadoEm?: Date | string
   usos?: Prisma.UsoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
   pagamentos?: Prisma.PagamentoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteUpdateInput = {
@@ -500,6 +505,7 @@ export type AssinaturaClienteUpdateInput = {
   plano?: Prisma.PlanoAssinaturaUpdateOneRequiredWithoutAssinaturasNestedInput
   usos?: Prisma.UsoAssinaturaUpdateManyWithoutAssinaturaNestedInput
   pagamentos?: Prisma.PagamentoAssinaturaUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteUncheckedUpdateInput = {
@@ -523,6 +529,7 @@ export type AssinaturaClienteUncheckedUpdateInput = {
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usos?: Prisma.UsoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
   pagamentos?: Prisma.PagamentoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteCreateManyInput = {
@@ -594,6 +601,11 @@ export type AssinaturaClienteListRelationFilter = {
 
 export type AssinaturaClienteOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AssinaturaClienteNullableScalarRelationFilter = {
+  is?: Prisma.AssinaturaClienteWhereInput | null
+  isNot?: Prisma.AssinaturaClienteWhereInput | null
 }
 
 export type AssinaturaClienteCountOrderByAggregateInput = {
@@ -758,6 +770,22 @@ export type AssinaturaClienteUncheckedUpdateManyWithoutPlanoNestedInput = {
   deleteMany?: Prisma.AssinaturaClienteScalarWhereInput | Prisma.AssinaturaClienteScalarWhereInput[]
 }
 
+export type AssinaturaClienteCreateNestedOneWithoutPedidoOrigemInput = {
+  create?: Prisma.XOR<Prisma.AssinaturaClienteCreateWithoutPedidoOrigemInput, Prisma.AssinaturaClienteUncheckedCreateWithoutPedidoOrigemInput>
+  connectOrCreate?: Prisma.AssinaturaClienteCreateOrConnectWithoutPedidoOrigemInput
+  connect?: Prisma.AssinaturaClienteWhereUniqueInput
+}
+
+export type AssinaturaClienteUpdateOneWithoutPedidoOrigemNestedInput = {
+  create?: Prisma.XOR<Prisma.AssinaturaClienteCreateWithoutPedidoOrigemInput, Prisma.AssinaturaClienteUncheckedCreateWithoutPedidoOrigemInput>
+  connectOrCreate?: Prisma.AssinaturaClienteCreateOrConnectWithoutPedidoOrigemInput
+  upsert?: Prisma.AssinaturaClienteUpsertWithoutPedidoOrigemInput
+  disconnect?: Prisma.AssinaturaClienteWhereInput | boolean
+  delete?: Prisma.AssinaturaClienteWhereInput | boolean
+  connect?: Prisma.AssinaturaClienteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssinaturaClienteUpdateToOneWithWhereWithoutPedidoOrigemInput, Prisma.AssinaturaClienteUpdateWithoutPedidoOrigemInput>, Prisma.AssinaturaClienteUncheckedUpdateWithoutPedidoOrigemInput>
+}
+
 export type EnumStatusAssinaturaFieldUpdateOperationsInput = {
   set?: $Enums.StatusAssinatura
 }
@@ -814,6 +842,7 @@ export type AssinaturaClienteCreateWithoutClienteInput = {
   plano: Prisma.PlanoAssinaturaCreateNestedOneWithoutAssinaturasInput
   usos?: Prisma.UsoAssinaturaCreateNestedManyWithoutAssinaturaInput
   pagamentos?: Prisma.PagamentoAssinaturaCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteUncheckedCreateWithoutClienteInput = {
@@ -836,6 +865,7 @@ export type AssinaturaClienteUncheckedCreateWithoutClienteInput = {
   atualizadoEm?: Date | string
   usos?: Prisma.UsoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
   pagamentos?: Prisma.PagamentoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteCreateOrConnectWithoutClienteInput = {
@@ -908,6 +938,7 @@ export type AssinaturaClienteCreateWithoutPlanoInput = {
   cliente: Prisma.UsuarioCreateNestedOneWithoutAssinaturasInput
   usos?: Prisma.UsoAssinaturaCreateNestedManyWithoutAssinaturaInput
   pagamentos?: Prisma.PagamentoAssinaturaCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteUncheckedCreateWithoutPlanoInput = {
@@ -930,6 +961,7 @@ export type AssinaturaClienteUncheckedCreateWithoutPlanoInput = {
   atualizadoEm?: Date | string
   usos?: Prisma.UsoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
   pagamentos?: Prisma.PagamentoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteCreateOrConnectWithoutPlanoInput = {
@@ -958,6 +990,114 @@ export type AssinaturaClienteUpdateManyWithWhereWithoutPlanoInput = {
   data: Prisma.XOR<Prisma.AssinaturaClienteUpdateManyMutationInput, Prisma.AssinaturaClienteUncheckedUpdateManyWithoutPlanoInput>
 }
 
+export type AssinaturaClienteCreateWithoutPedidoOrigemInput = {
+  id?: string
+  status?: $Enums.StatusAssinatura
+  inicio?: Date | string
+  vigenciaInicio: Date | string
+  vigenciaFim: Date | string
+  saldoCortes: number
+  renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
+  observacao?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  cliente: Prisma.UsuarioCreateNestedOneWithoutAssinaturasInput
+  plano: Prisma.PlanoAssinaturaCreateNestedOneWithoutAssinaturasInput
+  usos?: Prisma.UsoAssinaturaCreateNestedManyWithoutAssinaturaInput
+  pagamentos?: Prisma.PagamentoAssinaturaCreateNestedManyWithoutAssinaturaInput
+}
+
+export type AssinaturaClienteUncheckedCreateWithoutPedidoOrigemInput = {
+  id?: string
+  clienteId: string
+  planoId: string
+  status?: $Enums.StatusAssinatura
+  inicio?: Date | string
+  vigenciaInicio: Date | string
+  vigenciaFim: Date | string
+  saldoCortes: number
+  renovaAutomaticamente?: boolean
+  provedorPagamento?: $Enums.ProvedorPagamento
+  providerCustomerId?: string | null
+  providerSubscriptionId?: string | null
+  proximaCobrancaEm?: Date | string | null
+  cancelarAoFimDoCiclo?: boolean
+  percentualComissaoBps?: number
+  observacao?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  usos?: Prisma.UsoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
+  pagamentos?: Prisma.PagamentoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
+}
+
+export type AssinaturaClienteCreateOrConnectWithoutPedidoOrigemInput = {
+  where: Prisma.AssinaturaClienteWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssinaturaClienteCreateWithoutPedidoOrigemInput, Prisma.AssinaturaClienteUncheckedCreateWithoutPedidoOrigemInput>
+}
+
+export type AssinaturaClienteUpsertWithoutPedidoOrigemInput = {
+  update: Prisma.XOR<Prisma.AssinaturaClienteUpdateWithoutPedidoOrigemInput, Prisma.AssinaturaClienteUncheckedUpdateWithoutPedidoOrigemInput>
+  create: Prisma.XOR<Prisma.AssinaturaClienteCreateWithoutPedidoOrigemInput, Prisma.AssinaturaClienteUncheckedCreateWithoutPedidoOrigemInput>
+  where?: Prisma.AssinaturaClienteWhereInput
+}
+
+export type AssinaturaClienteUpdateToOneWithWhereWithoutPedidoOrigemInput = {
+  where?: Prisma.AssinaturaClienteWhereInput
+  data: Prisma.XOR<Prisma.AssinaturaClienteUpdateWithoutPedidoOrigemInput, Prisma.AssinaturaClienteUncheckedUpdateWithoutPedidoOrigemInput>
+}
+
+export type AssinaturaClienteUpdateWithoutPedidoOrigemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumStatusAssinaturaFieldUpdateOperationsInput | $Enums.StatusAssinatura
+  inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vigenciaInicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
+  renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
+  observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAssinaturasNestedInput
+  plano?: Prisma.PlanoAssinaturaUpdateOneRequiredWithoutAssinaturasNestedInput
+  usos?: Prisma.UsoAssinaturaUpdateManyWithoutAssinaturaNestedInput
+  pagamentos?: Prisma.PagamentoAssinaturaUpdateManyWithoutAssinaturaNestedInput
+}
+
+export type AssinaturaClienteUncheckedUpdateWithoutPedidoOrigemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
+  planoId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumStatusAssinaturaFieldUpdateOperationsInput | $Enums.StatusAssinatura
+  inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vigenciaInicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vigenciaFim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  saldoCortes?: Prisma.IntFieldUpdateOperationsInput | number
+  renovaAutomaticamente?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  provedorPagamento?: Prisma.EnumProvedorPagamentoFieldUpdateOperationsInput | $Enums.ProvedorPagamento
+  providerCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proximaCobrancaEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelarAoFimDoCiclo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  percentualComissaoBps?: Prisma.IntFieldUpdateOperationsInput | number
+  observacao?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  usos?: Prisma.UsoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
+  pagamentos?: Prisma.PagamentoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
+}
+
 export type AssinaturaClienteCreateWithoutUsosInput = {
   id?: string
   status?: $Enums.StatusAssinatura
@@ -978,6 +1118,7 @@ export type AssinaturaClienteCreateWithoutUsosInput = {
   cliente: Prisma.UsuarioCreateNestedOneWithoutAssinaturasInput
   plano: Prisma.PlanoAssinaturaCreateNestedOneWithoutAssinaturasInput
   pagamentos?: Prisma.PagamentoAssinaturaCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteUncheckedCreateWithoutUsosInput = {
@@ -1000,6 +1141,7 @@ export type AssinaturaClienteUncheckedCreateWithoutUsosInput = {
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   pagamentos?: Prisma.PagamentoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteCreateOrConnectWithoutUsosInput = {
@@ -1038,6 +1180,7 @@ export type AssinaturaClienteUpdateWithoutUsosInput = {
   cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAssinaturasNestedInput
   plano?: Prisma.PlanoAssinaturaUpdateOneRequiredWithoutAssinaturasNestedInput
   pagamentos?: Prisma.PagamentoAssinaturaUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteUncheckedUpdateWithoutUsosInput = {
@@ -1060,6 +1203,7 @@ export type AssinaturaClienteUncheckedUpdateWithoutUsosInput = {
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pagamentos?: Prisma.PagamentoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteCreateWithoutPagamentosInput = {
@@ -1082,6 +1226,7 @@ export type AssinaturaClienteCreateWithoutPagamentosInput = {
   cliente: Prisma.UsuarioCreateNestedOneWithoutAssinaturasInput
   plano: Prisma.PlanoAssinaturaCreateNestedOneWithoutAssinaturasInput
   usos?: Prisma.UsoAssinaturaCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteUncheckedCreateWithoutPagamentosInput = {
@@ -1104,6 +1249,7 @@ export type AssinaturaClienteUncheckedCreateWithoutPagamentosInput = {
   criadoEm?: Date | string
   atualizadoEm?: Date | string
   usos?: Prisma.UsoAssinaturaUncheckedCreateNestedManyWithoutAssinaturaInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedCreateNestedOneWithoutAssinaturaInput
 }
 
 export type AssinaturaClienteCreateOrConnectWithoutPagamentosInput = {
@@ -1142,6 +1288,7 @@ export type AssinaturaClienteUpdateWithoutPagamentosInput = {
   cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAssinaturasNestedInput
   plano?: Prisma.PlanoAssinaturaUpdateOneRequiredWithoutAssinaturasNestedInput
   usos?: Prisma.UsoAssinaturaUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteUncheckedUpdateWithoutPagamentosInput = {
@@ -1164,6 +1311,7 @@ export type AssinaturaClienteUncheckedUpdateWithoutPagamentosInput = {
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usos?: Prisma.UsoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteCreateManyClienteInput = {
@@ -1206,6 +1354,7 @@ export type AssinaturaClienteUpdateWithoutClienteInput = {
   plano?: Prisma.PlanoAssinaturaUpdateOneRequiredWithoutAssinaturasNestedInput
   usos?: Prisma.UsoAssinaturaUpdateManyWithoutAssinaturaNestedInput
   pagamentos?: Prisma.PagamentoAssinaturaUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteUncheckedUpdateWithoutClienteInput = {
@@ -1228,6 +1377,7 @@ export type AssinaturaClienteUncheckedUpdateWithoutClienteInput = {
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usos?: Prisma.UsoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
   pagamentos?: Prisma.PagamentoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteUncheckedUpdateManyWithoutClienteInput = {
@@ -1290,6 +1440,7 @@ export type AssinaturaClienteUpdateWithoutPlanoInput = {
   cliente?: Prisma.UsuarioUpdateOneRequiredWithoutAssinaturasNestedInput
   usos?: Prisma.UsoAssinaturaUpdateManyWithoutAssinaturaNestedInput
   pagamentos?: Prisma.PagamentoAssinaturaUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteUncheckedUpdateWithoutPlanoInput = {
@@ -1312,6 +1463,7 @@ export type AssinaturaClienteUncheckedUpdateWithoutPlanoInput = {
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usos?: Prisma.UsoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
   pagamentos?: Prisma.PagamentoAssinaturaUncheckedUpdateManyWithoutAssinaturaNestedInput
+  pedidoOrigem?: Prisma.PedidoAssinaturaUncheckedUpdateOneWithoutAssinaturaNestedInput
 }
 
 export type AssinaturaClienteUncheckedUpdateManyWithoutPlanoInput = {
@@ -1397,6 +1549,7 @@ export type AssinaturaClienteSelect<ExtArgs extends runtime.Types.Extensions.Int
   plano?: boolean | Prisma.PlanoAssinaturaDefaultArgs<ExtArgs>
   usos?: boolean | Prisma.AssinaturaCliente$usosArgs<ExtArgs>
   pagamentos?: boolean | Prisma.AssinaturaCliente$pagamentosArgs<ExtArgs>
+  pedidoOrigem?: boolean | Prisma.AssinaturaCliente$pedidoOrigemArgs<ExtArgs>
   _count?: boolean | Prisma.AssinaturaClienteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["assinaturaCliente"]>
 
@@ -1473,6 +1626,7 @@ export type AssinaturaClienteInclude<ExtArgs extends runtime.Types.Extensions.In
   plano?: boolean | Prisma.PlanoAssinaturaDefaultArgs<ExtArgs>
   usos?: boolean | Prisma.AssinaturaCliente$usosArgs<ExtArgs>
   pagamentos?: boolean | Prisma.AssinaturaCliente$pagamentosArgs<ExtArgs>
+  pedidoOrigem?: boolean | Prisma.AssinaturaCliente$pedidoOrigemArgs<ExtArgs>
   _count?: boolean | Prisma.AssinaturaClienteCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssinaturaClienteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1491,6 +1645,7 @@ export type $AssinaturaClientePayload<ExtArgs extends runtime.Types.Extensions.I
     plano: Prisma.$PlanoAssinaturaPayload<ExtArgs>
     usos: Prisma.$UsoAssinaturaPayload<ExtArgs>[]
     pagamentos: Prisma.$PagamentoAssinaturaPayload<ExtArgs>[]
+    pedidoOrigem: Prisma.$PedidoAssinaturaPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1909,6 +2064,7 @@ export interface Prisma__AssinaturaClienteClient<T, Null = never, ExtArgs extend
   plano<T extends Prisma.PlanoAssinaturaDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PlanoAssinaturaDefaultArgs<ExtArgs>>): Prisma.Prisma__PlanoAssinaturaClient<runtime.Types.Result.GetResult<Prisma.$PlanoAssinaturaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   usos<T extends Prisma.AssinaturaCliente$usosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssinaturaCliente$usosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsoAssinaturaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pagamentos<T extends Prisma.AssinaturaCliente$pagamentosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssinaturaCliente$pagamentosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PagamentoAssinaturaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pedidoOrigem<T extends Prisma.AssinaturaCliente$pedidoOrigemArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssinaturaCliente$pedidoOrigemArgs<ExtArgs>>): Prisma.Prisma__PedidoAssinaturaClient<runtime.Types.Result.GetResult<Prisma.$PedidoAssinaturaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2402,6 +2558,25 @@ export type AssinaturaCliente$pagamentosArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.PagamentoAssinaturaScalarFieldEnum | Prisma.PagamentoAssinaturaScalarFieldEnum[]
+}
+
+/**
+ * AssinaturaCliente.pedidoOrigem
+ */
+export type AssinaturaCliente$pedidoOrigemArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PedidoAssinatura
+   */
+  select?: Prisma.PedidoAssinaturaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PedidoAssinatura
+   */
+  omit?: Prisma.PedidoAssinaturaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PedidoAssinaturaInclude<ExtArgs> | null
+  where?: Prisma.PedidoAssinaturaWhereInput
 }
 
 /**

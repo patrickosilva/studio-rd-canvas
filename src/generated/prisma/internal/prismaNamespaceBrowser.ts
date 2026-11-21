@@ -60,6 +60,9 @@ export const ModelName = {
   Agendamento: 'Agendamento',
   BloqueioAgenda: 'BloqueioAgenda',
   PlanoAssinatura: 'PlanoAssinatura',
+  ConfiguracaoAssinatura: 'ConfiguracaoAssinatura',
+  SolicitacaoAssinatura: 'SolicitacaoAssinatura',
+  PedidoAssinatura: 'PedidoAssinatura',
   AssinaturaCliente: 'AssinaturaCliente',
   UsoAssinatura: 'UsoAssinatura',
   PagamentoAssinatura: 'PagamentoAssinatura',
@@ -67,6 +70,7 @@ export const ModelName = {
   IntegracaoExterna: 'IntegracaoExterna',
   EventoWebhookPagamento: 'EventoWebhookPagamento',
   Notificacao: 'Notificacao',
+  ConviteFuncionario: 'ConviteFuncionario',
   TokenRedefinicaoSenha: 'TokenRedefinicaoSenha',
   EventoSeguranca: 'EventoSeguranca',
   EventoWebhookResend: 'EventoWebhookResend',
@@ -140,6 +144,7 @@ export const ProfissionalScalarFieldEnum = {
   nome: 'nome',
   telefone: 'telefone',
   descricao: 'descricao',
+  fotoUrl: 'fotoUrl',
   ativo: 'ativo',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
@@ -225,6 +230,7 @@ export const PlanoAssinaturaScalarFieldEnum = {
   descricao: 'descricao',
   precoCentavos: 'precoCentavos',
   cortesPorCiclo: 'cortesPorCiclo',
+  duracaoMeses: 'duracaoMeses',
   duracaoDias: 'duracaoDias',
   ativo: 'ativo',
   providerPlanId: 'providerPlanId',
@@ -233,6 +239,61 @@ export const PlanoAssinaturaScalarFieldEnum = {
 } as const
 
 export type PlanoAssinaturaScalarFieldEnum = (typeof PlanoAssinaturaScalarFieldEnum)[keyof typeof PlanoAssinaturaScalarFieldEnum]
+
+
+export const ConfiguracaoAssinaturaScalarFieldEnum = {
+  id: 'id',
+  chave: 'chave',
+  aprovacaoAutomatica: 'aprovacaoAutomatica',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type ConfiguracaoAssinaturaScalarFieldEnum = (typeof ConfiguracaoAssinaturaScalarFieldEnum)[keyof typeof ConfiguracaoAssinaturaScalarFieldEnum]
+
+
+export const SolicitacaoAssinaturaScalarFieldEnum = {
+  id: 'id',
+  clienteId: 'clienteId',
+  planoId: 'planoId',
+  status: 'status',
+  solicitadoEm: 'solicitadoEm',
+  decididoEm: 'decididoEm',
+  decididoPorUsuarioId: 'decididoPorUsuarioId',
+  observacaoDecisao: 'observacaoDecisao',
+  utilizadoEm: 'utilizadoEm',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type SolicitacaoAssinaturaScalarFieldEnum = (typeof SolicitacaoAssinaturaScalarFieldEnum)[keyof typeof SolicitacaoAssinaturaScalarFieldEnum]
+
+
+export const PedidoAssinaturaScalarFieldEnum = {
+  id: 'id',
+  clienteId: 'clienteId',
+  planoId: 'planoId',
+  solicitacaoId: 'solicitacaoId',
+  assinaturaId: 'assinaturaId',
+  status: 'status',
+  precoOriginalCentavos: 'precoOriginalCentavos',
+  descontoCentavos: 'descontoCentavos',
+  valorFinalCentavos: 'valorFinalCentavos',
+  orderNsu: 'orderNsu',
+  checkoutUrl: 'checkoutUrl',
+  expiraEm: 'expiraEm',
+  transactionNsu: 'transactionNsu',
+  invoiceSlug: 'invoiceSlug',
+  receiptUrl: 'receiptUrl',
+  captureMethod: 'captureMethod',
+  paidAmountCentavos: 'paidAmountCentavos',
+  installments: 'installments',
+  pagoEm: 'pagoEm',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+} as const
+
+export type PedidoAssinaturaScalarFieldEnum = (typeof PedidoAssinaturaScalarFieldEnum)[keyof typeof PedidoAssinaturaScalarFieldEnum]
 
 
 export const AssinaturaClienteScalarFieldEnum = {
@@ -358,6 +419,19 @@ export const NotificacaoScalarFieldEnum = {
 } as const
 
 export type NotificacaoScalarFieldEnum = (typeof NotificacaoScalarFieldEnum)[keyof typeof NotificacaoScalarFieldEnum]
+
+
+export const ConviteFuncionarioScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  tokenHash: 'tokenHash',
+  expiraEm: 'expiraEm',
+  usadoEm: 'usadoEm',
+  criadoPorUsuarioId: 'criadoPorUsuarioId',
+  criadoEm: 'criadoEm'
+} as const
+
+export type ConviteFuncionarioScalarFieldEnum = (typeof ConviteFuncionarioScalarFieldEnum)[keyof typeof ConviteFuncionarioScalarFieldEnum]
 
 
 export const TokenRedefinicaoSenhaScalarFieldEnum = {

@@ -12,6 +12,7 @@ import {
   DollarSign,
   History,
   LayoutDashboard,
+  Activity,
   PlugZap,
   Settings,
   TicketPercent,
@@ -95,6 +96,10 @@ const items = [
     icon: CalendarX2,
   },
   {
+    label: "Equipe",
+    to: "/admin/equipe",
+    icon: UsersRound,
+  },  {
     label: "Financeiro",
     to: "/admin/financeiro",
     icon: DollarSign,
@@ -120,7 +125,12 @@ const items = [
     icon: UsersRound,
   },
   {
-    label: "Conexoes",
+    label: "Saúde do sistema",
+    to: "/admin/monitoramento",
+    icon: Activity,
+  },
+  {
+    label: "Conexões",
     to: "/admin/conexoes",
     icon: PlugZap,
   },
