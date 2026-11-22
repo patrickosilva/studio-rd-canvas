@@ -2,7 +2,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   CalendarDays,
@@ -254,6 +254,23 @@ function ClienteAssinaturaPage() {
         </section>
       ) : assinatura ? (
         <>
+          <section className="mb-6 rounded-xl border border-gold/40 bg-gold-soft p-6" aria-label="Assinatura Premium ativa">
+            <div className="flex items-center gap-2 text-gold">
+              <Crown className="h-5 w-5" />
+              <span className="text-xs font-semibold uppercase tracking-widest">Premium RD Black · Assinatura ativa</span>
+            </div>
+            <h2 className="mt-3 text-2xl font-display">Você é Premium!</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Sua assinatura {assinatura.plano.nome} está ativa. Você tem {assinatura.saldoCortes} corte(s) disponível(is) até {formatarData(assinatura.vigenciaFim)}.
+              Agende seu próximo atendimento para aproveitar seu plano.
+            </p>
+            <Link
+              to="/cliente/agendamentos"
+              className="mt-5 inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground"
+            >
+              <CalendarDays className="h-4 w-4" /> Ir para agendamentos
+            </Link>
+          </section>
           <div className="mb-8 grid gap-4 md:grid-cols-4">
             <section className="rounded-xl border border-gold/30 bg-gold-soft p-5">
               <div className="flex items-center justify-between">

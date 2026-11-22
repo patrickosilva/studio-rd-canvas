@@ -60,6 +60,7 @@ async function exigirDono() {
 }
 
 const solicitarAgendamentoSchema = z.object({
+  pretendeUsarAssinatura: z.boolean().optional().default(false),
   profissionalId: z
     .string()
     .trim()
@@ -1091,6 +1092,27 @@ export const solicitarAgendamento = createServerFn({
       };
     }
 
+    // A escolha é uma intenção, não uma reserva nem um desconto de saldo.
+    if (data.pretendeUsarAssinatura) {
+      const assinaturaElegivel = await prisma.assinaturaCliente.findFirst({
+        where: {
+          clienteId: usuario.id,
+          status: "ATIVA",
+          vigenciaInicio: { lte: agora },
+          vigenciaFim: { gte: inicio },
+          saldoCortes: { gt: 0 },
+        },
+        select: { id: true },
+      });
+
+      if (!assinaturaElegivel) {
+        return {
+          sucesso: false,
+          mensagem: "Sua assinatura não possui saldo ou vigência para esse agendamento. Escolha pagamento avulso.",
+        };
+      }
+    }
+
     const cupomCodigoAgendamento =
       data.cupomCodigo?.trim() || "";
 
@@ -1131,6 +1153,7 @@ export const solicitarAgendamento = createServerFn({
         inicio,
         fim,
         status: "SOLICITADO",
+        pretendeUsarAssinatura: data.pretendeUsarAssinatura,
         observacaoCliente:
           data.observacaoCliente?.trim() || null,
       },
@@ -1825,6 +1848,7 @@ export const listarMeusAgendamentos = createServerFn({
       inicio: true,
       fim: true,
       status: true,
+      pretendeUsarAssinatura: true,
         precoOriginalCentavos: true,
         descontoCupomCentavos: true,
         valorFinalCentavos: true,
@@ -1930,6 +1954,7 @@ export const funcionarioListarSolicitacoes =
         inicio: true,
         fim: true,
         status: true,
+        pretendeUsarAssinatura: true,
         precoOriginalCentavos: true,
         descontoCupomCentavos: true,
         valorFinalCentavos: true,
@@ -1941,6 +1966,20 @@ export const funcionarioListarSolicitacoes =
             nome: true,
             email: true,
             telefone: true,
+          assinaturas: {
+            where: {
+              status: "ATIVA",
+              vigenciaInicio: { lte: new Date() },
+              vigenciaFim: { gte: new Date() },
+            },
+            orderBy: { criadoEm: "desc" },
+            take: 1,
+            select: {
+              saldoCortes: true,
+              vigenciaFim: true,
+              plano: { select: { nome: true } },
+            },
+          },
           },
         },
         servico: {

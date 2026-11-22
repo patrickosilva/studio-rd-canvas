@@ -199,6 +199,7 @@ model Agendamento {
 
   status StatusAgendamento @default(SOLICITADO)
 
+  pretendeUsarAssinatura Boolean @default(false)
   observacaoCliente   String?
   observacaoInterna   String?
   motivoRecusa        String?

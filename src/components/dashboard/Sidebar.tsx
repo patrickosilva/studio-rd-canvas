@@ -3,6 +3,7 @@ import {
   LogOut,
   Menu,
   Scissors,
+  Crown,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -27,7 +28,7 @@ export function DashboardShell({
 }: {
   items: SidebarItem[];
   title: string;
-  user: { name: string; role: string };
+  user: { name: string; role: string; premium?: boolean };
   children: ReactNode;
 }) {
   const { location } = useRouterState();
@@ -142,6 +143,11 @@ export function DashboardShell({
                   <div className="truncate text-xs text-muted-foreground">
                     {user.role}
                   </div>
+                  {user.premium && (
+                    <div className="mt-1 flex items-center gap-1 text-xs font-semibold text-gold">
+                      <Crown className="h-3.5 w-3.5" /> Premium RD Black
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -205,6 +211,11 @@ export function DashboardShell({
               <div className="text-xs text-muted-foreground">
                 {user.role}
               </div>
+              {user.premium && (
+                <div className="mt-1 flex items-center gap-1 text-xs font-semibold text-gold">
+                  <Crown className="h-3.5 w-3.5" /> Premium RD Black
+                </div>
+              )}
             </div>
           </div>
 

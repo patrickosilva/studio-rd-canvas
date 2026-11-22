@@ -172,7 +172,9 @@ async function ativarPedidoConfirmado({
   captureMethod: string | null;
 }) {
   return prisma.$transaction(async (tx) => {
-    await tx.$queryRawUnsafe(
+    // O retorno void de pg_advisory_xact_lock não deve ser decodificado
+    // como resultado de consulta pelo Prisma/driver PostgreSQL.
+    await tx.$executeRawUnsafe(
       "SELECT pg_advisory_xact_lock(hashtext($1))",
       pedidoId,
     );

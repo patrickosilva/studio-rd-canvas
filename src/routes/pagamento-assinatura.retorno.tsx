@@ -137,6 +137,14 @@ function RetornoPagamentoAssinaturaPage() {
         </p>
 
         <div className="mt-6 flex flex-col gap-3">
+          {estado === "SUCESSO" && (
+            <Link
+              to="/cliente/agendamentos"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+            >
+              Agendar meu próximo corte
+            </Link>
+          )}
           <Link
             to="/cliente/assinatura"
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"

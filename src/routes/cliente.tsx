@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { listarMinhaAssinaturaAtiva } from "@/lib/api/assinatura.functions";
 import {
   createFileRoute,
   getRouteApi,
@@ -107,6 +110,21 @@ const items = [
 
 function ClientLayout() {
   const { usuario } = rootRoute.useRouteContext();
+  const buscarAssinatura = useServerFn(listarMinhaAssinaturaAtiva);
+  const [premium, setPremium] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+    // O selo é exibido apenas quando uma assinatura ativa está confirmada no banco.
+    void buscarAssinatura()
+      .then((assinatura) => {
+        if (ativo) setPremium(Boolean(assinatura));
+      })
+      .catch(() => {
+        if (ativo) setPremium(false);
+      });
+    return () => { ativo = false; };
+  }, [buscarAssinatura]);
 
   return (
     <DashboardShell
@@ -115,6 +133,7 @@ function ClientLayout() {
       user={{
         name: usuario?.nome ?? "Cliente",
         role: "Cliente Studio RD",
+        premium,
       }}
     >
       <Outlet />

@@ -2486,6 +2486,7 @@ export const AgendamentoScalarFieldEnum = {
   inicio: 'inicio',
   fim: 'fim',
   status: 'status',
+  pretendeUsarAssinatura: 'pretendeUsarAssinatura',
   observacaoCliente: 'observacaoCliente',
   observacaoInterna: 'observacaoInterna',
   motivoRecusa: 'motivoRecusa',

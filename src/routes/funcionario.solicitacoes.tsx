@@ -9,6 +9,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   CalendarCheck,
+  Crown,
   CalendarClock,
   CalendarPlus,
   CheckCircle2,
@@ -79,6 +80,7 @@ type Solicitacao = {
   inicio: string | Date;
   fim: string | Date;
   status: string;
+  pretendeUsarAssinatura: boolean;
   precoOriginalCentavos: number | null;
   descontoCupomCentavos: number | null;
   valorFinalCentavos: number | null;
@@ -89,6 +91,11 @@ type Solicitacao = {
     nome: string;
     email: string;
     telefone: string | null;
+    assinaturas: Array<{
+      saldoCortes: number;
+      vigenciaFim: string | Date;
+      plano: { nome: string };
+    }>;
   };
   servico: {
     id: string;
@@ -560,7 +567,9 @@ function SolicitacoesPage() {
   const formaPagamentoSelecionada: FormaPagamentoValor =
     agendamentoSelecionado
       ? formasPagamentoPorAgendamento[agendamentoSelecionado.id] ??
-      "PIX"
+      (agendamentoSelecionado.pretendeUsarAssinatura &&
+      (agendamentoSelecionado.cliente.assinaturas[0]?.saldoCortes ?? 0) > 0
+        ? "ASSINATURA" : "PIX")
       : "PIX";
 
   const valorSelecionado = agendamentoSelecionado
@@ -917,7 +926,10 @@ function SolicitacoesPage() {
     setProcessandoId(solicitacao.id);
 
     const formaPagamento =
-      formasPagamentoPorAgendamento[solicitacao.id] ?? "PIX";
+      formasPagamentoPorAgendamento[solicitacao.id] ??
+      (solicitacao.pretendeUsarAssinatura &&
+      (solicitacao.cliente.assinaturas[0]?.saldoCortes ?? 0) > 0
+        ? "ASSINATURA" : "PIX");
 
     const valorDigitado =
       valoresPagosPorAgendamento[solicitacao.id] ??
@@ -2174,6 +2186,20 @@ function ConteudoDetalhes({
           </span>
         )}
       </div>
+
+      {agendamento.cliente.assinaturas[0] && (
+        <div className="rounded-xl border border-gold/40 bg-gold-soft/20 p-3 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-gold"><Crown className="h-4 w-4" /> Cliente RD Black Premium</div>
+          <p className="mt-1">{agendamento.cliente.assinaturas[0].plano.nome} · {agendamento.cliente.assinaturas[0].saldoCortes} corte(s) disponível(is)</p>
+          {agendamento.pretendeUsarAssinatura && (
+            <p className="mt-2 text-xs font-semibold">Cliente solicitou utilizar 1 corte da assinatura neste atendimento.</p>
+          )}
+          <p className="mt-1 text-xs text-muted-foreground">O corte somente será debitado na conclusão, se o saldo ainda estiver disponível.</p>
+        </div>
+      )}
+      {agendamento.pretendeUsarAssinatura && !agendamento.cliente.assinaturas[0] && (
+        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs">O cliente solicitou usar a assinatura, mas não há assinatura ativa atualmente. Verifique antes de concluir.</p>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <InfoBox

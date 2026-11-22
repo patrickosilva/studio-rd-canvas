@@ -11,6 +11,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import {
   Calendar,
+  Crown,
   CheckCircle2,
   Clock,
   TicketPercent,
@@ -26,6 +27,7 @@ import {
   listarProfissionaisAtivos,
   listarServicosAtivos,
 } from "@/lib/api/catalogo.functions";
+import { listarMinhaAssinaturaAtiva } from "@/lib/api/assinatura.functions";
 import { validarMeuCupomParaAgendamento } from "@/lib/api/cupons.functions";
 import {
   clienteCancelarAgendamento,
@@ -97,6 +99,7 @@ type Agendamento = {
   inicio: string | Date;
   fim: string | Date;
   status: string;
+  pretendeUsarAssinatura: boolean;
   precoOriginalCentavos: number | null;
   descontoCupomCentavos: number | null;
   valorFinalCentavos: number | null;
@@ -316,7 +319,14 @@ function traduzirStatus(status: string): string {
   return mapa[status] ?? status;
 }
 
+type AssinaturaResumo = {
+  saldoCortes: number;
+  vigenciaFim: string | Date;
+  plano: { nome: string };
+};
+
 function AgendamentosPage() {
+  const carregarAssinatura = useServerFn(listarMinhaAssinaturaAtiva);
   const carregarServicos = useServerFn(listarServicosAtivos);
   const carregarProfissionais = useServerFn(listarProfissionaisAtivos);
 
@@ -361,6 +371,8 @@ function AgendamentosPage() {
   const [erroCupom, setErroCupom] = useState("");
 
   const [observacao, setObservacao] = useState("");
+  const [assinatura, setAssinatura] = useState<AssinaturaResumo | null>(null);
+  const [usarAssinatura, setUsarAssinatura] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [cancelandoId, setCancelandoId] = useState("");
@@ -460,15 +472,21 @@ function AgendamentosPage() {
         servicosResposta,
         profissionaisResposta,
         agendamentosResposta,
+        assinaturaResposta,
       ] = await Promise.all([
         carregarServicos(),
         carregarProfissionais(),
         carregarMeusAgendamentos(),
+        carregarAssinatura(),
       ]);
 
       setServicos(servicosResposta);
       setProfissionais(profissionaisResposta);
       setAgendamentos(agendamentosResposta);
+      setAssinatura(assinaturaResposta);
+      if (!assinaturaResposta || assinaturaResposta.saldoCortes <= 0) {
+        setUsarAssinatura(false);
+      }
 
       if (!servicoId && servicosResposta[0]) {
         setServicoId(servicosResposta[0].id);
@@ -546,6 +564,11 @@ function AgendamentosPage() {
       return;
     }
 
+    if (usarAssinatura) {
+      setErroCupom("Para utilizar a assinatura, não aplique cupom neste agendamento.");
+      return;
+    }
+
     if (!cupomCodigo.trim()) {
       setErroCupom("Informe o código do cupom.");
       return;
@@ -613,7 +636,8 @@ function AgendamentosPage() {
             horarioSelecionado,
           ),
           observacaoCliente: observacao,
-          cupomCodigo: cupomAplicado?.codigo ?? "",
+          cupomCodigo: usarAssinatura ? "" : cupomAplicado?.codigo ?? "",
+          pretendeUsarAssinatura: usarAssinatura,
         },
       });
 
@@ -624,6 +648,7 @@ function AgendamentosPage() {
 
       setMensagem(resultado.mensagem);
       setObservacao("");
+      setUsarAssinatura(false);
       setCupomCodigo("");
       setCupomAplicado(null);
       setErroCupom("");
@@ -946,6 +971,37 @@ function AgendamentosPage() {
                   </p>
                 )}
               </div>
+
+              {assinatura && (
+                <div className="rounded-2xl border border-gold/40 bg-gold-soft/20 p-4">
+                  <div className="flex items-center gap-2 text-gold">
+                    <Crown className="h-5 w-5" />
+                    <strong>Você é RD Black Premium</strong>
+                  </div>
+                  <p className="mt-2 text-sm">Plano {assinatura.plano.nome} · {assinatura.saldoCortes} corte(s) disponível(is)</p>
+                  {assinatura.saldoCortes > 0 ? (
+                    <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm">
+                      <input
+                        type="checkbox"
+                        className="mt-1 accent-amber-500"
+                        checked={usarAssinatura}
+                        onChange={(event) => {
+                          setUsarAssinatura(event.target.checked);
+                          if (event.target.checked) {
+                            setCupomAplicado(null);
+                            setCupomCodigo("");
+                          }
+                        }}
+                      />
+                      <span><strong>Usar 1 corte da minha assinatura</strong><br />
+                        <span className="text-xs text-muted-foreground">Nenhum corte é descontado ao agendar. A equipe confirma o uso na conclusão, sujeito a saldo e vigência válidos.</span>
+                      </span>
+                    </label>
+                  ) : (
+                    <p className="mt-2 text-sm text-muted-foreground">Sua assinatura não tem cortes disponíveis. Você pode agendar normalmente.</p>
+                  )}
+                </div>
+              )}
 
               <div className="rounded-2xl border border-border bg-background/40 p-4">
                 <div className="flex items-center gap-2">

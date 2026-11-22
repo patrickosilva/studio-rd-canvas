@@ -48,6 +48,7 @@ export type AgendamentoMinAggregateOutputType = {
   inicio: Date | null
   fim: Date | null
   status: $Enums.StatusAgendamento | null
+  pretendeUsarAssinatura: boolean | null
   observacaoCliente: string | null
   observacaoInterna: string | null
   motivoRecusa: string | null
@@ -74,6 +75,7 @@ export type AgendamentoMaxAggregateOutputType = {
   inicio: Date | null
   fim: Date | null
   status: $Enums.StatusAgendamento | null
+  pretendeUsarAssinatura: boolean | null
   observacaoCliente: string | null
   observacaoInterna: string | null
   motivoRecusa: string | null
@@ -100,6 +102,7 @@ export type AgendamentoCountAggregateOutputType = {
   inicio: number
   fim: number
   status: number
+  pretendeUsarAssinatura: number
   observacaoCliente: number
   observacaoInterna: number
   motivoRecusa: number
@@ -142,6 +145,7 @@ export type AgendamentoMinAggregateInputType = {
   inicio?: true
   fim?: true
   status?: true
+  pretendeUsarAssinatura?: true
   observacaoCliente?: true
   observacaoInterna?: true
   motivoRecusa?: true
@@ -168,6 +172,7 @@ export type AgendamentoMaxAggregateInputType = {
   inicio?: true
   fim?: true
   status?: true
+  pretendeUsarAssinatura?: true
   observacaoCliente?: true
   observacaoInterna?: true
   motivoRecusa?: true
@@ -194,6 +199,7 @@ export type AgendamentoCountAggregateInputType = {
   inicio?: true
   fim?: true
   status?: true
+  pretendeUsarAssinatura?: true
   observacaoCliente?: true
   observacaoInterna?: true
   motivoRecusa?: true
@@ -307,6 +313,7 @@ export type AgendamentoGroupByOutputType = {
   inicio: Date
   fim: Date
   status: $Enums.StatusAgendamento
+  pretendeUsarAssinatura: boolean
   observacaoCliente: string | null
   observacaoInterna: string | null
   motivoRecusa: string | null
@@ -356,6 +363,7 @@ export type AgendamentoWhereInput = {
   inicio?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   fim?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   status?: Prisma.EnumStatusAgendamentoFilter<"Agendamento"> | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFilter<"Agendamento"> | boolean
   observacaoCliente?: Prisma.StringNullableFilter<"Agendamento"> | string | null
   observacaoInterna?: Prisma.StringNullableFilter<"Agendamento"> | string | null
   motivoRecusa?: Prisma.StringNullableFilter<"Agendamento"> | string | null
@@ -387,6 +395,7 @@ export type AgendamentoOrderByWithRelationInput = {
   inicio?: Prisma.SortOrder
   fim?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  pretendeUsarAssinatura?: Prisma.SortOrder
   observacaoCliente?: Prisma.SortOrderInput | Prisma.SortOrder
   observacaoInterna?: Prisma.SortOrderInput | Prisma.SortOrder
   motivoRecusa?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -421,6 +430,7 @@ export type AgendamentoWhereUniqueInput = Prisma.AtLeast<{
   inicio?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   fim?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   status?: Prisma.EnumStatusAgendamentoFilter<"Agendamento"> | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFilter<"Agendamento"> | boolean
   observacaoCliente?: Prisma.StringNullableFilter<"Agendamento"> | string | null
   observacaoInterna?: Prisma.StringNullableFilter<"Agendamento"> | string | null
   motivoRecusa?: Prisma.StringNullableFilter<"Agendamento"> | string | null
@@ -452,6 +462,7 @@ export type AgendamentoOrderByWithAggregationInput = {
   inicio?: Prisma.SortOrder
   fim?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  pretendeUsarAssinatura?: Prisma.SortOrder
   observacaoCliente?: Prisma.SortOrderInput | Prisma.SortOrder
   observacaoInterna?: Prisma.SortOrderInput | Prisma.SortOrder
   motivoRecusa?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -486,6 +497,7 @@ export type AgendamentoScalarWhereWithAggregatesInput = {
   inicio?: Prisma.DateTimeWithAggregatesFilter<"Agendamento"> | Date | string
   fim?: Prisma.DateTimeWithAggregatesFilter<"Agendamento"> | Date | string
   status?: Prisma.EnumStatusAgendamentoWithAggregatesFilter<"Agendamento"> | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolWithAggregatesFilter<"Agendamento"> | boolean
   observacaoCliente?: Prisma.StringNullableWithAggregatesFilter<"Agendamento"> | string | null
   observacaoInterna?: Prisma.StringNullableWithAggregatesFilter<"Agendamento"> | string | null
   motivoRecusa?: Prisma.StringNullableWithAggregatesFilter<"Agendamento"> | string | null
@@ -509,6 +521,7 @@ export type AgendamentoCreateInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -540,6 +553,7 @@ export type AgendamentoUncheckedCreateInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -565,6 +579,7 @@ export type AgendamentoUpdateInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -596,6 +611,7 @@ export type AgendamentoUncheckedUpdateInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -624,6 +640,7 @@ export type AgendamentoCreateManyInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -647,6 +664,7 @@ export type AgendamentoUpdateManyMutationInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -673,6 +691,7 @@ export type AgendamentoUncheckedUpdateManyInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -709,6 +728,7 @@ export type AgendamentoCountOrderByAggregateInput = {
   inicio?: Prisma.SortOrder
   fim?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  pretendeUsarAssinatura?: Prisma.SortOrder
   observacaoCliente?: Prisma.SortOrder
   observacaoInterna?: Prisma.SortOrder
   motivoRecusa?: Prisma.SortOrder
@@ -742,6 +762,7 @@ export type AgendamentoMaxOrderByAggregateInput = {
   inicio?: Prisma.SortOrder
   fim?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  pretendeUsarAssinatura?: Prisma.SortOrder
   observacaoCliente?: Prisma.SortOrder
   observacaoInterna?: Prisma.SortOrder
   motivoRecusa?: Prisma.SortOrder
@@ -768,6 +789,7 @@ export type AgendamentoMinOrderByAggregateInput = {
   inicio?: Prisma.SortOrder
   fim?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  pretendeUsarAssinatura?: Prisma.SortOrder
   observacaoCliente?: Prisma.SortOrder
   observacaoInterna?: Prisma.SortOrder
   motivoRecusa?: Prisma.SortOrder
@@ -980,6 +1002,7 @@ export type AgendamentoCreateWithoutClienteInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1009,6 +1032,7 @@ export type AgendamentoUncheckedCreateWithoutClienteInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1066,6 +1090,7 @@ export type AgendamentoScalarWhereInput = {
   inicio?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   fim?: Prisma.DateTimeFilter<"Agendamento"> | Date | string
   status?: Prisma.EnumStatusAgendamentoFilter<"Agendamento"> | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFilter<"Agendamento"> | boolean
   observacaoCliente?: Prisma.StringNullableFilter<"Agendamento"> | string | null
   observacaoInterna?: Prisma.StringNullableFilter<"Agendamento"> | string | null
   motivoRecusa?: Prisma.StringNullableFilter<"Agendamento"> | string | null
@@ -1089,6 +1114,7 @@ export type AgendamentoCreateWithoutServicoInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1118,6 +1144,7 @@ export type AgendamentoUncheckedCreateWithoutServicoInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1169,6 +1196,7 @@ export type AgendamentoCreateWithoutProfissionalInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1198,6 +1226,7 @@ export type AgendamentoUncheckedCreateWithoutProfissionalInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1249,6 +1278,7 @@ export type AgendamentoCreateWithoutUsoAssinaturaInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1279,6 +1309,7 @@ export type AgendamentoUncheckedCreateWithoutUsoAssinaturaInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1319,6 +1350,7 @@ export type AgendamentoUpdateWithoutUsoAssinaturaInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1349,6 +1381,7 @@ export type AgendamentoUncheckedUpdateWithoutUsoAssinaturaInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1373,6 +1406,7 @@ export type AgendamentoCreateWithoutUsoCupomInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1403,6 +1437,7 @@ export type AgendamentoUncheckedCreateWithoutUsoCupomInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1443,6 +1478,7 @@ export type AgendamentoUpdateWithoutUsoCupomInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1473,6 +1509,7 @@ export type AgendamentoUncheckedUpdateWithoutUsoCupomInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1499,6 +1536,7 @@ export type AgendamentoCreateManyClienteInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1522,6 +1560,7 @@ export type AgendamentoUpdateWithoutClienteInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1551,6 +1590,7 @@ export type AgendamentoUncheckedUpdateWithoutClienteInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1578,6 +1618,7 @@ export type AgendamentoUncheckedUpdateManyWithoutClienteInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1603,6 +1644,7 @@ export type AgendamentoCreateManyServicoInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1626,6 +1668,7 @@ export type AgendamentoUpdateWithoutServicoInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1655,6 +1698,7 @@ export type AgendamentoUncheckedUpdateWithoutServicoInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1682,6 +1726,7 @@ export type AgendamentoUncheckedUpdateManyWithoutServicoInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1707,6 +1752,7 @@ export type AgendamentoCreateManyProfissionalInput = {
   inicio: Date | string
   fim: Date | string
   status?: $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: string | null
   observacaoInterna?: string | null
   motivoRecusa?: string | null
@@ -1730,6 +1776,7 @@ export type AgendamentoUpdateWithoutProfissionalInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1759,6 +1806,7 @@ export type AgendamentoUncheckedUpdateWithoutProfissionalInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1786,6 +1834,7 @@ export type AgendamentoUncheckedUpdateManyWithoutProfissionalInput = {
   inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumStatusAgendamentoFieldUpdateOperationsInput | $Enums.StatusAgendamento
+  pretendeUsarAssinatura?: Prisma.BoolFieldUpdateOperationsInput | boolean
   observacaoCliente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observacaoInterna?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   motivoRecusa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1814,6 +1863,7 @@ export type AgendamentoSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   inicio?: boolean
   fim?: boolean
   status?: boolean
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: boolean
   observacaoInterna?: boolean
   motivoRecusa?: boolean
@@ -1845,6 +1895,7 @@ export type AgendamentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   inicio?: boolean
   fim?: boolean
   status?: boolean
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: boolean
   observacaoInterna?: boolean
   motivoRecusa?: boolean
@@ -1874,6 +1925,7 @@ export type AgendamentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   inicio?: boolean
   fim?: boolean
   status?: boolean
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: boolean
   observacaoInterna?: boolean
   motivoRecusa?: boolean
@@ -1903,6 +1955,7 @@ export type AgendamentoSelectScalar = {
   inicio?: boolean
   fim?: boolean
   status?: boolean
+  pretendeUsarAssinatura?: boolean
   observacaoCliente?: boolean
   observacaoInterna?: boolean
   motivoRecusa?: boolean
@@ -1921,7 +1974,7 @@ export type AgendamentoSelectScalar = {
   cupomCodigo?: boolean
 }
 
-export type AgendamentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "profissionalId" | "servicoId" | "inicio" | "fim" | "status" | "observacaoCliente" | "observacaoInterna" | "motivoRecusa" | "motivoCancelamento" | "canceladoEm" | "formaPagamento" | "valorPagoCentavos" | "pagoEm" | "observacaoPagamento" | "reminderSentAt" | "criadoEm" | "atualizadoEm" | "precoOriginalCentavos" | "descontoCupomCentavos" | "valorFinalCentavos" | "cupomCodigo", ExtArgs["result"]["agendamento"]>
+export type AgendamentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "profissionalId" | "servicoId" | "inicio" | "fim" | "status" | "pretendeUsarAssinatura" | "observacaoCliente" | "observacaoInterna" | "motivoRecusa" | "motivoCancelamento" | "canceladoEm" | "formaPagamento" | "valorPagoCentavos" | "pagoEm" | "observacaoPagamento" | "reminderSentAt" | "criadoEm" | "atualizadoEm" | "precoOriginalCentavos" | "descontoCupomCentavos" | "valorFinalCentavos" | "cupomCodigo", ExtArgs["result"]["agendamento"]>
 export type AgendamentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   usoAssinatura?: boolean | Prisma.Agendamento$usoAssinaturaArgs<ExtArgs>
   cliente?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
@@ -1957,6 +2010,7 @@ export type $AgendamentoPayload<ExtArgs extends runtime.Types.Extensions.Interna
     inicio: Date
     fim: Date
     status: $Enums.StatusAgendamento
+    pretendeUsarAssinatura: boolean
     observacaoCliente: string | null
     observacaoInterna: string | null
     motivoRecusa: string | null
@@ -2408,6 +2462,7 @@ export interface AgendamentoFieldRefs {
   readonly inicio: Prisma.FieldRef<"Agendamento", 'DateTime'>
   readonly fim: Prisma.FieldRef<"Agendamento", 'DateTime'>
   readonly status: Prisma.FieldRef<"Agendamento", 'StatusAgendamento'>
+  readonly pretendeUsarAssinatura: Prisma.FieldRef<"Agendamento", 'Boolean'>
   readonly observacaoCliente: Prisma.FieldRef<"Agendamento", 'String'>
   readonly observacaoInterna: Prisma.FieldRef<"Agendamento", 'String'>
   readonly motivoRecusa: Prisma.FieldRef<"Agendamento", 'String'>

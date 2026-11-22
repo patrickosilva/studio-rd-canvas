@@ -1,0 +1,89 @@
+--- a/src/routes/cliente.agendamentos.tsx
++++ b/src/routes/cliente.agendamentos.tsx
+@@ -467,42 +467,62 @@
+     setCarregando(true);
+     setErro("");
+ 
+-    try {
+-      const [
+-        servicosResposta,
+-        profissionaisResposta,
+-        agendamentosResposta,
+-        assinaturaResposta,
+-      ] = await Promise.all([
++    // As consultas são independentes: erro na assinatura ou nos pedidos
++    // anteriores não deve esconder serviços e profissionais disponíveis.
++    const [servicosResultado, profissionaisResultado, agendamentosResultado, assinaturaResultado] =
++      await Promise.allSettled([
+         carregarServicos(),
+         carregarProfissionais(),
+         carregarMeusAgendamentos(),
+         carregarAssinatura(),
+-      ]);
++      ] as const);
+ 
+-      setServicos(servicosResposta);
+-      setProfissionais(profissionaisResposta);
+-      setAgendamentos(agendamentosResposta);
+-      setAssinatura(assinaturaResposta);
+-      if (!assinaturaResposta || assinaturaResposta.saldoCortes <= 0) {
+-        setUsarAssinatura(false);
+-      }
++    const falhas: string[] = [];
+ 
+-      if (!servicoId && servicosResposta[0]) {
+-        setServicoId(servicosResposta[0].id);
++    if (servicosResultado.status === "fulfilled") {
++      setServicos(servicosResultado.value);
++      if (!servicoId && servicosResultado.value[0]) {
++        setServicoId(servicosResultado.value[0].id);
+       }
++    } else {
++      console.error("Erro ao carregar serviços:", servicosResultado.reason);
++      falhas.push("serviços");
++    }
++
++    if (profissionaisResultado.status === "fulfilled") {
++      setProfissionais(profissionaisResultado.value);
++    } else {
++      console.error("Erro ao carregar profissionais:", profissionaisResultado.reason);
++      falhas.push("profissionais");
++    }
+ 
++    if (agendamentosResultado.status === "fulfilled") {
++      setAgendamentos(agendamentosResultado.value);
++    } else {
++      console.error("Erro ao carregar pedidos de agendamento:", agendamentosResultado.reason);
++      falhas.push("seus agendamentos");
++    }
+ 
+-      if (!dataSelecionada && proximosDias[0]) {
+-        setDataSelecionada(proximosDias[0]);
++    if (assinaturaResultado.status === "fulfilled") {
++      setAssinatura(assinaturaResultado.value);
++      if (!assinaturaResultado.value || assinaturaResultado.value.saldoCortes <= 0) {
++        setUsarAssinatura(false);
+       }
+-    } catch (error) {
+-      console.error(error);
++    } else {
++      console.error("Erro ao consultar assinatura:", assinaturaResultado.reason);
++      setAssinatura(null);
++      setUsarAssinatura(false);
++      falhas.push("assinatura RD Black");
++    }
++
++    if (falhas.length > 0) {
++      setErro(`Não foi possível carregar: ${falhas.join(", ")}. Atualize a página ou procure o suporte.`);
++    }
+ 
+-      setErro("Não foi possível carregar seus agendamentos.");
+-    } finally {
+-      setCarregando(false);
++    if (!dataSelecionada && proximosDias[0]) {
++      setDataSelecionada(proximosDias[0]);
+     }
++    setCarregando(false);
+   }
+ 
+   async function carregarIndisponibilidades(
