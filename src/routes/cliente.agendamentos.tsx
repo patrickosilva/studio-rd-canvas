@@ -770,6 +770,47 @@ function AgendamentosPage() {
               className="space-y-6"
               onSubmit={handleSubmit}
             >
+              {/* Escolha Premium antes de qualquer etapa do agendamento. */}
+              {assinatura && (
+                <fieldset className="rounded-2xl border border-gold/50 bg-gold-soft/20 p-4">
+                  <legend className="sr-only">Forma de pagamento do atendimento</legend>
+                  <div className="flex items-center gap-2 text-gold">
+                    <Crown className="h-5 w-5" aria-hidden="true" />
+                    <strong>Seu RD Black está ativo</strong>
+                  </div>
+                  <p className="mt-2 text-sm">
+                    Plano {assinatura.plano.nome} · {assinatura.saldoCortes} corte(s) disponível(is)
+                  </p>
+                  {assinatura.saldoCortes > 0 ? (
+                    <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-xl border border-gold/30 bg-background/40 p-3 text-sm">
+                      <input
+                        type="checkbox"
+                        className="mt-1 accent-amber-500"
+                        checked={usarAssinatura}
+                        onChange={(event) => {
+                          setUsarAssinatura(event.target.checked);
+                          if (event.target.checked) {
+                            setCupomAplicado(null);
+                            setCupomCodigo("");
+                            setErroCupom("");
+                          }
+                        }}
+                      />
+                      <span>
+                        <strong>Usar 1 corte do meu RD Black neste agendamento</strong>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          Selecione antes de escolher serviço, profissional e horário. O corte não é descontado agora: a equipe registra o uso somente ao concluir o atendimento, após conferir saldo e vigência.
+                        </span>
+                      </span>
+                    </label>
+                  ) : (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Você não tem cortes disponíveis neste momento. Pode agendar com pagamento avulso.
+                    </p>
+                  )}
+                </fieldset>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="servico">
                   Serviço
@@ -971,37 +1012,6 @@ function AgendamentosPage() {
                   </p>
                 )}
               </div>
-
-              {assinatura && (
-                <div className="rounded-2xl border border-gold/40 bg-gold-soft/20 p-4">
-                  <div className="flex items-center gap-2 text-gold">
-                    <Crown className="h-5 w-5" />
-                    <strong>Você é RD Black Premium</strong>
-                  </div>
-                  <p className="mt-2 text-sm">Plano {assinatura.plano.nome} · {assinatura.saldoCortes} corte(s) disponível(is)</p>
-                  {assinatura.saldoCortes > 0 ? (
-                    <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm">
-                      <input
-                        type="checkbox"
-                        className="mt-1 accent-amber-500"
-                        checked={usarAssinatura}
-                        onChange={(event) => {
-                          setUsarAssinatura(event.target.checked);
-                          if (event.target.checked) {
-                            setCupomAplicado(null);
-                            setCupomCodigo("");
-                          }
-                        }}
-                      />
-                      <span><strong>Usar 1 corte da minha assinatura</strong><br />
-                        <span className="text-xs text-muted-foreground">Nenhum corte é descontado ao agendar. A equipe confirma o uso na conclusão, sujeito a saldo e vigência válidos.</span>
-                      </span>
-                    </label>
-                  ) : (
-                    <p className="mt-2 text-sm text-muted-foreground">Sua assinatura não tem cortes disponíveis. Você pode agendar normalmente.</p>
-                  )}
-                </div>
-              )}
 
               <div className="rounded-2xl border border-border bg-background/40 p-4">
                 <div className="flex items-center gap-2">
