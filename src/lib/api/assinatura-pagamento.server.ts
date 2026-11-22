@@ -554,101 +554,31 @@ export async function criarCheckoutAssinaturaServer(
 
   const agora = new Date();
 
-  const pedidoExistente =
-    await prisma.pedidoAssinatura.findFirst({
-      where: {
-        clienteId: usuario.id,
-        planoId: plano.id,
-        status: {
-          in: [
-            "CRIADO",
-            "CHECKOUT_CRIADO",
-            "FALHOU",
-          ],
-        },
-      },
-      orderBy: {
-        criadoEm: "desc",
-      },
-      select: {
-        id: true,
-        status: true,
-        checkoutUrl: true,
-        expiraEm: true,
-      },
-    });
-
-  if (
-    pedidoExistente?.status === "CHECKOUT_CRIADO" &&
-    pedidoExistente.checkoutUrl &&
-    pedidoExistente.expiraEm &&
-    pedidoExistente.expiraEm > agora
-  ) {
-    return {
-      sucesso: true as const,
-      checkoutUrl:
-        pedidoExistente.checkoutUrl,
-      reutilizado: true,
-    };
-  }
-
-  const orderNsu =
-    `studio-rd-ass-${randomUUID()}`;
-
+  // Cada tentativa recebe um pedido e um link novos. Não reutilizamos URLs
+  // de pagamento que podem ter sido pagas, expirado ou geradas antes da troca
+  // do domínio público. Os pedidos anteriores permanecem no banco para
+  // conciliação dos pagamentos já realizados.
+  const orderNsu = `studio-rd-ass-${randomUUID()}`;
   const valorOriginal = plano.precoCentavos;
-
-  // Snapshot comercial do pedido.
-  // O desconto de assinatura continua separado dos cupons de agendamento.
   const descontoCentavos = 0;
-  const valorFinal =
-    valorOriginal - descontoCentavos;
+  const valorFinal = valorOriginal - descontoCentavos;
 
-  const pedido = pedidoExistente
-    ? await prisma.pedidoAssinatura.update({
-        where: {
-          id: pedidoExistente.id,
-        },
-        data: {
-          solicitacaoId: acesso.id,
-          status: "CRIADO",
-          orderNsu,
-          checkoutUrl: null,
-          expiraEm: null,
-          transactionNsu: null,
-          invoiceSlug: null,
-          receiptUrl: null,
-          captureMethod: null,
-          paidAmountCentavos: null,
-          installments: null,
-          precoOriginalCentavos:
-            valorOriginal,
-          descontoCentavos,
-          valorFinalCentavos:
-            valorFinal,
-        },
-        select: {
-          id: true,
-          orderNsu: true,
-        },
-      })
-    : await prisma.pedidoAssinatura.create({
-        data: {
-          clienteId: usuario.id,
-          planoId: plano.id,
-          solicitacaoId: acesso.id,
-          status: "CRIADO",
-          precoOriginalCentavos:
-            valorOriginal,
-          descontoCentavos,
-          valorFinalCentavos:
-            valorFinal,
-          orderNsu,
-        },
-        select: {
-          id: true,
-          orderNsu: true,
-        },
-      });
+  const pedido = await prisma.pedidoAssinatura.create({
+    data: {
+      clienteId: usuario.id,
+      planoId: plano.id,
+      solicitacaoId: acesso.id,
+      status: "CRIADO",
+      precoOriginalCentavos: valorOriginal,
+      descontoCentavos,
+      valorFinalCentavos: valorFinal,
+      orderNsu,
+    },
+    select: {
+      id: true,
+      orderNsu: true,
+    },
+  });
 
   const expiraEm = new Date(
     agora.getTime() + 30 * 60 * 1000,
@@ -681,6 +611,12 @@ export async function criarCheckoutAssinaturaServer(
         },
       });
 
+    console.info("[InfinitePay] Checkout gerado", {
+      pedidoId: pedido.id,
+      dominioRetorno: new URL(base).hostname,
+      dominioCheckout: new URL(checkout.checkoutUrl).hostname,
+    });
+
     await prisma.pedidoAssinatura.update({
       where: {
         id: pedido.id,
@@ -704,6 +640,10 @@ export async function criarCheckoutAssinaturaServer(
       error instanceof Error
         ? error.message
         : "Falha ao criar checkout InfinitePay.";
+    console.error("[InfinitePay] Falha na criacao do checkout", {
+      pedidoId: pedido.id,
+      erro: mensagem.slice(0, 300),
+    });
 
     await prisma.pedidoAssinatura.update({
       where: {
