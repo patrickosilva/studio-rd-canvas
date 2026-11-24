@@ -598,7 +598,7 @@ async function existeConflitoDeHorario({
           not: ignorarAgendamentoId,
         }
         : undefined,
-      status: "CONFIRMADO",
+      status: { in: ["SOLICITADO", "CONFIRMADO"] },
       inicio: {
         lt: fim,
       },
@@ -689,7 +689,7 @@ async function buscarAgendamentoConflitante({
           not: ignorarAgendamentoId,
         }
         : undefined,
-      status: "CONFIRMADO",
+      status: { in: ["SOLICITADO", "CONFIRMADO"] },
       inicio: {
         lt: fim,
       },
@@ -1118,6 +1118,42 @@ export const solicitarAgendamento = createServerFn({
 
     const resultadoCriacaoAgendamento =
       await prisma.$transaction(async (tx) => {
+        // Serializa reservas do mesmo profissional; só o primeiro pedido
+        // concorrente pode ocupar o intervalo, mesmo quando SOLICITADO.
+        await tx.$queryRaw<{ acquired: number }[]>`
+          SELECT 1::integer AS acquired
+          FROM (SELECT pg_advisory_xact_lock(hashtext(${profissional.id}))) AS bloqueio
+        `;
+        const horarioJaOcupado = await tx.agendamento.findFirst({
+          where: {
+            profissionalId: profissional.id,
+            status: { in: ["SOLICITADO", "CONFIRMADO"] },
+            inicio: { lt: fim },
+            fim: { gt: inicio },
+          },
+          select: { id: true },
+        });
+        if (horarioJaOcupado) {
+          return {
+            sucesso: false as const,
+            mensagem: "Esse horário acabou de ser reservado. Escolha outro horário.",
+          };
+        }
+        const bloqueioAtual = await tx.bloqueioAgenda.findFirst({
+          where: {
+            ativo: true,
+            inicio: { lt: fim },
+            fim: { gt: inicio },
+            OR: [{ profissionalId: null }, { profissionalId: profissional.id }],
+          },
+          select: { id: true },
+        });
+        if (bloqueioAtual) {
+          return {
+            sucesso: false as const,
+            mensagem: "Esse horário está bloqueado na agenda da barbearia.",
+          };
+        }
         const avaliacaoCupom = cupomCodigoAgendamento
           ? await avaliarCupomParaAgendamento({
               clienteId: usuario.id,
@@ -1521,6 +1557,43 @@ export const funcionarioCriarAgendamentoParaCliente =
 
     const resultadoCriacaoAgendamento =
       await prisma.$transaction(async (tx) => {
+        // A criação pela equipe compartilha o mesmo lock dos clientes.
+        await tx.$queryRaw<{ acquired: number }[]>`
+          SELECT 1::integer AS acquired
+          FROM (SELECT pg_advisory_xact_lock(hashtext(${profissional.id}))) AS bloqueio
+        `;
+        const horarioJaOcupado = await tx.agendamento.findFirst({
+          where: {
+            profissionalId: profissional.id,
+            status: { in: ["SOLICITADO", "CONFIRMADO"] },
+            inicio: { lt: fim },
+            fim: { gt: inicio },
+          },
+          select: { id: true },
+        });
+        if (horarioJaOcupado) {
+          return {
+            sucesso: false as const,
+            mensagem: "Esse profissional já possui uma solicitação ou agendamento nesse horário.",
+          };
+        }
+        if (!horarioPersonalizado) {
+          const bloqueioAtual = await tx.bloqueioAgenda.findFirst({
+            where: {
+              ativo: true,
+              inicio: { lt: fim },
+              fim: { gt: inicio },
+              OR: [{ profissionalId: null }, { profissionalId: profissional.id }],
+            },
+            select: { id: true },
+          });
+          if (bloqueioAtual) {
+            return {
+              sucesso: false as const,
+              mensagem: "Esse horário está bloqueado na agenda da barbearia.",
+            };
+          }
+        }
         const avaliacaoCupom = cupomCodigoAgendamento
           ? await avaliarCupomParaAgendamento({
               clienteId: cliente.id,
@@ -3725,6 +3798,40 @@ export const operacionalRemarcarAgendamento =
 
       const agendamentoAtualizado =
         await prisma.$transaction(async (tx) => {
+          await tx.$queryRaw<{ acquired: number }[]>`
+            SELECT 1::integer AS acquired
+            FROM (SELECT pg_advisory_xact_lock(hashtext(${agendamento.profissionalId}))) AS bloqueio
+          `;
+          const horarioJaOcupado = await tx.agendamento.findFirst({
+            where: {
+              profissionalId: agendamento.profissionalId,
+              id: { not: agendamento.id },
+              status: { in: ["SOLICITADO", "CONFIRMADO"] },
+              inicio: { lt: novoFim },
+              fim: { gt: novoInicio },
+            },
+            select: { id: true },
+          });
+          if (horarioJaOcupado) {
+            throw new Error("HORARIO_OCUPADO_REAGENDAMENTO");
+          }
+          if (!horarioPersonalizado) {
+            const bloqueioAtual = await tx.bloqueioAgenda.findFirst({
+              where: {
+                ativo: true,
+                inicio: { lt: novoFim },
+                fim: { gt: novoInicio },
+                OR: [
+                  { profissionalId: null },
+                  { profissionalId: agendamento.profissionalId },
+                ],
+              },
+              select: { id: true },
+            });
+            if (bloqueioAtual) {
+              throw new Error("HORARIO_BLOQUEADO_REAGENDAMENTO");
+            }
+          }
           if (
             agendamento.usoCupom &&
             ajusteCupom?.mantem
@@ -3812,7 +3919,22 @@ export const operacionalRemarcarAgendamento =
               },
             },
           });
+        }).catch((error: unknown) => {
+          if (error instanceof Error && (
+            error.message === "HORARIO_OCUPADO_REAGENDAMENTO" ||
+            error.message === "HORARIO_BLOQUEADO_REAGENDAMENTO"
+          )) {
+            return null;
+          }
+          throw error;
         });
+
+      if (!agendamentoAtualizado) {
+        return {
+          sucesso: false,
+          mensagem: "O horário foi ocupado ou bloqueado enquanto você remarcava. Escolha outro horário.",
+        };
+      }
 
       if (apenasDuracaoAlterada) {
         return {
@@ -3979,7 +4101,7 @@ export const listarIndisponibilidadesAgenda =
         prisma.agendamento.findMany({
           where: {
             profissionalId: data.profissionalId,
-            status: "CONFIRMADO",
+            status: { in: ["SOLICITADO", "CONFIRMADO"] },
             inicio: {
               lt: fimDia,
             },
