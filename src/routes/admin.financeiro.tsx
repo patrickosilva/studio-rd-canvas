@@ -1,13 +1,10 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   BarChart3,
   CalendarClock,
+  CalendarRange,
   CheckCircle2,
   Clock,
   CreditCard,
@@ -22,87 +19,48 @@ import {
   Wallet,
   XCircle,
 } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { PageHeader } from "@/components/dashboard/Sidebar";
-import { adminListarAgenda } from "@/lib/api/agendamento.functions";
-import { adminListarPagamentosAssinatura } from "@/lib/api/assinatura.functions";
+import { type ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { adminListarFinanceiroPeriodo } from "@/lib/api/financeiro.functions";
+import { celulaMonetariaCsv, celulaTextoCsv, montarConteudoCsv } from "@/lib/financeiro-csv";
+import {
+  type AgrupamentoFinanceiro,
+  type GranularidadeFinanceira,
+  type IntervaloDatasFinanceiro,
+  type TipoPeriodoFinanceiro,
+  LIMITE_DIAS_PERIODO_FINANCEIRO,
+  TIMEZONE_FINANCEIRO,
+  calcularPeriodoRapido,
+  chaveAgrupamento,
+  contarDiasInclusivos,
+  criarAgrupamentos,
+  dataSaoPaulo,
+  definirGranularidade,
+  descreverGranularidade,
+  formatarIntervaloDatas,
+  hojeSaoPaulo,
+  validarPeriodoFinanceiro,
+} from "@/lib/financeiro-periodo";
 
 export const Route = createFileRoute("/admin/financeiro")({
   component: FinanceiroPage,
 });
 
-type AgendamentoFinanceiro = {
-  id: string;
-  inicio: string | Date;
-  fim: string | Date;
-  status: string;
-  observacaoCliente: string | null;
-  motivoRecusa: string | null;
-  formaPagamento: string | null;
-  valorPagoCentavos: number | null;
-  pagoEm: string | Date | null;
-  observacaoPagamento: string | null;
-  criadoEm: string | Date;
-  atualizadoEm: string | Date;
+type RespostaFinanceiro = Awaited<ReturnType<typeof adminListarFinanceiroPeriodo>>;
 
-  cliente: {
-    id: string;
-    nome: string;
-    email: string;
-    telefone: string | null;
-  };
+type AgendamentoFinanceiro = RespostaFinanceiro["agendamentos"][number];
 
-  profissional: {
-    id: string;
-    nome: string;
-  };
-
-  servico: {
-    id: string;
-    nome: string;
-    duracaoMinutos: number;
-    precoCentavos: number;
-  };
+type PeriodoAplicado = IntervaloDatasFinanceiro & {
+  tipo: TipoPeriodoFinanceiro;
 };
 
-type PagamentoAssinatura = {
-  id: string;
-  formaPagamento:
-  | "PIX"
-  | "DINHEIRO"
-  | "CARTAO_DEBITO"
-  | "CARTAO_CREDITO"
-  | "ASSINATURA"
-  | "CORTESIA"
-  | "OUTRO";
-  valorCentavos: number;
-  pagoEm: string | Date;
-  observacao: string | null;
-
-  assinatura: {
-    id: string;
-    status: string;
-
-    cliente: {
-      id: string;
-      nome: string;
-      email: string;
-      telefone: string | null;
-    };
-
-    plano: {
-      id: string;
-      nome: string;
-      precoCentavos: number;
-    };
-  };
+type DadosFinanceiros = {
+  periodo: PeriodoAplicado;
+  agendamentos: RespostaFinanceiro["agendamentos"];
+  pagamentosAssinatura: RespostaFinanceiro["pagamentosAssinatura"];
 };
-
-type FiltroPeriodo =
-  | "hoje"
-  | "semanaAtual"
-  | "ultimos7"
-  | "mesAtual";
 
 type MovimentoFinanceiro = {
   id: string;
@@ -115,142 +73,185 @@ type MovimentoFinanceiro = {
   valorCentavos: number;
 };
 
-function FinanceiroPage() {
-  const carregarAgenda = useServerFn(adminListarAgenda);
-  const listarPagamentosAssinatura = useServerFn(
-    adminListarPagamentosAssinatura,
-  );
+type ResumoAgrupamento = {
+  chave: string;
+  label: string;
+  rotuloCurto: string;
+  atendimentos: number;
+  assinaturas: number;
+  previstos: number;
+  receitaRealizada: number;
+  receitaPrevista: number;
+  receitaPerdida: number;
+};
 
-  const [agendamentos, setAgendamentos] = useState<
-    AgendamentoFinanceiro[]
-  >([]);
-  const [pagamentosAssinatura, setPagamentosAssinatura] = useState<
-    PagamentoAssinatura[]
-  >([]);
-  const [periodo, setPeriodo] =
-    useState<FiltroPeriodo>("semanaAtual");
+const STATUS_PREVISTOS = ["SOLICITADO", "CONFIRMADO"];
+
+const STATUS_PERDIDOS = ["RECUSADO", "CANCELADO_CLIENTE", "CANCELADO_FUNCIONARIO", "FALTOU"];
+
+const QUANTIDADE_ULTIMOS_MOVIMENTOS = 10;
+
+const ROTULOS_PERIODO: Record<TipoPeriodoFinanceiro, string> = {
+  hoje: "Hoje",
+  semanaAtual: "Semana atual",
+  ultimos7: "Últimos 7 dias",
+  mesAtual: "Mês atual",
+  mesAnterior: "Mês anterior",
+  personalizado: "Personalizado",
+};
+
+const FILTROS_RAPIDOS: Exclude<TipoPeriodoFinanceiro, "personalizado">[] = [
+  "hoje",
+  "semanaAtual",
+  "ultimos7",
+  "mesAtual",
+  "mesAnterior",
+];
+
+const configuracaoGrafico = {
+  receitaRealizada: {
+    label: "Realizado",
+    color: "var(--gold)",
+  },
+} satisfies ChartConfig;
+
+function criarPeriodoRapido(
+  tipo: Exclude<TipoPeriodoFinanceiro, "personalizado">,
+): PeriodoAplicado {
+  return {
+    tipo,
+    ...calcularPeriodoRapido(tipo, hojeSaoPaulo()),
+  };
+}
+
+function FinanceiroPage() {
+  const listarFinanceiroPeriodo = useServerFn(adminListarFinanceiroPeriodo);
+
+  const [periodoAplicado, setPeriodoAplicado] = useState<PeriodoAplicado>(() =>
+    criarPeriodoRapido("semanaAtual"),
+  );
+  const [personalizadoAberto, setPersonalizadoAberto] = useState(false);
+  const [rascunho, setRascunho] = useState<IntervaloDatasFinanceiro>(() => ({
+    dataInicial: periodoAplicado.dataInicial,
+    dataFinal: periodoAplicado.dataFinal,
+  }));
+  const [erroRascunho, setErroRascunho] = useState("");
+
+  const [dados, setDados] = useState<DadosFinanceiros | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [tentativa, setTentativa] = useState(0);
 
-  async function carregarDados() {
+  // Identifica a requisição mais recente. Respostas de consultas anteriores
+  // são descartadas para não sobrescrever o período selecionado depois.
+  const requisicaoAtual = useRef(0);
+
+  useEffect(() => {
+    const idRequisicao = requisicaoAtual.current + 1;
+
+    requisicaoAtual.current = idRequisicao;
+
+    // Nunca exibir valores de outro período enquanto o novo é carregado.
+    setDados(null);
     setCarregando(true);
     setErro("");
 
-    try {
-      const [agendaResposta, pagamentosAssinaturaResposta] =
-        await Promise.all([
-          carregarAgenda(),
-          listarPagamentosAssinatura(),
-        ]);
+    listarFinanceiroPeriodo({
+      data: {
+        dataInicial: periodoAplicado.dataInicial,
+        dataFinal: periodoAplicado.dataFinal,
+      },
+    })
+      .then((resposta) => {
+        if (idRequisicao !== requisicaoAtual.current) {
+          return;
+        }
 
-      setAgendamentos(agendaResposta as AgendamentoFinanceiro[]);
-      setPagamentosAssinatura(
-        pagamentosAssinaturaResposta as PagamentoAssinatura[],
-      );
-    } catch (error) {
-      console.error(error);
+        setDados({
+          periodo: periodoAplicado,
+          agendamentos: resposta.agendamentos,
+          pagamentosAssinatura: resposta.pagamentosAssinatura,
+        });
+      })
+      .catch((error: unknown) => {
+        if (idRequisicao !== requisicaoAtual.current) {
+          return;
+        }
 
-      setErro("Não foi possível carregar os dados financeiros.");
-    } finally {
-      setCarregando(false);
-    }
-  }
+        console.error(error);
 
-  useEffect(() => {
-    void carregarDados();
-  }, []);
+        setErro("Não foi possível carregar os dados financeiros do período selecionado.");
+      })
+      .finally(() => {
+        if (idRequisicao === requisicaoAtual.current) {
+          setCarregando(false);
+        }
+      });
+  }, [listarFinanceiroPeriodo, periodoAplicado, tentativa]);
 
-  const intervaloPeriodo = useMemo(
-    () => obterIntervaloPeriodo(periodo),
-    [periodo],
+  const diasNoPeriodo = contarDiasInclusivos(
+    periodoAplicado.dataInicial,
+    periodoAplicado.dataFinal,
   );
 
-  const agendamentosNoPeriodo = useMemo(() => {
-    return agendamentos.filter((agendamento) =>
-      estaEntreDatas(
-        agendamento.inicio,
-        intervaloPeriodo.inicio,
-        intervaloPeriodo.fim,
-      ),
-    );
-  }, [agendamentos, intervaloPeriodo]);
+  const granularidade = definirGranularidade(diasNoPeriodo);
 
-  const agendamentosRecebidosNoPeriodo = useMemo(() => {
-    return agendamentos.filter((agendamento) => {
-      if (agendamento.status !== "CONCLUIDO") {
-        return false;
-      }
+  const intervaloAplicadoTexto = formatarIntervaloDatas(periodoAplicado);
 
-      return estaEntreDatas(
-        obterDataFinanceiraAgendamento(agendamento),
-        intervaloPeriodo.inicio,
-        intervaloPeriodo.fim,
-      );
-    });
-  }, [agendamentos, intervaloPeriodo]);
+  const validacaoRascunho = validarPeriodoFinanceiro(rascunho.dataInicial, rascunho.dataFinal);
 
-  const pagamentosAssinaturaFiltrados = useMemo(() => {
-    return pagamentosAssinatura.filter((pagamento) =>
-      estaEntreDatas(
-        pagamento.pagoEm,
-        intervaloPeriodo.inicio,
-        intervaloPeriodo.fim,
-      ),
-    );
-  }, [pagamentosAssinatura, intervaloPeriodo]);
+  const rascunhoPendente =
+    personalizadoAberto &&
+    (periodoAplicado.tipo !== "personalizado" ||
+      rascunho.dataInicial !== periodoAplicado.dataInicial ||
+      rascunho.dataFinal !== periodoAplicado.dataFinal);
+
+  const agendamentosNoPeriodo = useMemo(() => dados?.agendamentos ?? [], [dados]);
+
+  const pagamentosAssinaturaFiltrados = useMemo(() => dados?.pagamentosAssinatura ?? [], [dados]);
+
+  const agendamentosRecebidosNoPeriodo = useMemo(
+    () => agendamentosNoPeriodo.filter((agendamento) => agendamento.status === "CONCLUIDO"),
+    [agendamentosNoPeriodo],
+  );
 
   const resumo = useMemo(() => {
     const previstos = agendamentosNoPeriodo.filter((agendamento) =>
-      ["SOLICITADO", "CONFIRMADO"].includes(agendamento.status),
+      STATUS_PREVISTOS.includes(agendamento.status),
     );
 
     const perdidos = agendamentosNoPeriodo.filter((agendamento) =>
-      [
-        "RECUSADO",
-        "CANCELADO_CLIENTE",
-        "CANCELADO_FUNCIONARIO",
-        "FALTOU",
-      ].includes(agendamento.status),
+      STATUS_PERDIDOS.includes(agendamento.status),
     );
 
-    const receitaAtendimentos =
-      agendamentosRecebidosNoPeriodo.reduce(
-        (total, agendamento) =>
-          total + obterValorRealizado(agendamento),
-        0,
-      );
+    const receitaAtendimentos = agendamentosRecebidosNoPeriodo.reduce(
+      (total, agendamento) => total + obterValorRealizado(agendamento),
+      0,
+    );
 
-    const receitaAssinaturas =
-      pagamentosAssinaturaFiltrados.reduce(
-        (total, pagamento) => total + pagamento.valorCentavos,
-        0,
-      );
+    const receitaAssinaturas = pagamentosAssinaturaFiltrados.reduce(
+      (total, pagamento) => total + pagamento.valorCentavos,
+      0,
+    );
 
     const receitaPrevista = previstos.reduce(
-      (total, agendamento) =>
-        total + agendamento.servico.precoCentavos,
+      (total, agendamento) => total + agendamento.servico.precoCentavos,
       0,
     );
 
     const receitaPerdida = perdidos.reduce(
-      (total, agendamento) =>
-        total + agendamento.servico.precoCentavos,
+      (total, agendamento) => total + agendamento.servico.precoCentavos,
       0,
     );
 
-    const receitaRealizada =
-      receitaAtendimentos + receitaAssinaturas;
+    const receitaRealizada = receitaAtendimentos + receitaAssinaturas;
 
     const quantidadeRecebimentos =
-      agendamentosRecebidosNoPeriodo.length +
-      pagamentosAssinaturaFiltrados.length;
+      agendamentosRecebidosNoPeriodo.length + pagamentosAssinaturaFiltrados.length;
 
     const ticketMedio =
       agendamentosRecebidosNoPeriodo.length > 0
-        ? Math.round(
-          receitaAtendimentos /
-          agendamentosRecebidosNoPeriodo.length,
-        )
+        ? Math.round(receitaAtendimentos / agendamentosRecebidosNoPeriodo.length)
         : 0;
 
     return {
@@ -267,11 +268,7 @@ function FinanceiroPage() {
       receitaPerdida,
       ticketMedio,
     };
-  }, [
-    agendamentosNoPeriodo,
-    agendamentosRecebidosNoPeriodo,
-    pagamentosAssinaturaFiltrados,
-  ]);
+  }, [agendamentosNoPeriodo, agendamentosRecebidosNoPeriodo, pagamentosAssinaturaFiltrados]);
 
   const faturamentoPorPagamento = useMemo(() => {
     const mapa = new Map<
@@ -284,16 +281,13 @@ function FinanceiroPage() {
     >();
 
     for (const agendamento of agendamentosRecebidosNoPeriodo) {
-      const chave =
-        agendamento.formaPagamento ?? "NAO_INFORMADO";
+      const chave = agendamento.formaPagamento ?? "NAO_INFORMADO";
 
-      const registro =
-        mapa.get(chave) ??
-        {
-          formaPagamento: chave,
-          quantidade: 0,
-          valor: 0,
-        };
+      const registro = mapa.get(chave) ?? {
+        formaPagamento: chave,
+        quantidade: 0,
+        valor: 0,
+      };
 
       registro.quantidade += 1;
       registro.valor += obterValorRealizado(agendamento);
@@ -304,13 +298,11 @@ function FinanceiroPage() {
     for (const pagamento of pagamentosAssinaturaFiltrados) {
       const chave = pagamento.formaPagamento;
 
-      const registro =
-        mapa.get(chave) ??
-        {
-          formaPagamento: chave,
-          quantidade: 0,
-          valor: 0,
-        };
+      const registro = mapa.get(chave) ?? {
+        formaPagamento: chave,
+        quantidade: 0,
+        valor: 0,
+      };
 
       registro.quantidade += 1;
       registro.valor += pagamento.valorCentavos;
@@ -319,152 +311,135 @@ function FinanceiroPage() {
     }
 
     return [...mapa.values()].sort((a, b) => b.valor - a.valor);
-  }, [
-    agendamentosRecebidosNoPeriodo,
-    pagamentosAssinaturaFiltrados,
-  ]);
+  }, [agendamentosRecebidosNoPeriodo, pagamentosAssinaturaFiltrados]);
 
-  const resumoPorDia = useMemo(() => {
-    const dias = criarDiasEntre(
-      intervaloPeriodo.inicio,
-      intervaloPeriodo.fim,
+  const resumoPorAgrupamento = useMemo<ResumoAgrupamento[]>(() => {
+    if (!dados) {
+      return [];
+    }
+
+    const periodoDados = dados.periodo;
+    const granularidadeDados = definirGranularidade(
+      contarDiasInclusivos(periodoDados.dataInicial, periodoDados.dataFinal),
     );
 
-    return dias.map((dia) => {
-      const atendimentosDoDia =
-        agendamentosRecebidosNoPeriodo.filter((agendamento) =>
-          mesmaData(
-            obterDataFinanceiraAgendamento(agendamento),
-            dia,
-          ),
-        );
+    const agrupamentos = criarAgrupamentos(periodoDados, granularidadeDados);
 
-      const assinaturasDoDia =
-        pagamentosAssinaturaFiltrados.filter((pagamento) =>
-          mesmaData(pagamento.pagoEm, dia),
-        );
+    const mapa = new Map<string, ResumoAgrupamento>(
+      agrupamentos.map((agrupamento: AgrupamentoFinanceiro) => [
+        agrupamento.chave,
+        {
+          chave: agrupamento.chave,
+          label: agrupamento.rotulo,
+          rotuloCurto: agrupamento.rotuloCurto,
+          atendimentos: 0,
+          assinaturas: 0,
+          previstos: 0,
+          receitaRealizada: 0,
+          receitaPrevista: 0,
+          receitaPerdida: 0,
+        },
+      ]),
+    );
 
-      const previstosDoDia = agendamentosNoPeriodo.filter(
-        (agendamento) =>
-          ["SOLICITADO", "CONFIRMADO"].includes(
-            agendamento.status,
-          ) && mesmaData(agendamento.inicio, dia),
+    function obterRegistro(valor: string | Date) {
+      const chave = chaveAgrupamento(
+        dataSaoPaulo(valor),
+        granularidadeDados,
+        periodoDados.dataInicial,
       );
 
-      const perdidosDoDia = agendamentosNoPeriodo.filter(
-        (agendamento) =>
-          [
-            "RECUSADO",
-            "CANCELADO_CLIENTE",
-            "CANCELADO_FUNCIONARIO",
-            "FALTOU",
-          ].includes(agendamento.status) &&
-          mesmaData(agendamento.inicio, dia),
-      );
+      const registro = mapa.get(chave);
 
-      const receitaAtendimentos = atendimentosDoDia.reduce(
-        (total, agendamento) =>
-          total + obterValorRealizado(agendamento),
-        0,
-      );
+      if (!registro) {
+        // O servidor já filtra pelo período; isso indicaria uma inconsistência
+        // de datas. Os totais dos cards não dependem deste agrupamento.
+        console.warn("Registro financeiro fora do período aplicado.", valor);
+      }
 
-      const receitaAssinaturas = assinaturasDoDia.reduce(
-        (total, pagamento) => total + pagamento.valorCentavos,
-        0,
-      );
+      return registro;
+    }
 
-      const receitaPrevista = previstosDoDia.reduce(
-        (total, agendamento) =>
-          total + agendamento.servico.precoCentavos,
-        0,
-      );
+    for (const agendamento of agendamentosNoPeriodo) {
+      const registro = obterRegistro(obterDataFinanceiraAgendamento(agendamento));
 
-      const receitaPerdida = perdidosDoDia.reduce(
-        (total, agendamento) =>
-          total + agendamento.servico.precoCentavos,
-        0,
-      );
+      if (!registro) {
+        continue;
+      }
 
-      return {
-        data: dia,
-        label: formatarDataCurta(dia),
-        atendimentos: atendimentosDoDia.length,
-        assinaturas: assinaturasDoDia.length,
-        previstos: previstosDoDia.length,
-        receitaRealizada: receitaAtendimentos + receitaAssinaturas,
-        receitaPrevista,
-        receitaPerdida,
-      };
-    });
-  }, [
-    agendamentosNoPeriodo,
-    agendamentosRecebidosNoPeriodo,
-    pagamentosAssinaturaFiltrados,
-    intervaloPeriodo,
-  ]);
+      if (agendamento.status === "CONCLUIDO") {
+        registro.atendimentos += 1;
+        registro.receitaRealizada += obterValorRealizado(agendamento);
+      } else if (STATUS_PREVISTOS.includes(agendamento.status)) {
+        registro.previstos += 1;
+        registro.receitaPrevista += agendamento.servico.precoCentavos;
+      } else if (STATUS_PERDIDOS.includes(agendamento.status)) {
+        registro.receitaPerdida += agendamento.servico.precoCentavos;
+      }
+    }
+
+    for (const pagamento of pagamentosAssinaturaFiltrados) {
+      const registro = obterRegistro(pagamento.pagoEm);
+
+      if (!registro) {
+        continue;
+      }
+
+      registro.assinaturas += 1;
+      registro.receitaRealizada += pagamento.valorCentavos;
+    }
+
+    return [...mapa.values()];
+  }, [dados, agendamentosNoPeriodo, pagamentosAssinaturaFiltrados]);
 
   const movimentosFinanceiros = useMemo<MovimentoFinanceiro[]>(() => {
-    const movimentosAtendimentos =
-      agendamentosRecebidosNoPeriodo.map((agendamento) => ({
-        id: `agendamento-${agendamento.id}`,
-        tipo: "ATENDIMENTO" as const,
-        data: obterDataFinanceiraAgendamento(agendamento),
-        titulo: agendamento.servico.nome,
-        cliente: agendamento.cliente.nome,
-        detalhe: `Profissional: ${agendamento.profissional.nome}`,
-        formaPagamento: agendamento.formaPagamento,
-        valorCentavos: obterValorRealizado(agendamento),
-      }));
+    const movimentosAtendimentos = agendamentosRecebidosNoPeriodo.map((agendamento) => ({
+      id: `agendamento-${agendamento.id}`,
+      tipo: "ATENDIMENTO" as const,
+      data: obterDataFinanceiraAgendamento(agendamento),
+      titulo: agendamento.servico.nome,
+      cliente: agendamento.cliente.nome,
+      detalhe: `Profissional: ${agendamento.profissional.nome}`,
+      formaPagamento: agendamento.formaPagamento,
+      valorCentavos: obterValorRealizado(agendamento),
+    }));
 
-    const movimentosAssinaturas =
-      pagamentosAssinaturaFiltrados.map((pagamento) => ({
-        id: `assinatura-${pagamento.id}`,
-        tipo: "ASSINATURA" as const,
-        data: pagamento.pagoEm,
-        titulo: `Assinatura ${pagamento.assinatura.plano.nome}`,
-        cliente: pagamento.assinatura.cliente.nome,
-        detalhe:
-          pagamento.observacao ||
-          `Plano com status ${pagamento.assinatura.status}`,
-        formaPagamento: pagamento.formaPagamento,
-        valorCentavos: pagamento.valorCentavos,
-      }));
+    const movimentosAssinaturas = pagamentosAssinaturaFiltrados.map((pagamento) => ({
+      id: `assinatura-${pagamento.id}`,
+      tipo: "ASSINATURA" as const,
+      data: pagamento.pagoEm,
+      titulo: `Assinatura ${pagamento.assinatura.plano.nome}`,
+      cliente: pagamento.assinatura.cliente.nome,
+      detalhe: pagamento.observacao || `Plano com status ${pagamento.assinatura.status}`,
+      formaPagamento: pagamento.formaPagamento,
+      valorCentavos: pagamento.valorCentavos,
+    }));
 
-    return [
-      ...movimentosAtendimentos,
-      ...movimentosAssinaturas,
-    ].sort(
-      (a, b) =>
-        new Date(b.data).getTime() - new Date(a.data).getTime(),
+    return [...movimentosAtendimentos, ...movimentosAssinaturas].sort(
+      (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
     );
-  }, [
-    agendamentosRecebidosNoPeriodo,
-    pagamentosAssinaturaFiltrados,
-  ]);
+  }, [agendamentosRecebidosNoPeriodo, pagamentosAssinaturaFiltrados]);
 
   const ultimosMovimentos = useMemo(
-    () => movimentosFinanceiros.slice(0, 10),
+    () => movimentosFinanceiros.slice(0, QUANTIDADE_ULTIMOS_MOVIMENTOS),
     [movimentosFinanceiros],
   );
 
-  const filtros = [
-    {
-      label: "Hoje",
-      value: "hoje" as const,
-    },
-    {
-      label: "Semana atual",
-      value: "semanaAtual" as const,
-    },
-    {
-      label: "Últimos 7 dias",
-      value: "ultimos7" as const,
-    },
-    {
-      label: "Mês atual",
-      value: "mesAtual" as const,
-    },
-  ];
+  const dadosProntos = Boolean(dados) && !carregando && !erro;
+
+  const exportacaoDisponivel = dadosProntos && movimentosFinanceiros.length > 0;
+
+  const valorCard = (valor: string | number) => {
+    if (carregando) {
+      return "...";
+    }
+
+    if (!dadosProntos) {
+      return "—";
+    }
+
+    return valor;
+  };
 
   const cards = [
     {
@@ -505,41 +480,122 @@ function FinanceiroPage() {
     },
   ];
 
+  const contadores = [
+    {
+      label: "Agendamentos",
+      value: resumo.totalAgendamentos,
+      icon: BarChart3,
+      descricao: "no período selecionado",
+    },
+    {
+      label: "Concluídos",
+      value: resumo.concluidos,
+      icon: CheckCircle2,
+      descricao: "atendimentos recebidos",
+    },
+    {
+      label: "Em aberto",
+      value: resumo.previstos,
+      icon: Clock,
+      descricao: "solicitados ou confirmados",
+    },
+    {
+      label: "Assinaturas",
+      value: resumo.quantidadeAssinaturas,
+      icon: Crown,
+      descricao: "pagamentos de plano",
+    },
+  ];
+
+  function aplicarFiltroRapido(tipo: Exclude<TipoPeriodoFinanceiro, "personalizado">) {
+    setPersonalizadoAberto(false);
+    setErroRascunho("");
+    setPeriodoAplicado(criarPeriodoRapido(tipo));
+  }
+
+  function abrirPersonalizado() {
+    setPersonalizadoAberto(true);
+    setErroRascunho("");
+    setRascunho({
+      dataInicial: periodoAplicado.dataInicial,
+      dataFinal: periodoAplicado.dataFinal,
+    });
+  }
+
+  function alterarRascunho(campo: keyof IntervaloDatasFinanceiro, valor: string) {
+    setErroRascunho("");
+    setRascunho((atual) => ({
+      ...atual,
+      [campo]: valor,
+    }));
+  }
+
+  function aplicarPersonalizado(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const validacao = validarPeriodoFinanceiro(rascunho.dataInicial, rascunho.dataFinal);
+
+    if (!validacao.valido) {
+      setErroRascunho(validacao.mensagem);
+      return;
+    }
+
+    setErroRascunho("");
+    setPeriodoAplicado({
+      tipo: "personalizado",
+      dataInicial: rascunho.dataInicial,
+      dataFinal: rascunho.dataFinal,
+    });
+  }
+
   function handleExportarCsv() {
-    exportarMovimentosFinanceiros(
-      movimentosFinanceiros,
-      intervaloPeriodo.rotulo,
-    );
+    if (!dados || !exportacaoDisponivel) {
+      return;
+    }
+
+    exportarMovimentosFinanceiros(movimentosFinanceiros, dados.periodo);
   }
 
   function handleExportarPdf() {
+    if (!dados || !exportacaoDisponivel) {
+      return;
+    }
+
+    const periodoDados = dados.periodo;
+
     abrirRelatorioFinanceiroPdf({
-      periodo: intervaloPeriodo.rotulo,
-      intervalo: formatarIntervalo(
-        intervaloPeriodo.inicio,
-        intervaloPeriodo.fim,
+      periodo: periodoDados,
+      granularidade: definirGranularidade(
+        contarDiasInclusivos(periodoDados.dataInicial, periodoDados.dataFinal),
       ),
       resumo,
-      resumoPorDia,
+      resumoPorAgrupamento,
       faturamentoPorPagamento,
       movimentos: movimentosFinanceiros,
     });
   }
 
+  const mensagemValidacaoVisivel =
+    erroRascunho ||
+    (personalizadoAberto && rascunho.dataInicial && rascunho.dataFinal && !validacaoRascunho.valido
+      ? validacaoRascunho.mensagem
+      : "");
+
+  const filtroAtivo: TipoPeriodoFinanceiro = personalizadoAberto
+    ? "personalizado"
+    : periodoAplicado.tipo;
+
   return (
     <div className="max-w-7xl p-8 lg:p-12">
       <PageHeader
         title="Financeiro"
-        subtitle={`Caixa do período: ${formatarIntervalo(
-          intervaloPeriodo.inicio,
-          intervaloPeriodo.fim,
-        )}. Para histórico completo, use a aba Relatórios.`}
+        subtitle={`Caixa do período: ${intervaloAplicadoTexto}. Para histórico completo, use a aba Relatórios.`}
         actions={
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handleExportarPdf}
-              disabled={movimentosFinanceiros.length === 0}
+              disabled={!exportacaoDisponivel}
               className="inline-flex h-10 items-center rounded-full border border-gold bg-gold-soft px-5 text-sm text-gold transition hover:bg-gold-soft/80 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Printer className="mr-2 h-4 w-4" />
@@ -549,7 +605,7 @@ function FinanceiroPage() {
             <button
               type="button"
               onClick={handleExportarCsv}
-              disabled={movimentosFinanceiros.length === 0}
+              disabled={!exportacaoDisponivel}
               className="inline-flex h-10 items-center rounded-full border border-border px-5 text-sm transition hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="mr-2 h-4 w-4" />
@@ -573,41 +629,144 @@ function FinanceiroPage() {
         }
       />
 
+      <section className="mb-6 rounded-2xl border border-border bg-surface p-5">
+        <div className="flex flex-wrap gap-2">
+          {FILTROS_RAPIDOS.map((tipo) => {
+            const ativo = filtroAtivo === tipo;
+
+            return (
+              <button
+                key={tipo}
+                type="button"
+                aria-pressed={ativo}
+                onClick={() => aplicarFiltroRapido(tipo)}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  ativo
+                    ? "border-gold bg-gold-soft text-gold"
+                    : "border-border bg-background text-muted-foreground hover:bg-surface-elevated"
+                }`}
+              >
+                {ROTULOS_PERIODO[tipo]}
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            aria-pressed={filtroAtivo === "personalizado"}
+            aria-expanded={personalizadoAberto}
+            onClick={abrirPersonalizado}
+            className={`inline-flex items-center rounded-full border px-4 py-2 text-sm transition ${
+              filtroAtivo === "personalizado"
+                ? "border-gold bg-gold-soft text-gold"
+                : "border-border bg-background text-muted-foreground hover:bg-surface-elevated"
+            }`}
+          >
+            <CalendarRange className="mr-2 h-4 w-4" />
+            Personalizado
+          </button>
+        </div>
+
+        {personalizadoAberto && (
+          <form
+            onSubmit={aplicarPersonalizado}
+            noValidate
+            className="mt-5 border-t border-border pt-5"
+          >
+            <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+              <div className="space-y-2">
+                <label
+                  htmlFor="financeiro-data-inicial"
+                  className="text-xs uppercase tracking-widest text-muted-foreground"
+                >
+                  Data inicial
+                </label>
+
+                <input
+                  id="financeiro-data-inicial"
+                  type="date"
+                  value={rascunho.dataInicial}
+                  max={rascunho.dataFinal || undefined}
+                  onChange={(event) => alterarRascunho("dataInicial", event.target.value)}
+                  className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="financeiro-data-final"
+                  className="text-xs uppercase tracking-widest text-muted-foreground"
+                >
+                  Data final
+                </label>
+
+                <input
+                  id="financeiro-data-final"
+                  type="date"
+                  value={rascunho.dataFinal}
+                  min={rascunho.dataInicial || undefined}
+                  onChange={(event) => alterarRascunho("dataFinal", event.target.value)}
+                  className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-gold"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="inline-flex h-11 items-center justify-center rounded-full border border-gold bg-gold-soft px-6 text-sm text-gold transition hover:bg-gold-soft/80"
+              >
+                Aplicar período
+              </button>
+            </div>
+
+            {mensagemValidacaoVisivel ? (
+              <p role="alert" className="mt-3 text-sm text-destructive">
+                {mensagemValidacaoVisivel}
+              </p>
+            ) : (
+              <p className="mt-3 text-xs text-muted-foreground">
+                {rascunhoPendente
+                  ? "Datas ainda não aplicadas. Clique em “Aplicar período” para atualizar os dados."
+                  : `Escolha qualquer intervalo de até ${LIMITE_DIAS_PERIODO_FINANCEIRO} dias, inclusive de anos anteriores ou datas futuras.`}
+              </p>
+            )}
+          </form>
+        )}
+
+        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border pt-4 text-sm">
+          <span className="text-xs uppercase tracking-widest text-muted-foreground">
+            Período aplicado
+          </span>
+
+          <span className="font-medium text-gold">{ROTULOS_PERIODO[periodoAplicado.tipo]}</span>
+
+          <span className="text-muted-foreground">
+            {intervaloAplicadoTexto} · {diasNoPeriodo} {diasNoPeriodo === 1 ? "dia" : "dias"}
+          </span>
+
+          {carregando && <span className="text-xs text-muted-foreground">Carregando...</span>}
+        </div>
+      </section>
+
       {erro && (
         <div
           role="alert"
-          className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          className="mb-6 flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between"
         >
-          {erro}
+          <span>{erro}</span>
+
+          <button
+            type="button"
+            onClick={() => setTentativa((atual) => atual + 1)}
+            className="inline-flex h-9 items-center justify-center rounded-full border border-destructive/40 px-4 text-xs transition hover:bg-destructive/10"
+          >
+            Tentar novamente
+          </button>
         </div>
       )}
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {filtros.map((filtro) => {
-          const ativo = periodo === filtro.value;
-
-          return (
-            <button
-              key={filtro.value}
-              type="button"
-              onClick={() => setPeriodo(filtro.value)}
-              className={`rounded-full border px-4 py-2 text-sm transition ${ativo
-                  ? "border-gold bg-gold-soft text-gold"
-                  : "border-border bg-surface text-muted-foreground hover:bg-surface-elevated"
-                }`}
-            >
-              {filtro.label}
-            </button>
-          );
-        })}
-      </div>
-
       <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {cards.map((card) => (
-          <section
-            key={card.label}
-            className="rounded-2xl border border-border bg-surface p-5"
-          >
+          <section key={card.label} className="rounded-2xl border border-border bg-surface p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs uppercase tracking-widest text-muted-foreground">
                 {card.label}
@@ -616,156 +775,94 @@ function FinanceiroPage() {
               <card.icon className="h-4 w-4 text-gold" />
             </div>
 
-            <div className="mt-3 text-2xl font-display">
-              {carregando ? "..." : card.value}
-            </div>
+            <div className="mt-3 text-2xl font-display">{valorCard(card.value)}</div>
 
-            <p className="mt-1 text-xs text-muted-foreground">
-              {card.descricao}
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">{card.descricao}</p>
           </section>
         ))}
       </div>
 
-      <div className="mb-8 grid gap-4 md:grid-cols-4">
-        <section className="rounded-2xl border border-border bg-surface p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              Agendamentos
-            </span>
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+        {contadores.map((contador) => (
+          <section key={contador.label} className="rounded-2xl border border-border bg-surface p-5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                {contador.label}
+              </span>
 
-            <BarChart3 className="h-4 w-4 text-gold" />
-          </div>
+              <contador.icon className="h-4 w-4 text-gold" />
+            </div>
 
-          <div className="mt-3 text-3xl font-display">
-            {carregando ? "..." : resumo.totalAgendamentos}
-          </div>
+            <div className="mt-3 text-3xl font-display">{valorCard(contador.value)}</div>
 
-          <p className="mt-1 text-xs text-muted-foreground">
-            no período selecionado
-          </p>
-        </section>
-
-        <section className="rounded-2xl border border-border bg-surface p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              Concluídos
-            </span>
-
-            <CheckCircle2 className="h-4 w-4 text-gold" />
-          </div>
-
-          <div className="mt-3 text-3xl font-display">
-            {carregando ? "..." : resumo.concluidos}
-          </div>
-
-          <p className="mt-1 text-xs text-muted-foreground">
-            atendimentos recebidos
-          </p>
-        </section>
-
-        <section className="rounded-2xl border border-border bg-surface p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              Em aberto
-            </span>
-
-            <Clock className="h-4 w-4 text-gold" />
-          </div>
-
-          <div className="mt-3 text-3xl font-display">
-            {carregando ? "..." : resumo.previstos}
-          </div>
-
-          <p className="mt-1 text-xs text-muted-foreground">
-            solicitados ou confirmados
-          </p>
-        </section>
-
-        <section className="rounded-2xl border border-border bg-surface p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              Assinaturas
-            </span>
-
-            <Crown className="h-4 w-4 text-gold" />
-          </div>
-
-          <div className="mt-3 text-3xl font-display">
-            {carregando ? "..." : resumo.quantidadeAssinaturas}
-          </div>
-
-          <p className="mt-1 text-xs text-muted-foreground">
-            pagamentos de plano
-          </p>
-        </section>
+            <p className="mt-1 text-xs text-muted-foreground">{contador.descricao}</p>
+          </section>
+        ))}
       </div>
+
+      <GraficoEvolucaoReceita
+        carregando={carregando}
+        disponivel={dadosProntos}
+        granularidade={granularidade}
+        resumoPorAgrupamento={resumoPorAgrupamento}
+        receitaRealizadaTotal={resumo.receitaRealizada}
+      />
 
       <div className="mb-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="overflow-hidden rounded-2xl border border-border bg-surface">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div>
               <h2 className="text-sm font-medium">
-                Resumo diário do período
+                Resumo do período {descreverGranularidade(granularidade)}
               </h2>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                Ideal para fechar o caixa da semana sem olhar o
-                histórico inteiro.
+                {granularidade === "dia"
+                  ? "Ideal para fechar o caixa sem olhar o histórico inteiro."
+                  : "Períodos longos são agrupados para facilitar a leitura. Todos os registros do intervalo são considerados."}
               </p>
             </div>
 
-            <CalendarClock className="h-4 w-4 text-gold" />
+            <CalendarClock className="h-4 w-4 shrink-0 text-gold" />
           </div>
 
           {carregando ? (
+            <div className="px-6 py-8 text-sm text-muted-foreground">Carregando resumo...</div>
+          ) : !dadosProntos ? (
             <div className="px-6 py-8 text-sm text-muted-foreground">
-              Carregando resumo diário...
+              Resumo indisponível para este período.
             </div>
           ) : (
             <div className="max-h-[520px] divide-y divide-border overflow-y-auto">
-              {resumoPorDia.map((dia) => (
+              {resumoPorAgrupamento.map((item) => (
                 <article
-                  key={dia.data.toISOString()}
-                  className="grid gap-4 px-6 py-4 md:grid-cols-[1fr_auto_auto_auto]"
+                  key={item.chave}
+                  className="grid grid-cols-3 gap-4 px-6 py-4 md:grid-cols-[1fr_auto_auto_auto]"
                 >
-                  <div>
-                    <h3 className="font-medium">{dia.label}</h3>
+                  <div className="col-span-3 md:col-span-1">
+                    <h3 className="font-medium">{item.label}</h3>
 
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {dia.atendimentos} atendimento
-                      {dia.atendimentos === 1 ? "" : "s"} pago
-                      {dia.atendimentos === 1 ? "" : "s"} ·{" "}
-                      {dia.assinaturas} assinatura
-                      {dia.assinaturas === 1 ? "" : "s"}
+                      {item.atendimentos} atendimento
+                      {item.atendimentos === 1 ? "" : "s"} pago
+                      {item.atendimentos === 1 ? "" : "s"} · {item.assinaturas} assinatura
+                      {item.assinaturas === 1 ? "" : "s"}
                     </p>
                   </div>
 
                   <div className="text-sm">
-                    <p className="text-xs text-muted-foreground">
-                      Realizado
-                    </p>
-                    <p className="font-medium">
-                      {formatarMoeda(dia.receitaRealizada)}
-                    </p>
+                    <p className="text-xs text-muted-foreground">Realizado</p>
+                    <p className="font-medium">{formatarMoeda(item.receitaRealizada)}</p>
                   </div>
 
                   <div className="text-sm">
-                    <p className="text-xs text-muted-foreground">
-                      Previsto
-                    </p>
-                    <p className="font-medium">
-                      {formatarMoeda(dia.receitaPrevista)}
-                    </p>
+                    <p className="text-xs text-muted-foreground">Previsto</p>
+                    <p className="font-medium">{formatarMoeda(item.receitaPrevista)}</p>
                   </div>
 
                   <div className="text-sm">
-                    <p className="text-xs text-muted-foreground">
-                      Perdido
-                    </p>
-                    <p className="font-medium">
-                      {formatarMoeda(dia.receitaPerdida)}
-                    </p>
+                    <p className="text-xs text-muted-foreground">Perdido</p>
+                    <p className="font-medium">{formatarMoeda(item.receitaPerdida)}</p>
                   </div>
                 </article>
               ))}
@@ -776,9 +873,7 @@ function FinanceiroPage() {
         <section className="overflow-hidden rounded-2xl border border-border bg-surface">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div>
-              <h2 className="text-sm font-medium">
-                Formas de pagamento
-              </h2>
+              <h2 className="text-sm font-medium">Formas de pagamento</h2>
 
               <p className="mt-1 text-xs text-muted-foreground">
                 Atendimentos pagos e assinaturas recebidas.
@@ -789,8 +884,10 @@ function FinanceiroPage() {
           </div>
 
           {carregando ? (
+            <div className="px-6 py-8 text-sm text-muted-foreground">Carregando pagamentos...</div>
+          ) : !dadosProntos ? (
             <div className="px-6 py-8 text-sm text-muted-foreground">
-              Carregando pagamentos...
+              Pagamentos indisponíveis para este período.
             </div>
           ) : faturamentoPorPagamento.length === 0 ? (
             <div className="px-6 py-8 text-sm text-muted-foreground">
@@ -806,9 +903,7 @@ function FinanceiroPage() {
                   <div>
                     <h3 className="flex items-center gap-2 font-medium">
                       <CreditCard className="h-4 w-4 text-gold" />
-                      {traduzirFormaPagamento(
-                        item.formaPagamento,
-                      )}
+                      {traduzirFormaPagamento(item.formaPagamento)}
                     </h3>
 
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -817,9 +912,7 @@ function FinanceiroPage() {
                     </p>
                   </div>
 
-                  <p className="text-right font-display">
-                    {formatarMoeda(item.valor)}
-                  </p>
+                  <p className="text-right font-display">{formatarMoeda(item.valor)}</p>
                 </article>
               ))}
             </div>
@@ -830,35 +923,36 @@ function FinanceiroPage() {
       <section className="mb-8 overflow-hidden rounded-2xl border border-border bg-surface">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div>
-            <h2 className="text-sm font-medium">
-              Últimos recebimentos do período
-            </h2>
+            <h2 className="text-sm font-medium">Últimos recebimentos do período</h2>
 
             <p className="mt-1 text-xs text-muted-foreground">
-              Lista curta para conferência rápida do caixa.
+              {dadosProntos && movimentosFinanceiros.length > ultimosMovimentos.length
+                ? `Mostrando ${ultimosMovimentos.length} de ${movimentosFinanceiros.length} recebimentos. A lista completa está no PDF e no CSV.`
+                : "Lista curta para conferência rápida do caixa."}
             </p>
           </div>
 
-          <Receipt className="h-4 w-4 text-gold" />
+          <Receipt className="h-4 w-4 shrink-0 text-gold" />
         </div>
 
         {carregando ? (
           <div className="px-6 py-10">
+            <p className="text-sm text-muted-foreground">Carregando movimentações...</p>
+          </div>
+        ) : !dadosProntos ? (
+          <div className="px-6 py-10">
             <p className="text-sm text-muted-foreground">
-              Carregando movimentações...
+              Movimentações indisponíveis para este período.
             </p>
           </div>
         ) : ultimosMovimentos.length === 0 ? (
           <div className="flex min-h-64 flex-col items-center justify-center px-6 py-10 text-center">
             <Receipt className="h-10 w-10 text-muted-foreground" />
 
-            <h3 className="mt-4 text-lg font-display">
-              Nenhum recebimento no período
-            </h3>
+            <h3 className="mt-4 text-lg font-display">Nenhum recebimento no período</h3>
 
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              Quando houver atendimento concluído ou assinatura paga,
-              o movimento aparecerá aqui.
+              Quando houver atendimento concluído ou assinatura paga, o movimento aparecerá aqui.
             </p>
           </div>
         ) : (
@@ -868,14 +962,10 @@ function FinanceiroPage() {
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="font-medium">
-                        {movimento.titulo}
-                      </h3>
+                      <h3 className="font-medium">{movimento.titulo}</h3>
 
                       <span className="rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
-                        {movimento.tipo === "ASSINATURA"
-                          ? "Assinatura"
-                          : "Atendimento"}
+                        {movimento.tipo === "ASSINATURA" ? "Assinatura" : "Atendimento"}
                       </span>
                     </div>
 
@@ -888,21 +978,14 @@ function FinanceiroPage() {
                     </div>
 
                     <p className="mt-2 text-xs text-muted-foreground">
-                      Pagamento:{" "}
-                      {traduzirFormaPagamento(
-                        movimento.formaPagamento,
-                      )}
+                      Pagamento: {traduzirFormaPagamento(movimento.formaPagamento)}
                     </p>
                   </div>
 
                   <div className="text-left lg:text-right">
-                    <p className="text-lg font-display">
-                      {formatarMoeda(movimento.valorCentavos)}
-                    </p>
+                    <p className="text-lg font-display">{formatarMoeda(movimento.valorCentavos)}</p>
 
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      recebido
-                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">recebido</p>
                   </div>
                 </div>
               </article>
@@ -913,20 +996,17 @@ function FinanceiroPage() {
 
       <section className="rounded-2xl border border-border bg-surface p-5">
         <div className="flex items-center gap-3">
-          <Scissors className="h-5 w-5 text-gold" />
+          <Scissors className="h-5 w-5 shrink-0 text-gold" />
 
           <div>
-            <h2 className="text-sm font-medium">
-              Regra atual do financeiro
-            </h2>
+            <h2 className="text-sm font-medium">Regra atual do financeiro</h2>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              Esta tela funciona como caixa do período. Atendimento
-              concluído entra pelo valor recebido. Assinatura entra no
-              dia do pagamento. Solicitações e confirmações entram como
-              previsão. Cancelamentos, recusas e faltas entram como
-              perda estimada. Para análise histórica completa, use a
-              aba Relatórios.
+              Esta tela funciona como caixa do período. Atendimento concluído entra pelo valor
+              recebido, na data do atendimento. Assinatura entra no dia do pagamento. Solicitações e
+              confirmações entram como previsão. Cancelamentos, recusas e faltas entram como perda
+              estimada. Datas consideradas no horário de Brasília. Para análise de serviços e
+              profissionais, use a aba Relatórios.
             </p>
           </div>
         </div>
@@ -935,22 +1015,136 @@ function FinanceiroPage() {
   );
 }
 
-function obterDataFinanceiraAgendamento(
-  agendamento: AgendamentoFinanceiro,
-): string | Date {
+function GraficoEvolucaoReceita({
+  carregando,
+  disponivel,
+  granularidade,
+  resumoPorAgrupamento,
+  receitaRealizadaTotal,
+}: {
+  carregando: boolean;
+  disponivel: boolean;
+  granularidade: GranularidadeFinanceira;
+  resumoPorAgrupamento: ResumoAgrupamento[];
+  receitaRealizadaTotal: number;
+}) {
+  const semMovimento = disponivel && receitaRealizadaTotal === 0;
+
+  return (
+    <section className="mb-8 overflow-hidden rounded-2xl border border-border bg-surface">
+      <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <div>
+          <h2 className="text-sm font-medium">
+            Receita realizada {descreverGranularidade(granularidade)}
+          </h2>
+
+          <p className="mt-1 text-xs text-muted-foreground">
+            Atendimentos concluídos e assinaturas recebidas no período aplicado.
+          </p>
+        </div>
+
+        <TrendingUp className="h-4 w-4 shrink-0 text-gold" />
+      </div>
+
+      {carregando ? (
+        <div className="px-6 py-8 text-sm text-muted-foreground">Carregando gráfico...</div>
+      ) : !disponivel ? (
+        <div className="px-6 py-8 text-sm text-muted-foreground">
+          Gráfico indisponível para este período.
+        </div>
+      ) : semMovimento ? (
+        <div className="px-6 py-8 text-sm text-muted-foreground">
+          Nenhuma receita realizada no período.
+        </div>
+      ) : (
+        <div className="px-2 pb-4 pt-6 sm:px-4">
+          <ChartContainer config={configuracaoGrafico} className="aspect-auto h-64 w-full sm:h-72">
+            <BarChart
+              data={resumoPorAgrupamento}
+              margin={{ top: 4, right: 8, bottom: 0, left: 8 }}
+              barCategoryGap={resumoPorAgrupamento.length > 31 ? 1 : "20%"}
+            >
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+
+              <XAxis
+                dataKey="rotuloCurto"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={16}
+              />
+
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                width={72}
+                tickFormatter={(valor: number) => formatarMoedaCompacta(valor)}
+              />
+
+              <ChartTooltip
+                cursor={{ fill: "var(--surface-elevated)" }}
+                content={<TooltipReceita />}
+              />
+
+              <Bar
+                dataKey="receitaRealizada"
+                fill="var(--color-receitaRealizada)"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={48}
+              />
+            </BarChart>
+          </ChartContainer>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function TooltipReceita({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload?: ResumoAgrupamento }>;
+}) {
+  const item = payload?.[0]?.payload;
+
+  if (!active || !item) {
+    return null;
+  }
+
+  return (
+    <div className="grid min-w-[10rem] gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs shadow-xl">
+      <p className="font-medium">{item.label}</p>
+
+      <div className="flex items-center justify-between gap-4">
+        <span className="flex items-center gap-2 text-muted-foreground">
+          <span className="h-2.5 w-2.5 rounded-[2px] bg-gold" />
+          Realizado
+        </span>
+        <span className="font-mono font-medium tabular-nums text-foreground">
+          {formatarMoeda(item.receitaRealizada)}
+        </span>
+      </div>
+
+      <p className="text-muted-foreground">
+        {item.atendimentos} atendimento{item.atendimentos === 1 ? "" : "s"} · {item.assinaturas}{" "}
+        assinatura{item.assinaturas === 1 ? "" : "s"}
+      </p>
+    </div>
+  );
+}
+
+function obterDataFinanceiraAgendamento(agendamento: AgendamentoFinanceiro): string | Date {
   // Para atendimentos, o financeiro segue a data em que o serviço
   // aconteceu. pagoEm continua sendo preservado como auditoria do
   // momento em que o pagamento foi registrado.
   return agendamento.inicio;
 }
 
-function obterValorRealizado(
-  agendamento: AgendamentoFinanceiro,
-): number {
-  return (
-    agendamento.valorPagoCentavos ??
-    agendamento.servico.precoCentavos
-  );
+function obterValorRealizado(agendamento: AgendamentoFinanceiro): number {
+  // "??" preserva valores iguais a zero (ex.: atendimento por assinatura).
+  return agendamento.valorPagoCentavos ?? agendamento.servico.precoCentavos;
 }
 
 function formatarMoeda(precoCentavos: number): string {
@@ -960,10 +1154,20 @@ function formatarMoeda(precoCentavos: number): string {
   }).format(precoCentavos / 100);
 }
 
+function formatarMoedaCompacta(precoCentavos: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(precoCentavos / 100);
+}
+
 function formatarDataHora(valor: string | Date): string {
   const data = new Date(valor);
 
   return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: TIMEZONE_FINANCEIRO,
     weekday: "short",
     day: "2-digit",
     month: "2-digit",
@@ -973,19 +1177,7 @@ function formatarDataHora(valor: string | Date): string {
   }).format(data);
 }
 
-function formatarDataCurta(valor: string | Date): string {
-  const data = new Date(valor);
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-  }).format(data);
-}
-
-function traduzirFormaPagamento(
-  formaPagamento: string | null,
-): string {
+function traduzirFormaPagamento(formaPagamento: string | null): string {
   const mapa: Record<string, string> = {
     PIX: "Pix",
     DINHEIRO: "Dinheiro",
@@ -1004,153 +1196,27 @@ function traduzirFormaPagamento(
   return mapa[formaPagamento] ?? formaPagamento;
 }
 
-function inicioDoDia(data: Date): Date {
-  const novaData = new Date(data);
-
-  novaData.setHours(0, 0, 0, 0);
-
-  return novaData;
+function descreverPeriodo(periodo: PeriodoAplicado): string {
+  return `${ROTULOS_PERIODO[periodo.tipo]} (${formatarIntervaloDatas(periodo)})`;
 }
 
-function fimDoDia(data: Date): Date {
-  const novaData = new Date(data);
-
-  novaData.setHours(23, 59, 59, 999);
-
-  return novaData;
-}
-
-function inicioDaSemana(data: Date): Date {
-  const novaData = inicioDoDia(data);
-  const diaSemana = novaData.getDay();
-  const diferenca = diaSemana === 0 ? -6 : 1 - diaSemana;
-
-  novaData.setDate(novaData.getDate() + diferenca);
-
-  return novaData;
-}
-
-function fimDaSemana(data: Date): Date {
-  const inicio = inicioDaSemana(data);
-  const fim = new Date(inicio);
-
-  fim.setDate(inicio.getDate() + 6);
-  fim.setHours(23, 59, 59, 999);
-
-  return fim;
-}
-
-function inicioDoMes(data: Date): Date {
-  return new Date(data.getFullYear(), data.getMonth(), 1);
-}
-
-function fimDoMes(data: Date): Date {
-  return new Date(
-    data.getFullYear(),
-    data.getMonth() + 1,
-    0,
-    23,
-    59,
-    59,
-    999,
-  );
-}
-
-function obterIntervaloPeriodo(periodo: FiltroPeriodo) {
-  const agora = new Date();
-
-  if (periodo === "hoje") {
-    return {
-      inicio: inicioDoDia(agora),
-      fim: fimDoDia(agora),
-      rotulo: "Hoje",
-    };
+function sufixoArquivoPeriodo(periodo: IntervaloDatasFinanceiro): string {
+  if (periodo.dataInicial === periodo.dataFinal) {
+    return periodo.dataInicial;
   }
 
-  if (periodo === "ultimos7") {
-    const inicio = inicioDoDia(agora);
-
-    inicio.setDate(inicio.getDate() - 6);
-
-    return {
-      inicio,
-      fim: fimDoDia(agora),
-      rotulo: "Últimos 7 dias",
-    };
-  }
-
-  if (periodo === "mesAtual") {
-    return {
-      inicio: inicioDoMes(agora),
-      fim: fimDoMes(agora),
-      rotulo: "Mês atual",
-    };
-  }
-
-  return {
-    inicio: inicioDaSemana(agora),
-    fim: fimDaSemana(agora),
-    rotulo: "Semana atual",
-  };
-}
-
-function estaEntreDatas(
-  valor: string | Date,
-  inicio: Date,
-  fim: Date,
-): boolean {
-  const data = new Date(valor);
-
-  return data >= inicio && data <= fim;
-}
-
-function mesmaData(valor: string | Date, referencia: Date): boolean {
-  const data = new Date(valor);
-
-  return (
-    data.getFullYear() === referencia.getFullYear() &&
-    data.getMonth() === referencia.getMonth() &&
-    data.getDate() === referencia.getDate()
-  );
-}
-
-function criarDiasEntre(inicio: Date, fim: Date): Date[] {
-  const dias: Date[] = [];
-  const cursor = inicioDoDia(inicio);
-  const limite = fimDoDia(fim);
-
-  while (cursor <= limite && dias.length <= 40) {
-    dias.push(new Date(cursor));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  return dias;
-}
-
-function formatarIntervalo(inicio: Date, fim: Date): string {
-  const formatador = new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-
-  return `${formatador.format(inicio)} até ${formatador.format(
-    fim,
-  )}`;
-}
-
-function normalizarValorCsv(
-  valor: string | number | null | undefined,
-): string {
-  const texto = valor === null || valor === undefined ? "" : String(valor);
-
-  return `"${texto.replace(/"/g, '""')}"`;
+  return `${periodo.dataInicial}_a_${periodo.dataFinal}`;
 }
 
 function exportarMovimentosFinanceiros(
   movimentos: MovimentoFinanceiro[],
-  rotuloPeriodo: string,
+  periodo: PeriodoAplicado,
 ) {
+  const descricaoPeriodo = descreverPeriodo(periodo);
+
+  // Textos (inclusive nomes e observações informados por usuários) passam
+  // pela proteção contra CSV Injection. O valor monetário é gerado pelo
+  // sistema e exportado sem alteração.
   const linhas = [
     [
       "Período",
@@ -1161,22 +1227,20 @@ function exportarMovimentosFinanceiros(
       "Detalhe",
       "Forma de pagamento",
       "Valor",
-    ],
+    ].map(celulaTextoCsv),
     ...movimentos.map((movimento) => [
-      rotuloPeriodo,
-      movimento.tipo,
-      formatarDataHora(movimento.data),
-      movimento.cliente,
-      movimento.titulo,
-      movimento.detalhe,
-      traduzirFormaPagamento(movimento.formaPagamento),
-      formatarMoeda(movimento.valorCentavos),
+      celulaTextoCsv(descricaoPeriodo),
+      celulaTextoCsv(movimento.tipo),
+      celulaTextoCsv(formatarDataHora(movimento.data)),
+      celulaTextoCsv(movimento.cliente),
+      celulaTextoCsv(movimento.titulo),
+      celulaTextoCsv(movimento.detalhe),
+      celulaTextoCsv(traduzirFormaPagamento(movimento.formaPagamento)),
+      celulaMonetariaCsv(formatarMoeda(movimento.valorCentavos)),
     ]),
   ];
 
-  const csv = linhas
-    .map((linha) => linha.map(normalizarValorCsv).join(";"))
-    .join("\n");
+  const csv = montarConteudoCsv(linhas);
 
   const blob = new Blob([`\uFEFF${csv}`], {
     type: "text/csv;charset=utf-8;",
@@ -1186,9 +1250,7 @@ function exportarMovimentosFinanceiros(
   const link = document.createElement("a");
 
   link.href = url;
-  link.download = `financeiro-${new Date()
-    .toISOString()
-    .slice(0, 10)}.csv`;
+  link.download = `financeiro_${sufixoArquivoPeriodo(periodo)}.csv`;
 
   document.body.appendChild(link);
   link.click();
@@ -1211,17 +1273,6 @@ type ResumoFinanceiroPdf = {
   ticketMedio: number;
 };
 
-type DiaFinanceiroPdf = {
-  data: Date;
-  label: string;
-  atendimentos: number;
-  assinaturas: number;
-  previstos: number;
-  receitaRealizada: number;
-  receitaPrevista: number;
-  receitaPerdida: number;
-};
-
 type PagamentoFinanceiroPdf = {
   formaPagamento: string;
   quantidade: number;
@@ -1241,20 +1292,21 @@ function escaparHtml(valor: string | number | null | undefined): string {
 
 function abrirRelatorioFinanceiroPdf({
   periodo,
-  intervalo,
+  granularidade,
   resumo,
-  resumoPorDia,
+  resumoPorAgrupamento,
   faturamentoPorPagamento,
   movimentos,
 }: {
-  periodo: string;
-  intervalo: string;
+  periodo: PeriodoAplicado;
+  granularidade: GranularidadeFinanceira;
   resumo: ResumoFinanceiroPdf;
-  resumoPorDia: DiaFinanceiroPdf[];
+  resumoPorAgrupamento: ResumoAgrupamento[];
   faturamentoPorPagamento: PagamentoFinanceiroPdf[];
   movimentos: MovimentoFinanceiro[];
 }) {
   const dataGeracao = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: TIMEZONE_FINANCEIRO,
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -1262,16 +1314,44 @@ function abrirRelatorioFinanceiroPdf({
     minute: "2-digit",
   }).format(new Date());
 
-  const linhasDias = resumoPorDia
+  const rotuloPeriodo = ROTULOS_PERIODO[periodo.tipo];
+  const intervalo = formatarIntervaloDatas(periodo);
+  const descricaoGranularidade = descreverGranularidade(granularidade);
+  const colunaAgrupamento =
+    granularidade === "dia" ? "Dia" : granularidade === "semana" ? "Semana" : "Mês";
+
+  const totalRecebidoMovimentos = movimentos.reduce(
+    (total, movimento) => total + movimento.valorCentavos,
+    0,
+  );
+
+  const totalAgrupamentos = resumoPorAgrupamento.reduce(
+    (total, item) => ({
+      atendimentos: total.atendimentos + item.atendimentos,
+      assinaturas: total.assinaturas + item.assinaturas,
+      receitaRealizada: total.receitaRealizada + item.receitaRealizada,
+      receitaPrevista: total.receitaPrevista + item.receitaPrevista,
+      receitaPerdida: total.receitaPerdida + item.receitaPerdida,
+    }),
+    {
+      atendimentos: 0,
+      assinaturas: 0,
+      receitaRealizada: 0,
+      receitaPrevista: 0,
+      receitaPerdida: 0,
+    },
+  );
+
+  const linhasAgrupamentos = resumoPorAgrupamento
     .map(
-      (dia) => `
+      (item) => `
         <tr>
-          <td>${escaparHtml(dia.label)}</td>
-          <td>${dia.atendimentos}</td>
-          <td>${dia.assinaturas}</td>
-          <td>${formatarMoeda(dia.receitaRealizada)}</td>
-          <td>${formatarMoeda(dia.receitaPrevista)}</td>
-          <td>${formatarMoeda(dia.receitaPerdida)}</td>
+          <td>${escaparHtml(item.label)}</td>
+          <td>${item.atendimentos}</td>
+          <td>${item.assinaturas}</td>
+          <td>${formatarMoeda(item.receitaRealizada)}</td>
+          <td>${formatarMoeda(item.receitaPrevista)}</td>
+          <td>${formatarMoeda(item.receitaPerdida)}</td>
         </tr>
       `,
     )
@@ -1281,9 +1361,7 @@ function abrirRelatorioFinanceiroPdf({
     .map(
       (pagamento) => `
         <tr>
-          <td>${escaparHtml(
-            traduzirFormaPagamento(pagamento.formaPagamento),
-          )}</td>
+          <td>${escaparHtml(traduzirFormaPagamento(pagamento.formaPagamento))}</td>
           <td>${pagamento.quantidade}</td>
           <td>${formatarMoeda(pagamento.valor)}</td>
         </tr>
@@ -1292,33 +1370,29 @@ function abrirRelatorioFinanceiroPdf({
     .join("");
 
   const linhasMovimentos = movimentos
-    .slice(0, 25)
     .map(
       (movimento) => `
         <tr>
           <td>${escaparHtml(formatarDataHora(movimento.data))}</td>
-          <td>${escaparHtml(
-            movimento.tipo === "ASSINATURA"
-              ? "Assinatura"
-              : "Atendimento",
-          )}</td>
+          <td>${escaparHtml(movimento.tipo === "ASSINATURA" ? "Assinatura" : "Atendimento")}</td>
           <td>${escaparHtml(movimento.cliente)}</td>
           <td>${escaparHtml(movimento.titulo)}</td>
-          <td>${escaparHtml(
-            traduzirFormaPagamento(movimento.formaPagamento),
-          )}</td>
-          <td>${formatarMoeda(movimento.valorCentavos)}</td>
+          <td>${escaparHtml(traduzirFormaPagamento(movimento.formaPagamento))}</td>
+          <td class="valor">${formatarMoeda(movimento.valorCentavos)}</td>
         </tr>
       `,
     )
     .join("");
+
+  // O título do documento é usado pelo navegador como nome sugerido do PDF.
+  const tituloDocumento = `Relatório financeiro ${sufixoArquivoPeriodo(periodo)}`;
 
   const html = `
     <!doctype html>
     <html lang="pt-BR">
       <head>
         <meta charset="utf-8" />
-        <title>Relatório financeiro - ${escaparHtml(periodo)}</title>
+        <title>${escaparHtml(tituloDocumento)}</title>
 
         <style>
           * {
@@ -1372,6 +1446,8 @@ function abrirRelatorioFinanceiroPdf({
             font-size: 18px;
             border-bottom: 1px solid #dddddd;
             padding-bottom: 6px;
+            break-after: avoid;
+            page-break-after: avoid;
           }
 
           .grid {
@@ -1386,6 +1462,8 @@ function abrirRelatorioFinanceiroPdf({
             border-radius: 12px;
             padding: 14px;
             background: #fafafa;
+            break-inside: avoid;
+            page-break-inside: avoid;
           }
 
           .card-label {
@@ -1408,21 +1486,42 @@ function abrirRelatorioFinanceiroPdf({
             page-break-inside: auto;
           }
 
+          thead {
+            display: table-header-group;
+          }
+
+          tfoot {
+            display: table-row-group;
+          }
+
           th {
             background: #111111;
             color: #ffffff;
             text-align: left;
             font-size: 12px;
             padding: 9px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
 
           td {
             border-bottom: 1px solid #dddddd;
             padding: 9px;
             vertical-align: top;
+            overflow-wrap: anywhere;
+          }
+
+          td.valor {
+            white-space: nowrap;
+          }
+
+          tfoot td {
+            border-top: 2px solid #111111;
+            font-weight: 800;
           }
 
           tr {
+            break-inside: avoid;
             page-break-inside: avoid;
           }
 
@@ -1433,6 +1532,8 @@ function abrirRelatorioFinanceiroPdf({
             border-radius: 10px;
             background: #f7f7f7;
             color: #444444;
+            break-inside: avoid;
+            page-break-inside: avoid;
           }
 
           .rodape {
@@ -1445,7 +1546,11 @@ function abrirRelatorioFinanceiroPdf({
 
           @media print {
             body {
-              padding: 18mm;
+              padding: 0;
+            }
+
+            @page {
+              margin: 14mm;
             }
 
             button {
@@ -1469,8 +1574,8 @@ function abrirRelatorioFinanceiroPdf({
           </div>
 
           <div class="periodo">
-            <strong>Período:</strong> ${escaparHtml(periodo)}<br />
-            <strong>Intervalo:</strong> ${escaparHtml(intervalo)}<br />
+            <strong>Período:</strong> ${escaparHtml(rotuloPeriodo)}<br />
+            <strong>Intervalo:</strong> ${escaparHtml(intervalo)} (horário de Brasília)<br />
             <strong>Gerado em:</strong> ${escaparHtml(dataGeracao)}
           </div>
         </section>
@@ -1481,55 +1586,43 @@ function abrirRelatorioFinanceiroPdf({
           <div class="grid">
             <div class="card">
               <div class="card-label">Receita realizada</div>
-              <div class="card-value">${formatarMoeda(
-                resumo.receitaRealizada,
-              )}</div>
+              <div class="card-value">${formatarMoeda(resumo.receitaRealizada)}</div>
             </div>
 
             <div class="card">
               <div class="card-label">Atendimentos</div>
-              <div class="card-value">${formatarMoeda(
-                resumo.receitaAtendimentos,
-              )}</div>
+              <div class="card-value">${formatarMoeda(resumo.receitaAtendimentos)}</div>
             </div>
 
             <div class="card">
               <div class="card-label">Assinaturas</div>
-              <div class="card-value">${formatarMoeda(
-                resumo.receitaAssinaturas,
-              )}</div>
+              <div class="card-value">${formatarMoeda(resumo.receitaAssinaturas)}</div>
             </div>
 
             <div class="card">
               <div class="card-label">Receita prevista</div>
-              <div class="card-value">${formatarMoeda(
-                resumo.receitaPrevista,
-              )}</div>
+              <div class="card-value">${formatarMoeda(resumo.receitaPrevista)}</div>
             </div>
 
             <div class="card">
               <div class="card-label">Ticket médio</div>
-              <div class="card-value">${formatarMoeda(
-                resumo.ticketMedio,
-              )}</div>
+              <div class="card-value">${formatarMoeda(resumo.ticketMedio)}</div>
             </div>
 
             <div class="card">
               <div class="card-label">Perdas estimadas</div>
-              <div class="card-value">${formatarMoeda(
-                resumo.receitaPerdida,
-              )}</div>
+              <div class="card-value">${formatarMoeda(resumo.receitaPerdida)}</div>
             </div>
           </div>
         </section>
 
         <section>
-          <h2>Resumo por dia</h2>
+          <h2>Resumo ${escaparHtml(descricaoGranularidade)}</h2>
 
           <table>
             <thead>
               <tr>
-                <th>Dia</th>
+                <th>${colunaAgrupamento}</th>
                 <th>Atend.</th>
                 <th>Assin.</th>
                 <th>Realizado</th>
@@ -1539,8 +1632,19 @@ function abrirRelatorioFinanceiroPdf({
             </thead>
 
             <tbody>
-              ${linhasDias}
+              ${linhasAgrupamentos}
             </tbody>
+
+            <tfoot>
+              <tr>
+                <td>Total</td>
+                <td>${totalAgrupamentos.atendimentos}</td>
+                <td>${totalAgrupamentos.assinaturas}</td>
+                <td>${formatarMoeda(totalAgrupamentos.receitaRealizada)}</td>
+                <td>${formatarMoeda(totalAgrupamentos.receitaPrevista)}</td>
+                <td>${formatarMoeda(totalAgrupamentos.receitaPerdida)}</td>
+              </tr>
+            </tfoot>
           </table>
         </section>
 
@@ -1557,16 +1661,13 @@ function abrirRelatorioFinanceiroPdf({
             </thead>
 
             <tbody>
-              ${
-                linhasPagamentos ||
-                '<tr><td colspan="3">Nenhum pagamento registrado.</td></tr>'
-              }
+              ${linhasPagamentos || '<tr><td colspan="3">Nenhum pagamento registrado.</td></tr>'}
             </tbody>
           </table>
         </section>
 
         <section>
-          <h2>Recebimentos do período</h2>
+          <h2>Recebimentos do período (${movimentos.length})</h2>
 
           <table>
             <thead>
@@ -1581,19 +1682,23 @@ function abrirRelatorioFinanceiroPdf({
             </thead>
 
             <tbody>
-              ${
-                linhasMovimentos ||
-                '<tr><td colspan="6">Nenhum recebimento registrado.</td></tr>'
-              }
+              ${linhasMovimentos || '<tr><td colspan="6">Nenhum recebimento registrado.</td></tr>'}
             </tbody>
+
+            <tfoot>
+              <tr>
+                <td colspan="5">Total recebido</td>
+                <td class="valor">${formatarMoeda(totalRecebidoMovimentos)}</td>
+              </tr>
+            </tfoot>
           </table>
         </section>
 
         <section class="observacao">
           <strong>Regra do relatório:</strong><br />
-          Atendimentos concluídos entram pelo valor recebido. Assinaturas entram no dia do pagamento.
+          Atendimentos concluídos entram pelo valor recebido, na data do atendimento. Assinaturas entram no dia do pagamento.
           Solicitações e confirmações aparecem como receita prevista. Cancelamentos, recusas e faltas
-          aparecem como perda estimada.
+          aparecem como perda estimada. Datas consideradas no horário de Brasília.
         </section>
 
         <footer class="rodape">
@@ -1612,9 +1717,7 @@ function abrirRelatorioFinanceiroPdf({
   const janela = window.open("", "_blank");
 
   if (!janela) {
-    alert(
-      "Não foi possível abrir o relatório. Verifique se o navegador bloqueou pop-ups.",
-    );
+    alert("Não foi possível abrir o relatório. Verifique se o navegador bloqueou pop-ups.");
 
     return;
   }
